@@ -1,0 +1,162 @@
+@font-face {
+  font-family: 'font-icons';
+  src:  url('fonts/font-icons.eot?ixr7zd');
+  src:  url('fonts/font-icons.eot?ixr7zd#iefix') format('embedded-opentype'),
+    url('fonts/font-icons.ttf?ixr7zd') format('truetype'),
+    url('fonts/font-icons.woff?ixr7zd') format('woff'),
+    url('fonts/font-icons.svg?ixr7zd#font-icons') format('svg');
+  font-weight: normal;
+  font-style: normal;
+  font-display: block;
+}
+
+[class^="fa-x-"], [class*=" fa-x-"] {
+  /* use !important to prevent issues with browser extensions that change fonts */
+  font-family: 'font-icons' !important;
+  speak: never;
+  font-style: normal;
+  font-weight: normal;
+  font-variant: normal;
+  text-transform: none;
+  line-height: 1;
+
+  /* Better Font Rendering =========== */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.fa-x-first:before {
+  content: "\e924";
+}
+.fa-x-last:before {
+  content: "\e925";
+}
+.fa-x-previous:before {
+  content: "\e926";
+}
+.fa-x-next:before {
+  content: "\e927";
+}
+.fa-x-date-input:before {
+  content: "\e90f";
+}
+.fa-x-sun:before {
+  content: "\e907";
+}
+.fa-x-shrink:before {
+  content: "\e921";
+}
+.fa-x-expand1:before {
+  content: "\e922";
+}
+.fa-x-moon:before {
+  content: "\e923";
+}
+.fa-x-woman-child:before {
+  content: "\e91b";
+}
+.fa-x-graduation:before {
+  content: "\e91c";
+}
+.fa-x-old-age:before {
+  content: "\e91d";
+}
+.fa-x-home-sun:before {
+  content: "\e91e";
+}
+.fa-x-plant-hand:before {
+  content: "\e91f";
+}
+.fa-x-app:before {
+  content: "\e91a";
+}
+.fa-x-minus:before {
+  content: "\e915";
+}
+.fa-x-plus:before {
+  content: "\e916";
+}
+.fa-x-dashboard:before {
+  content: "\e908";
+}
+.fa-x-download:before {
+  content: "\e909";
+}
+.fa-x-expand:before {
+  content: "\e90a";
+}
+.fa-x-info:before {
+  content: "\e90b";
+}
+.fa-x-fullscreen:before {
+  content: "\e90c";
+}
+.fa-x-bars-1:before {
+  content: "\e90d";
+}
+.fa-x-sitemap:before {
+  content: "\e910";
+}
+.fa-x-round-right:before {
+  content: "\e911";
+}
+.fa-x-list:before {
+  content: "\e920";
+}
+.fa-x-network:before {
+  content: "\e912";
+}
+.fa-x-setting:before {
+  content: "\e913";
+}
+.fa-x-search:before {
+  content: "\e914";
+}
+.fa-x-360:before {
+  content: "\e917";
+}
+.fa-x-application:before {
+  content: "\e918";
+}
+.fa-x-bell-solid:before {
+  content: "\e919";
+}
+.fa-x-arrow-left:before {
+  content: "\e905";
+}
+.fa-x-arrow-right:before {
+  content: "\e902";
+}
+.fa-x-arrow-up:before {
+  content: "\e906";
+}
+.fa-x-arrow-down:before {
+  content: "\e90e";
+}
+.fa-x-close:before {
+  content: "\e903";
+}
+.fa-x-bars:before {
+  content: "\e904";
+}
+.fa-x-user-plus:before {
+  content: "\e900";
+}
+.fa-x-user:before {
+  content: "\e901";
+}
+.fa-x-accessibility:before {
+  content: "\e928";
+}
+.fa-x-font-plus:before {
+  content: "\e929";
+}
+.fa-x-font-normal:before {
+  content: "\e92a";
+}
+.fa-x-font-minus:before {
+  content: "\e92b";
+}
+.fa-x-seek:before {
+  content: "\e92c";
+}

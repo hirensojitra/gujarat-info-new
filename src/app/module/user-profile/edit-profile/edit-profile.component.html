@@ -1,0 +1,66 @@
+<div class="h-100 w-100 position-md-absolute overflow-auto d-flex flex-column">
+    <div class="card-header d-flex align-items-center">
+        <h5 class="m-0">Edit Profile</h5>
+        <button class="btn btn-danger btn-sm ms-auto" routerLink="/user-profile/view"><i class="fa fa-close me-2"></i>Cancel</button>
+    </div>
+    <div class="card-body flex-grow-1 position-relative p-0">
+        <div class="h-100 w-100 p-3 position-md-absolute start-0 top-0 overflow-auto">
+            <form [formGroup]="userForm" class="row g-3" (ngSubmit)="false;">
+                <pre>{{userForm.value|json}}</pre>
+                <div class="col-lg-3 col-md-4 col-sm-6" *ngIf="userForm.get('firstname') !== null;">
+                    <div class="form-group mt-1">
+                        <label class="form-label">First Name</label>
+                        <input type="text" class="form-control" placeholder="" aria-label="First name" formControlName="firstname">
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-4 col-sm-6" *ngIf="userForm.get('lastname') !== null;">
+                    <div class="form-group mt-1">
+                        <label class="form-label">Last Name</label>
+                        <input type="text" class="form-control" placeholder="" aria-label="Last name" formControlName="lastname">
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-4 col-sm-6" *ngIf="userForm.get('mobile') !== null;">
+                    <div class="form-group mt-1">
+                        <label class="form-label">Phone number</label>
+                        <div class="input-group">
+                            <div class="input-group-text">+91</div>
+                            <input type="text" class="form-control" placeholder="" aria-label="Phone number" formControlName="mobile">
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6 col-lg-3">
+                    <div class="form-group mt-1" *ngIf="userForm.get('district_id')">
+                        <label for="district_id" class="form-label">District</label>
+                        <select class="form-select" id="district_id" formControlName="district_id" selectDropdown [options]="districts">
+                            <option value="" disabled selected>Select a district</option>
+                            <option *ngFor="let d of districts" [value]="d.id">{{ d.name }}</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-6 col-lg-3">
+                    <div class="form-group mt-1" *ngIf="userForm.get('taluka_id')">
+                        <label for="taluka_id" class="form-label">Taluka</label>
+                        <select class="form-select" id="taluka_id" formControlName="taluka_id">
+                            <option value="" disabled selected>Select a Taluka</option>
+                            <option *ngFor="let t of talukas" [value]="t.id">{{ t.name }}</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-6 col-lg-3">
+                    <div class="form-group mt-1" *ngIf="userForm.get('village_id')">
+                        <label for="village_id" class="form-label">Village</label>
+                        <select class="form-select" id="village_id" formControlName="village_id">
+                            <option value="" disabled selected>Select a Village</option>
+                            <option *ngFor="let v of villages" [value]="v.id">{{ v.name }}</option>
+                        </select>
+                    </div>
+                </div>
+            </form>
+            <div class="row gx-3 mt-3">
+                <div class="col-12">
+                    <button class="btn btn-success" (click)="saveUser()"><i class="fa fa-save me-2"></i>Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

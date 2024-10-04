@@ -1,0 +1,9 @@
+<!-- Render dashboard layout -->
+<div *ngIf="currentLayout === 'dashboard-layout'">
+    <app-dashboard-layout></app-dashboard-layout>
+</div>
+
+<!-- Render empty layout -->
+<div *ngIf="currentLayout === 'empty-layout'">
+    <app-empty-layout></app-empty-layout>
+</div>
