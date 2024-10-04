@@ -13,8 +13,7 @@ export class AuthComponent implements OnInit {
 
   ngOnInit(): void {
     if (this.authService.isAuthenticated()) {
-      // If the user is authenticated, redirect to the /img route
-      this.router.navigate(['/img']);
+      this.router.navigate(['/dashboard']);
     }
   }
 }

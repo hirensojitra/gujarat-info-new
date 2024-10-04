@@ -6,7 +6,7 @@
     <div class="card-body flex-grow-1 position-relative p-0">
         <div class="h-100 w-100 p-3 position-md-absolute start-0 top-0 overflow-auto">
             <form [formGroup]="userForm" class="row g-3" (ngSubmit)="false;">
-                <pre>{{userForm.value|json}}</pre>
+                <pre>{{user|json}}</pre>
                 <div class="col-lg-3 col-md-4 col-sm-6" *ngIf="userForm.get('firstname') !== null;">
                     <div class="form-group mt-1">
                         <label class="form-label">First Name</label>

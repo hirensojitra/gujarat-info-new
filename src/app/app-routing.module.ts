@@ -2,6 +2,7 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { LayoutComponent } from './layout/layout.component';
 import { AuthGuard } from './common/guards/auth.guard';
+import { RoleGuard } from './common/guards/role.guard';
 
 const routes: Routes = [
   // Route for dashboard-layout
@@ -20,8 +21,8 @@ const routes: Routes = [
   {
     path: 'img',
     component: LayoutComponent,
-    data: { layout: 'dashboard-layout' },
-    canActivate: [AuthGuard],
+    data: { layout: 'dashboard-layout', role:['admin'] },
+    canActivate: [AuthGuard, RoleGuard],
     children: [
       {
         path: '',
@@ -55,6 +56,15 @@ const routes: Routes = [
     data: { layout: 'empty-layout' },
     children: [
       { path: '', loadChildren: () => import('./module/about-us/about-us.module').then(m => m.AboutUsModule) }
+    ],
+  },
+  {
+    path: 'broken-pages',
+    component: LayoutComponent,
+    data: { layout: 'empty-layout' },
+    children: [
+      { path: '', pathMatch: 'full', redirectTo: 'unauthorized' },
+      { path: 'unauthorized', loadChildren: () => import('./module/broken-pages/unauthorized/unauthorized.module').then(m => m.UnauthorizedModule) }
     ],
   },
   // Redirect unmatched paths to auth

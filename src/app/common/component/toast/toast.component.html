@@ -10,6 +10,7 @@
       [style]="
         'margin-bottom:' + (i === toastService.toasts.length - 1 ? '0' : '1rem')
       "
+      [@toastAnimation]
     >
       <div class="toast-header">
         <strong class="me-auto">{{ toast.title || "Notification" }}</strong>

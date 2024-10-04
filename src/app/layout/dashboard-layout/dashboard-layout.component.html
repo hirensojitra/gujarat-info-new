@@ -3,9 +3,10 @@
         <div class="d-flex align-items-center py-3">
             <span *ngIf="isAuthenticated&&name" class="me-3"><i class="fa fa-user me-2"></i>{{name}}</span>
             <div class="controls ms-auto">
-                <button class="btn btn-sm btn-dark" *ngIf="isAuthenticated" [routerLink]="'/user-profile/view'">Profile</button>
-                <button class="btn btn-sm btn-dark" *ngIf="!isAuthenticated" (click)="login()">Login</button>
-                <button class="btn btn-sm btn-dark" *ngIf="isAuthenticated" (click)="logout()">Logout</button>
+                <button class="btn btn-sm btn-dark mx-1" *ngIf="isAuthenticated" [routerLink]="'/user-profile/view'">Profile</button>
+                <button class="btn btn-sm btn-dark mx-1" *ngIf="!isAuthenticated" (click)="login()">Login</button>
+                <button class="btn btn-sm btn-dark mx-1" *ngIf="isAuthenticated" (click)="logout()">Logout</button>
+                <button class="btn btn-sm btn-dark mx-1" *ngIf="isAdmin()" [routerLink]="'/img'">Images</button>
             </div>
         </div>
     </div>

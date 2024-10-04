@@ -170,8 +170,8 @@ export class EditProfileComponent implements OnInit, OnDestroy {
           },
           error => {
             console.error('Error updating user:', error);
-            const errorMessage = error.error && typeof error.error.message === 'string'
-              ? error.error.message
+            const errorMessage = error && typeof error.message === 'string'
+              ? error.message
               : 'Unexpected server response. Please check the network log.';
             this.toastService.show(errorMessage, { class: 'bg-danger' });
           }

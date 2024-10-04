@@ -10,13 +10,12 @@ import { filter } from 'rxjs/operators';
 export class LayoutComponent implements OnInit {
   currentLayout: string = 'dashboard-layout'; // Default layout
 
-  constructor(private route: ActivatedRoute, private router: Router) { }
-
+  constructor(private activatedRoute: ActivatedRoute) {
+    
+  }
   ngOnInit(): void {
-    this.router.events
-      .pipe(filter((event) => event instanceof NavigationEnd))
-      .subscribe(() => {
-        this.currentLayout = this.route.snapshot.firstChild?.data['layout'] || 'dashboard-layout';
-      });
+    this.activatedRoute.data.subscribe((data) => {
+      this.currentLayout = data['layout'] || 'empty';
+    });
   }
 }

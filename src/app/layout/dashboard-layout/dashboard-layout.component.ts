@@ -46,4 +46,7 @@ export class DashboardLayoutComponent implements OnInit {
   logout() {
     this.authService.logout();
   }
+  isAdmin():boolean{
+    return this.authService.hasRole(['admin'])
+  }
 }

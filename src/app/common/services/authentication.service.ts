@@ -3,11 +3,11 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { catchError, map, switchMap } from 'rxjs/operators';
-import { environment } from 'src/environments/environment';
 import { UserService } from './user.service';
 import { AbstractControl, AsyncValidatorFn, ValidationErrors } from '@angular/forms';
 import { ToastService } from './toast.service';
 import { Router } from '@angular/router';
+import { environment } from '../../../environments/environment';
 
 
 @Injectable({

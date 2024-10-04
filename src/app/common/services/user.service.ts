@@ -5,7 +5,6 @@ import { User } from '../interfaces/commonInterfaces';
 import { Router } from '@angular/router';
 import { environment } from '../../../environments/environment';
 import { CookieService } from 'ngx-cookie-service';
-import { AuthService } from './auth.service';
 
 @Injectable({
   providedIn: 'root',
@@ -18,8 +17,7 @@ export class UserService {
   constructor(
     private http: HttpClient,
     private router: Router,
-    private cookieService: CookieService,
-    private authService: AuthService
+    private cookieService: CookieService
   ) {
     // Initialize the user subject based on stored user details in cookies
     const storedUser = this.cookieService.get('user');
@@ -72,7 +70,7 @@ export class UserService {
   updateUserData(userid: number, updatedData: Partial<User>): Observable<any> {
     const headers = new HttpHeaders({
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${this.authService.getToken()}`
+      'Authorization': `Bearer ${this.cookieService.get('token')}`
     });
     const fullUrl = `${this.apiUrl}/updateUser/${userid}`;
     return this.http.put(fullUrl, updatedData, { headers });
@@ -83,7 +81,7 @@ export class UserService {
   verifyEmail(userId: number): Observable<any> {
     const headers = new HttpHeaders({
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${this.authService.getToken()}`
+      'Authorization': `Bearer ${this.cookieService.get('token')}`
     });
     return this.http.get(`${this.apiUrl}/verify-email/${userId}`, { headers });
   }
