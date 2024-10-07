@@ -6,6 +6,7 @@ import { User, Village } from '../../common/interfaces/commonInterfaces';
 import { UserService } from '../../common/services/user.service';
 import { DevelopmentService } from '../../common/services/development.service';
 import { VillageService } from '../../common/services/village.service';
+import { environment } from '../../../environments/environment';
 declare const bootstrap: any;
 
 
@@ -128,41 +129,59 @@ export class UserProfileComponent implements OnInit, AfterViewInit {
       const croppedCanvas = this.cropper.getCroppedCanvas();
       const resizedCanvas = document.createElement('canvas');
       const resizedContext = resizedCanvas.getContext('2d')!;
-      resizedCanvas.width = 200;
-      resizedCanvas.height = 200;
-      resizedContext.drawImage(croppedCanvas, 0, 0, 200, 200);
+      resizedCanvas.width = 320;
+      resizedCanvas.height = 320;
+      resizedContext.drawImage(croppedCanvas, 0, 0, 320, 320);
       const resizedImageData = resizedCanvas.toDataURL('image/png'); // Adjust format as needed
       this.profilePictureForm.get('image')?.setValue(resizedImageData);
     }
   }
   saveCroppedImage(): void {
     this.handleCropEvent();
+
     if (this.profilePictureForm.valid) {
-      if (this.user) {
-        let formValue = this.profilePictureForm.value;
-        const isUserDataChanged = Object.keys(formValue).some(key => this.user![key] !== formValue[key]);
-        if (!isUserDataChanged) {
-          return;
-        }
-        const username = this.user?.username || '';
-        this.user.image = formValue.image;
-        this.cropperModal.hide();
-        this.US.setUser(this.user)
-        // this.US.updateUserData(username, formValue).subscribe(
-        //   (response: any) => {
-        //     this.US.setUser(response.user);
-        //     this.cropperModal.hide();
-        //   },
-        //   error => {
-        //     console.error('Error updating user:', error);
-        //     // Handle error, e.g., show an error message to the user
-        //   }
-        // );
+      const formData = new FormData();
+      const formValue = this.profilePictureForm.value;
+
+      if (formValue.image) {
+        // Convert base64 image to File object
+        const file = this.base64ToFile(formValue.image, 'profile-picture.png');
+
+        // Append the file to the FormData object
+        formData.append('image', file);
       }
+
+      // If there are additional form fields, you can append them as well
+      formData.append('username', this.profilePictureForm.get('username')?.value);
+
+      // Update the user data via the UserService
+      this.US.updateUserData(this.user.id, formData).subscribe(
+        (response: any) => {
+          // Set user and hide the modal on successful upload
+          this.US.setUser(response.user);
+          this.cropperModal.hide();
+        },
+        (error) => {
+          console.error('Error uploading image:', error);
+        }
+      );
     }
   }
+  base64ToFile(base64Image: string, fileName: string): File {
+    const arr = base64Image.split(',');
+    const mime = arr[0].match(/:(.*?);/)[1];
+    const bstr = atob(arr[1]);
+    let n = bstr.length;
+    const u8arr = new Uint8Array(n);
+    while (n--) {
+      u8arr[n] = bstr.charCodeAt(n);
+    }
+    return new File([u8arr], fileName, { type: mime });
+  }
+
+  private apiUrl = environment.MasterApi + '/auth/profile-image/';
   validateImage(imageUrl: string): string {
-    return imageUrl || `https://dummyimage.com/300x300/F4F4F4/000000&text=${this.imageText()}`;
+    return imageUrl ? this.apiUrl + this.user.username : `https://dummyimage.com/300x300/F4F4F4/000000&text=${this.imageText()}`;
   }
   imageText(): string {
     if (this.user && this.user.firstname && this.user.lastname) {
