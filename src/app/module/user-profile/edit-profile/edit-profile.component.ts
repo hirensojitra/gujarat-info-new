@@ -138,35 +138,23 @@ export class EditProfileComponent implements OnInit, OnDestroy {
     if (this.userForm.valid) {
       if (this.user) {
         const formValue = this.userForm.value;
-
-        // Check if user data has changed
         const isUserDataChanged = Object.keys(formValue).some(key => this.user![key] !== formValue[key]);
         if (!isUserDataChanged) {
           this.toastService.show('User data has not changed. Skipping update.', { class: 'bg-danger' });
           return;
         }
-
-        // Get the userId (not username)
-        const userid = this.user['id']; // Get the userid instead of userId
+        const userid = this.user['id'];
         if (!userid) {
           this.toastService.show('Invalid userid.', { class: 'bg-danger' });
           return;
         }
-        console.log(userid)
+        this.userForm.setValue(formValue);
         const updateUser$ = this.userService.updateUserData(userid, formValue);
-
-        // Subscribe to the updateUser$ observable
         updateUser$.subscribe(
           (response: any) => {
-            console.log('API response:', response); // Add this line to check the response structure
-
-            if (this.user.image) {
-              response.user.image = this.user.image;
-            }
-
-            // Update the stored user data in the UserService
             this.userService.setUser(response.user);
             this.toastService.show(response.message, { class: 'bg-success' });
+            this.userForm.setValue(formValue);
           },
           error => {
             console.error('Error updating user:', error);

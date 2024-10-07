@@ -15,17 +15,14 @@ export class RoleGuard implements CanActivate {
     private authService: AuthService,
     private router: Router,
     private platformService: PlatformService,
-    private cookieService:CookieService
+    private cookieService: CookieService
   ) { }
 
   canActivate(
     route: ActivatedRouteSnapshot,
     state: RouterStateSnapshot
   ): Observable<boolean> {
-    console.log(this.cookieService.get('user'))
-    // Extract expected roles from the route
     const expectedRoles = route.data['role'] || [];
-
     // Check if running on the server
     if (!this.platformService.isBrowser()) {
       // Handle server-side logic
@@ -33,7 +30,7 @@ export class RoleGuard implements CanActivate {
       if (!isAuthenticated) {
         return of(false); // Prevent access to the route
       }
-      
+
       const hasRole = this.authService.hasRole(expectedRoles);
       return of(hasRole); // Return observable for server-side
     } else {

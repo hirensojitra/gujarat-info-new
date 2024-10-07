@@ -2,8 +2,8 @@ import { Component, OnInit } from '@angular/core';
 // Adjust the import path as necessary
 import { Subscription } from 'rxjs';
 import { AuthService } from '../../common/services/auth.service';
-import { UserService } from '../../common/services/user.service';
 import { Router } from '@angular/router';
+import { UserService } from '../../common/services/user.service';
 
 @Component({
   selector: 'app-dashboard-layout',
@@ -17,8 +17,8 @@ export class DashboardLayoutComponent implements OnInit {
 
   constructor(
     private authService: AuthService,
-    private userService: UserService,
-    private router: Router
+    private router: Router,
+    private userService: UserService
   ) { }
 
   ngOnInit() {
@@ -46,7 +46,7 @@ export class DashboardLayoutComponent implements OnInit {
   logout() {
     this.authService.logout();
   }
-  isAdmin():boolean{
+  isAdmin(): boolean {
     return this.authService.hasRole(['admin'])
   }
 }

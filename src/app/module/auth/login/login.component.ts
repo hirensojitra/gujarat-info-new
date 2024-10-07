@@ -34,22 +34,31 @@ export class LoginComponent implements OnInit {
   onSubmit() {
     if (this.loginForm.valid) {
       const loginData = this.loginForm.value;
+
       this.authService.loginUser(loginData.username, loginData.password).subscribe(
         response => {
-          if (response.error) {
-            this.toast.show(response.error, { class: 'bg-danger' })
-          }
-          else {
+          if (response.token) {
+            this.userService.setUser(response);  // Passing the entire response since it includes user data
             this.authService.setToken(response.token);
-            this.userService.setUser(response.user);
+            // Setting token in authService
+            debugger
+            this.userService.getUser().subscribe(data => {
+              console.log(data)
+            })
             this.router.navigate(['/dashboard']);
-
+          } else if (response.error) {
+            // Handle error and show toast notification for error message
+            this.toast.show(response.error, { class: 'bg-danger' });
           }
         },
         error => {
+          // Handle network or server errors
           console.error('Login error:', error);
+          this.toast.show('An error occurred during login', { class: 'bg-danger' });
         }
       );
     }
   }
+
+
 }

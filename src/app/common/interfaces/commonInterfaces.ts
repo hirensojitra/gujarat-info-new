@@ -9,6 +9,7 @@ export interface User {
     district_id: string,
     taluka_id: string,
     village_id: string,
+    token: string,
     [key: string]: any
 }
 

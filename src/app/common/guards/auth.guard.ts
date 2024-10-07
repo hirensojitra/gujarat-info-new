@@ -18,24 +18,17 @@ export class AuthGuard implements CanActivate {
     route: ActivatedRouteSnapshot,
     state: RouterStateSnapshot
   ): Promise<boolean> {
-    // Check if running on the browser
     if (this.platformService.isBrowser()) {
-      // Client-side authentication check
       if (this.authService.isAuthenticated()) {
-        return true; // User is authenticated
+        return true;
       } else {
-        // Navigate to login if not authenticated
-        this.router.navigate(['/auth/login'], { queryParams: { returnUrl: state.url }});
+        this.router.navigate(['/auth/login'], { queryParams: { returnUrl: state.url } });
         return false; // Prevent access and redirect to login
       }
     }
-
-    // If running on the server (SSR)
     if (!this.authService.isAuthenticated()) {
-      // Do not attempt to navigate on the server
-      return false; // Prevent access for unauthenticated users
+      return false;
     }
-
-    return true; // Allow access if authenticated
+    return true;
   }
 }

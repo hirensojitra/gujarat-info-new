@@ -38,6 +38,7 @@ export class UserService {
   }
   getFullName(): string {
     const user = this.userSubject.value;
+    console.log(user)
     if (user) {
       const firstName = user.firstname || ''; // Default to an empty string if undefined
       const lastName = user.lastname || '';   // Default to an empty string if undefined
@@ -47,16 +48,12 @@ export class UserService {
   }
   // Set and store the user details in cookies
   setUser(user: User): void {
+    this.cookieService.set('user', JSON.stringify(user), {
+      path: '/', // Ensures the cookie is available throughout the application
+      secure: false // Set to true if you're using HTTPS
+    });
     this.userSubject.next(user);
-    this.cookieService.set('user', JSON.stringify(user));
-    if (user && user['token']) {
-      this.cookieService.set('token', user['token']);
-    }
-    // if (!user.image) {
-    //   setTimeout(() => {
-    //     this.router.navigate(['/dashboard']);
-    //   }, 1500);
-    // }
+
   }
 
   // Clear user details from the service and cookies

@@ -275,9 +275,8 @@ export class SelectDropdownDirective implements OnInit, AfterViewInit, OnChanges
                         return firstLetter === key;
                     });
                     if (matchingItem) {
-                        this.lastFocusedItem = matchingItem as HTMLLIElement; // Assert the type here
+                        this.lastFocusedItem = matchingItem as HTMLLIElement;
                         matchingItem.setAttribute('tabindex', '0');
-
                         matchingItem.focus();
                     }
                 }
@@ -288,7 +287,4 @@ export class SelectDropdownDirective implements OnInit, AfterViewInit, OnChanges
             this.focusedItem.click();
         }
     };
-
-
-
 }

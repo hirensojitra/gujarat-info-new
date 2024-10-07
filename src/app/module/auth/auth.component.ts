@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { AfterViewInit, Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../../common/services/auth.service';
 
@@ -7,11 +7,9 @@ import { AuthService } from '../../common/services/auth.service';
   templateUrl: './auth.component.html',
   styleUrls: ['./auth.component.scss'] // Corrected property name from styleUrl to styleUrls
 })
-export class AuthComponent implements OnInit {
-
+export class AuthComponent implements AfterViewInit {
   constructor(private authService: AuthService, private router: Router) { }
-
-  ngOnInit(): void {
+  ngAfterViewInit(): void {
     if (this.authService.isAuthenticated()) {
       this.router.navigate(['/dashboard']);
     }

@@ -7,6 +7,7 @@ import { UserService } from '../../common/services/user.service';
 import { DevelopmentService } from '../../common/services/development.service';
 import { VillageService } from '../../common/services/village.service';
 import { environment } from '../../../environments/environment';
+import * as CryptoJS from 'crypto-js';
 declare const bootstrap: any;
 
 
@@ -72,8 +73,10 @@ export class UserProfileComponent implements OnInit, AfterViewInit {
         this.profilePictureForm.get('username')?.setValue(user.username);
         this.getVillage(user.village_id);
         if (!this.user.image) { this.imageSelect.show(); }
+        this.validateImage(this.user.username)
       }
     });
+
   }
   ngAfterViewInit(): void {
 
@@ -138,26 +141,16 @@ export class UserProfileComponent implements OnInit, AfterViewInit {
   }
   saveCroppedImage(): void {
     this.handleCropEvent();
-
     if (this.profilePictureForm.valid) {
       const formData = new FormData();
       const formValue = this.profilePictureForm.value;
-
       if (formValue.image) {
-        // Convert base64 image to File object
         const file = this.base64ToFile(formValue.image, 'profile-picture.png');
-
-        // Append the file to the FormData object
         formData.append('image', file);
       }
-
-      // If there are additional form fields, you can append them as well
       formData.append('username', this.profilePictureForm.get('username')?.value);
-
-      // Update the user data via the UserService
       this.US.updateUserData(this.user.id, formData).subscribe(
         (response: any) => {
-          // Set user and hide the modal on successful upload
           this.US.setUser(response.user);
           this.cropperModal.hide();
         },
@@ -180,9 +173,17 @@ export class UserProfileComponent implements OnInit, AfterViewInit {
   }
 
   private apiUrl = environment.MasterApi + '/auth/profile-image/';
-  validateImage(imageUrl: string): string {
-    return imageUrl ? this.apiUrl + this.user.username : `https://dummyimage.com/300x300/F4F4F4/000000&text=${this.imageText()}`;
+  imageUrl: string;
+  validateImage(username: string) {
+    const randomParam = `?v=${new Date().getTime()}`; // Generate a random query parameter using timestamp
+
+    const imageUrl = username
+      ? `${this.apiUrl + username}${randomParam}` // Append randomParam if username exists
+      : `https://dummyimage.com/300x300/F4F4F4/000000&text=${this.imageText()}`; // Return default image URL
+
+    this.imageUrl = imageUrl;
   }
+
   imageText(): string {
     if (this.user && this.user.firstname && this.user.lastname) {
       const firstCharFirstName = this.user.firstname.charAt(0);

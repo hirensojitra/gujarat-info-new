@@ -21,12 +21,24 @@ const routes: Routes = [
   {
     path: 'img',
     component: LayoutComponent,
-    data: { layout: 'dashboard-layout', role:['admin'] },
+    data: { layout: 'dashboard-layout', role: ['admin'] },
     canActivate: [AuthGuard, RoleGuard],
     children: [
       {
         path: '',
         loadChildren: () => import('./module/img/img.module').then((m) => m.ImgModule)
+      },
+    ],
+  },
+  {
+    path: 'admin',
+    component: LayoutComponent,
+    data: { layout: 'dashboard-layout' },
+    canActivate: [AuthGuard],
+    children: [
+      {
+        path: '',
+        loadChildren: () => import('./module/admin/admin.module').then((m) => m.AdminModule)
       },
     ],
   },
