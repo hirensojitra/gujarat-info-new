@@ -7,7 +7,6 @@ import { UserService } from '../../common/services/user.service';
 import { DevelopmentService } from '../../common/services/development.service';
 import { VillageService } from '../../common/services/village.service';
 import { environment } from '../../../environments/environment';
-import * as CryptoJS from 'crypto-js';
 declare const bootstrap: any;
 
 

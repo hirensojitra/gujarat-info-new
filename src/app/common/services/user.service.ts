@@ -36,9 +36,9 @@ export class UserService {
   getUser(): Observable<User | null> {
     return this.userSubject.asObservable();
   }
+
   getFullName(): string {
     const user = this.userSubject.value;
-    console.log(user)
     if (user) {
       const firstName = user.firstname || ''; // Default to an empty string if undefined
       const lastName = user.lastname || '';   // Default to an empty string if undefined
@@ -46,6 +46,7 @@ export class UserService {
     }
     return '';
   }
+
   // Set and store the user details in cookies
   setUser(user: User): void {
     this.cookieService.set('user', JSON.stringify(user), {
@@ -53,26 +54,29 @@ export class UserService {
       secure: false // Set to true if you're using HTTPS
     });
     this.userSubject.next(user);
-
   }
 
-  // Clear user details from the service and cookies
+  // Clear user details from the service and cookies, and navigate to home
   clearUser(): void {
-    this.userSubject.next(null);
     this.cookieService.delete('user');
     this.cookieService.delete('token');
+    this.cookieService.deleteAll();  // Optionally delete all cookies if you have more than user/token stored
+
+    // Reset user subject to null
+    this.userSubject.next(null);
+
+    // Navigate to the home page after clearing user data
+    this.router.navigate(['/home']);
   }
 
   // Update user data based on user ID
   updateUserData(userid: number, updatedData: Partial<User>): Observable<any> {
     const headers = new HttpHeaders({
-      // 'Content-Type': 'application/json',
       'Authorization': `Bearer ${this.cookieService.get('token')}`
     });
     const fullUrl = `${this.apiUrl}/updateUser/${userid}`;
     return this.http.put(fullUrl, updatedData, { headers });
   }
-
 
   // Verify email by sending the verification link
   verifyEmail(userId: number): Observable<any> {
@@ -82,6 +86,8 @@ export class UserService {
     });
     return this.http.get(`${this.apiUrl}/verify-email/${userId}`, { headers });
   }
+
+  // Register a new user
   registerUser(username: string, password: string, email: string, roles: string[], emailVerified: boolean): Observable<any> {
     return this.http.post<any>(`${this.apiUrl}/register`, {
       username,

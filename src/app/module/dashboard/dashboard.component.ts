@@ -12,10 +12,6 @@ import { UserService } from '../../common/services/user.service';
 export class DashboardComponent implements OnInit {
   constructor(public authService: AuthService, private router: Router, private userService: UserService) { }
   user: User;
-  async logout() {
-    this.authService.logout();
-    this.router.navigate(['/auth']);
-  }
   ngOnInit(): void {
     this.userService.getUser().subscribe((data) => {
       this.user = data
