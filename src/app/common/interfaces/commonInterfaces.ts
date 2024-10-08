@@ -10,6 +10,7 @@ export interface User {
     taluka_id: string,
     village_id: string,
     token: string,
+    emailverified: boolean,
     [key: string]: any
 }
 

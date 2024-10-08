@@ -24,7 +24,7 @@ export class BaseUrlService {
         } else {
             // Handle SSR: Return a default base URL or some fallback logic
             console.warn('Document is not available in SSR. Returning fallback base URL.');
-            this.baseUrl = 'https://gujarat-info.netlify.app/'; // Replace with a sensible fallback for SSR
+            this.baseUrl = 'https://gujarat-uvach.netlify.app/'; // Replace with a sensible fallback for SSR
         }
         return this.baseUrl;
     }

@@ -8,7 +8,7 @@ const app = express();
 enableProdMode();
 
 // Path to the Angular app
-const DIST_FOLDER = join(process.cwd(), 'dist/gujarat-info');
+const DIST_FOLDER = join(process.cwd(), 'dist/gujarat-uvach');
 
 // Dynamically import the Angular server-side module
 async function getAngularServerModule() {

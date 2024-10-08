@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "gujarat-info": {
+    "gujarat-uvach": {
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
@@ -24,7 +24,7 @@
         "build": {
           "builder": "@angular-devkit/build-angular:application",
           "options": {
-            "outputPath": "dist/gujarat-info",
+            "outputPath": "dist/gujarat-uvach",
             "index": "src/index.html",
             "browser": "src/main.ts",
             "polyfills": [
@@ -83,10 +83,10 @@
           "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "gujarat-info:build:production"
+              "buildTarget": "gujarat-uvach:build:production"
             },
             "development": {
-              "buildTarget": "gujarat-info:build:development"
+              "buildTarget": "gujarat-uvach:build:development"
             }
           },
           "defaultConfiguration": "development"
@@ -94,7 +94,7 @@
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "buildTarget": "gujarat-info:build"
+            "buildTarget": "gujarat-uvach:build"
           }
         },
         "test": {

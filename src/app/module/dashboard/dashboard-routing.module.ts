@@ -6,9 +6,9 @@ const routes: Routes = [{
   path: '',
   component: DashboardComponent,
   data: {
-    title: 'Dashboard | Gujarat Info',
-    description: 'Welcome to the Gujarat Info dashboard. Access a variety of services and features designed to enhance your experience.',
-    keywords: 'Gujarat Info, services, dashboard, user portal, features, access',
+    title: 'Dashboard | Gujarat Uvach',
+    description: 'Welcome to the Gujarat Uvach dashboard. Access a variety of services and features designed to enhance your experience.',
+    keywords: 'Gujarat Uvach, services, dashboard, user portal, features, access',
     robots: 'index, follow',
   }
 }];

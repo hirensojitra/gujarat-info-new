@@ -79,12 +79,11 @@ export class UserService {
   }
 
   // Verify email by sending the verification link
-  verifyEmail(userId: number): Observable<any> {
+  verifyEmail(token: string, email: string): Observable<any> {
     const headers = new HttpHeaders({
-      'Content-Type': 'application/json',
       'Authorization': `Bearer ${this.cookieService.get('token')}`
     });
-    return this.http.get(`${this.apiUrl}/verify-email/${userId}`, { headers });
+    return this.http.get(`${this.apiUrl}/verify-email?token=${encodeURIComponent(token)}&email=${encodeURIComponent(email)}`, { headers });
   }
 
   // Register a new user

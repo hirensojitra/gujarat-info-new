@@ -9,9 +9,9 @@ const routes: Routes = [
     path: '',
     component: AdminComponent,
     data: {
-      title: 'Gujarat Info | Admin',
-      description: 'Login or register to Gujarat Info portal for accessing services',
-      keywords: 'Gujarat Info, login, register, authentication, portal',
+      title: 'Gujarat Uvach | Admin',
+      description: 'Login or register to Gujarat Uvach portal for accessing services',
+      keywords: 'Gujarat Uvach, login, register, authentication, portal',
       robots: 'index, follow',
     },
     children: [

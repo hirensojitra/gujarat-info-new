@@ -1,0 +1,5 @@
+<div class="h-100-vh d-flex flex-column align-items-center justify-content-center">
+    <h2>Email Verification</h2>
+    <p>{{ verificationStatus }}</p>
+    <button *ngIf="isVerified" (click)="redirectToLogin()" class="btn btn-primary">Go to Login</button>
+</div>

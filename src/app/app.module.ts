@@ -11,10 +11,12 @@ import { AuthGuard } from './common/guards/auth.guard';
 import { HttpLoaderInterceptor } from './common/interceptor/http-loader.interceptor';
 import { ToastComponent } from './common/component/toast/toast.component';
 import { ToastModule } from './common/component/toast/toast.module';
+import { EmailVerificationComponent } from './module/email-verification/email-verification.component';
 
 @NgModule({
   declarations: [
-    AppComponent
+    AppComponent,
+    EmailVerificationComponent
   ],
   imports: [
     BrowserModule,

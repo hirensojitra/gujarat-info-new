@@ -6,11 +6,11 @@ const routes: Routes = [{
   path: '',
   component: UnauthorizedComponent,
   data: {
-    title: 'Unauthorized Access | Gujarat Info',
+    title: 'Unauthorized Access | Gujarat Uvach',
     description: 'You do not have permission to access this page. Please log in or contact support for assistance.',
-    keywords: 'Gujarat Info, unauthorized, access denied, authentication, portal',
+    keywords: 'Gujarat Uvach, unauthorized, access denied, authentication, portal',
     robots: 'noindex, nofollow',
-    author: 'Gujarat Info Team',
+    author: 'Gujarat Uvach Team',
     themeColor: '#FF5733',
   }
 }];

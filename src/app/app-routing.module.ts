@@ -71,6 +71,14 @@ const routes: Routes = [
     ],
   },
   {
+    path: 'verify-email',
+    component: LayoutComponent,
+    data: { layout: 'empty-layout' },
+    children: [
+      { path: '', loadChildren: () => import('./module/email-verification/email-verification.module').then(m => m.EmailVerificationModule) }
+    ],
+  },
+  {
     path: 'broken-pages',
     component: LayoutComponent,
     data: { layout: 'empty-layout' },

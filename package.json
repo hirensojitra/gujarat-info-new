@@ -1,5 +1,5 @@
 {
-  "name": "gujarat-info",
+  "name": "gujarat-uvach",
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
@@ -7,7 +7,7 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "serve:ssr:gujarat-info": "node dist/gujarat-info/server/server.mjs"
+    "serve:ssr:gujarat-uvach": "node dist/gujarat-uvach/server/server.mjs"
   },
   "private": true,
   "dependencies": {
