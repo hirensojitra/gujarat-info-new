@@ -23,7 +23,6 @@ export class DashboardLayoutComponent implements OnInit {
 
   ngOnInit() {
     this.userSubscription = this.userService.getUser().subscribe((user) => {
-      console.log(user)
       this.username = user?.username || null;
       this.name = this.userService.getFullName();
     });

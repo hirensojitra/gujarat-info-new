@@ -71,12 +71,12 @@
         </div>
       </div>
       <div class="card-body">
-        <ul class="row g-3 list-unstyled align-items-stretch">
-          <li *ngFor="let image of images" class="col-lg-3 col-md-4 col-sm-6 col-12">
-            <div class="d-flex h-100 flex-column p-2 border rounded shadow-sm">
+        <ul class="row g-2 list-unstyled align-items-stretch">
+          <li *ngFor="let image of images" class="col-lg-2 col-md-3 col-sm-4 col-6 d-flex flex-column">
+            <div class="d-flex mt-auto flex-column p-2 border rounded shadow-sm w-100">
               <div class="img-container flex-grow-1 d-flex align-items-end mb-2">
                 <img [src]="apiUrl + '/img' + getImagePath(image) + '?quality=30'" alt="Image"
-                  class="img-fluid rounded m-auto" />
+                  class="img-fluid rounded mx-auto" />
               </div>
               <div class="row g-2">
                 <div class="col-4">
@@ -87,8 +87,7 @@
                 </div>
                 <div class="col-4">
                   <a href="{{getImagePath(image)}}" class="btn btn-sm btn-outline-dark w-100"
-                    (click)="copyHrefToClipboard($event, getImagePath(image))">{{image.url}}<i class="fa fa-copy"></i>
-                    Copy</a>
+                    (click)="copyHrefToClipboard($event, getImagePath(image))">{{image.url}}<i class="fa fa-copy"></i></a>
                 </div>
                 <div class="col-4">
                   <button (click)="deleteImage(selectedFolderId, image.id)" class="btn btn-sm btn-outline-danger w-100">
