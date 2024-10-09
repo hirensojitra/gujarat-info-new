@@ -31,6 +31,18 @@ const routes: Routes = [
     ],
   },
   {
+    path: 'user-img',
+    component: LayoutComponent,
+    data: { layout: 'dashboard-layout' },
+    canActivate: [AuthGuard],
+    children: [
+      {
+        path: '',
+        loadChildren: () => import('./module/user-img/user-img.module').then((m) => m.UserImgModule)
+      },
+    ],
+  },
+  {
     path: 'admin',
     component: LayoutComponent,
     data: { layout: 'dashboard-layout' },

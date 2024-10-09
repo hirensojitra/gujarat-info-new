@@ -70,11 +70,15 @@ export class UserService {
   }
 
   // Update user data based on user ID
-  updateUserData(userid: number, updatedData: Partial<User>): Observable<any> {
+  updateUserData(userid: string, updatedData: Partial<User>): Observable<any> {
+    const token = this.cookieService.get('token');
     const headers = new HttpHeaders({
-      'Authorization': `Bearer ${this.cookieService.get('token')}`
+      'Authorization': `Bearer ${token}`
     });
+
+    // API endpoint for updating user data
     const fullUrl = `${this.apiUrl}/updateUser/${userid}`;
+
     return this.http.put(fullUrl, updatedData, { headers });
   }
 

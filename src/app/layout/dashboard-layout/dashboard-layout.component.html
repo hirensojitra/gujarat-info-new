@@ -11,12 +11,10 @@
                     </g>
                 </svg></span>
             <div class="controls ms-auto">
-                <button class="btn btn-sm btn-dark mx-1" routerLinkActive="bg-success border-success"
-                    *ngIf="isAuthenticated" [routerLink]="'/user-profile/view'">Profile</button>
-                <button class="btn btn-sm btn-dark mx-1" routerLinkActive="bg-success border-success" *ngIf="isAdmin()"
-                    [routerLink]="'/img'">Images</button>
-                <button class="btn btn-sm btn-dark mx-1" routerLinkActive="bg-success border-success" *ngIf="isAdmin()"
-                    [routerLink]="'/admin/users'">Users</button>
+                <button class="btn btn-sm btn-dark mx-1" routerLinkActive="bg-success border-success" *ngIf="isAuthenticated" [routerLink]="'/user-profile/view'">Profile</button>
+                <button class="btn btn-sm btn-dark mx-1" routerLinkActive="bg-success border-success" *ngIf="isAdmin()" [routerLink]="'/img'">Images</button>
+                <button class="btn btn-sm btn-dark mx-1" routerLinkActive="bg-success border-success" [routerLink]="'/user-img'">User Images</button>
+                <button class="btn btn-sm btn-dark mx-1" routerLinkActive="bg-success border-success" *ngIf="isAdmin()" [routerLink]="'/admin/users'">Users</button>
                 <button class="btn btn-sm btn-dark mx-1" *ngIf="isAuthenticated" (click)="logout()">Logout</button>
                 <button class="btn btn-sm btn-dark mx-1" *ngIf="!isAuthenticated" (click)="login()">Login</button>
             </div>
