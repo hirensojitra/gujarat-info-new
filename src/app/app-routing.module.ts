@@ -102,7 +102,7 @@ const routes: Routes = [
   // Redirect unmatched paths to auth
   {
     path: '**',
-    redirectTo: 'about-us',
+    redirectTo: 'auth/login',
     pathMatch: 'full',
   }
 ];

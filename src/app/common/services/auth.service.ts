@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
 import { CookieService } from 'ngx-cookie-service';
 import { catchError, map, Observable, of, throwError } from 'rxjs';
 import { environment } from '../../../environments/environment';
@@ -95,5 +95,21 @@ export class AuthService {
       }
     }
     return throwError(errorMessage);
+  }
+  validateToken(): Observable<any> {
+    const token = this.cookieService.get('authToken'); // Get the token from cookies
+
+    if (!token) {
+      // No token in cookies, you may handle this error (like logging out the user)
+      return new Observable(observer => {
+        observer.error({ message: 'No token provided' });
+      });
+    }
+
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}` // Send the token in the Authorization header
+    });
+
+    return this.http.post(`${this.apiUrl}/validate-token`, {}, { headers }); // POST request to backend
   }
 }
