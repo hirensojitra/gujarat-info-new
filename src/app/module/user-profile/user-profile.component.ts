@@ -71,7 +71,7 @@ export class UserProfileComponent implements OnInit, AfterViewInit {
         this.user = user;
         this.profilePictureForm.get('username')?.setValue(user.username);
         this.getVillage(user.village_id);
-        if (!this.user.image) { this.imageSelect.show(); }
+        // if (!this.user.image) { this.imageSelect.show(); }
         this.validateImage(this.user.username)
       }
     });
