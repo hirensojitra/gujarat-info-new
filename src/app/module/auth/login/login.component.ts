@@ -40,8 +40,6 @@ export class LoginComponent implements OnInit {
           if (response.token) {
             this.userService.setUser(response);  // Passing the entire response since it includes user data
             this.authService.setToken(response.token);
-            // Setting token in authService
-            debugger
             this.userService.getUser().subscribe(data => {
               console.log(data)
             })

@@ -30,6 +30,7 @@ export class UserImgComponent implements OnInit, AfterViewInit {
   // Image pagination properties
   imagePage: number = 1;
   imageLimit: number = 10;
+  imageItems: number = 0;
   totalImagePages: number = 1;
 
   // Folder pagination properties
@@ -93,7 +94,8 @@ export class UserImgComponent implements OnInit, AfterViewInit {
     });
 
     this.renameFolderForm = this.formBuilder.group({
-      folderName: ['', Validators.required]
+      folderName: ['', Validators.required],
+      folderId: ['', Validators.required]
     });
   }
 
@@ -136,8 +138,7 @@ export class UserImgComponent implements OnInit, AfterViewInit {
         this.images = data.images;
         this.selectedFolderId = folderId;
         this.selectedFolderName = this.folders.find(folder => folder.id === folderId)?.name || '';
-
-        // Update the URL with folder ID as a query parameter
+        this.loadImageCount(folderId);
         this.router.navigate([], {
           relativeTo: this.route,
           queryParams: { folder: folderId },
@@ -167,8 +168,7 @@ export class UserImgComponent implements OnInit, AfterViewInit {
     const folder = this.folders.find(f => f.id === folderId);
     if (folder) {
       this.selectedFolderId = folderId;
-      this.renameFolderForm.patchValue({ folderName: folder.name });
-      this.fetchImages(folderId);
+      this.renameFolderForm.patchValue({ folderName: folder.name, folderId: folder.id });
       const renameFolderModal = new bootstrap.Modal(document.getElementById('renameFolderModal'));
       renameFolderModal.show();
     }
@@ -195,7 +195,8 @@ export class UserImgComponent implements OnInit, AfterViewInit {
   renameFolder(): void {
     if (this.renameFolderForm.valid) {
       const folderName = this.renameFolderForm.value.folderName;
-      this.userImageService.renameFolder(this.userId, this.selectedFolderId, folderName).subscribe({
+      const folderId = this.renameFolderForm.value.folderId;
+      this.userImageService.renameFolder(folderId, folderName).subscribe({
         next: () => {
           this.fetchFolders();
           this.toast.show('Folder renamed successfully!', { class: 'bg-success' });
@@ -210,7 +211,7 @@ export class UserImgComponent implements OnInit, AfterViewInit {
 
   deleteFolder(): void {
     if (this.selectedFolderId !== null) {
-      this.userImageService.deleteFolder(this.userId, this.selectedFolderId).subscribe({
+      this.userImageService.deleteFolder(this.selectedFolderId).subscribe({
         next: () => {
           this.toast.show('Folder deleted successfully!', { class: 'bg-success' });
           this.selectedFolderId = null;
@@ -294,15 +295,17 @@ export class UserImgComponent implements OnInit, AfterViewInit {
       }
     });
   }
-
-  loadImageCount(folderId: string): void {
-    this.userImageService.getTotalImageCount(this.userId, folderId).subscribe(
-      (response) => {
-        this.totalImagePages = response.count;
-      },
-      (error) => {
-        console.error('Error fetching image count', error);
+  imageCounts: { [key: string]: number } = {};
+  async loadImageCount(folderId: string): Promise<void> {
+    try {
+      if (!this.imageCounts[folderId]) {
+        const response = await this.userImageService.getTotalImageCount(folderId).toPromise();
+        this.imageCounts[folderId] = response.totalCount; // Store the count for the folder
       }
-    );
+    } catch (error) {
+      console.error('Error fetching image count', error);
+      this.imageCounts[folderId] = 0; // Fallback in case of error
+    }
   }
+
 }

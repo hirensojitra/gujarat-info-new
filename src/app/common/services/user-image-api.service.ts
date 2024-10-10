@@ -61,11 +61,20 @@ export class UserImageApiService {
         return this.http.get(`${this.apiUrl}/folders/${folderId}/images`, { params });
     }
 
-    // Delete an image from a specific user's folder
     deleteImage(userid: string, folderId: string, imageId: number): Observable<any> {
-        const body = { userid: userid };
-        return this.http.delete(`${this.apiUrl}/folders/${folderId}/images/${imageId}`, { body });
+        const token = this.cookieService.get('token');
+        const headers = new HttpHeaders({
+            'Authorization': `Bearer ${token}`
+        });
+
+        // Pass userid as a query parameter
+        return this.http.delete(`${this.apiUrl}/folders/${folderId}/images/${imageId}`, {
+            headers: headers,
+            params: { userid: userid } // Pass userid as query parameter
+        });
     }
+
+
 
     // Get the total count of folders for a user
     getTotalFolderCount(userid: string, search: string = ''): Observable<{ count: number }> {
@@ -74,9 +83,10 @@ export class UserImageApiService {
     }
 
     // Get the total image count in a specific folder for a user
-    getTotalImageCount(userid: string, folderId: string): Observable<{ count: number }> {
-        const params = new HttpParams().set('userid', userid);
-        return this.http.get<{ count: number }>(`${this.apiUrl}/folders/${folderId}/images/count`, { params });
+    getTotalImageCount(folderId: string, search = ''): Observable<{ totalCount: number }> {
+        const params = new HttpParams()
+            .set('search', search);
+        return this.http.get<{ totalCount: number }>(`${this.apiUrl}/folders/${folderId}/images/count`, { params });
     }
 
     // Refresh an image for a specific user
@@ -95,13 +105,28 @@ export class UserImageApiService {
     }
 
     // Delete a folder for a specific user
-    deleteFolder(userid: string, folderId: string): Observable<any> {
-        return this.http.delete(`${this.apiUrl}/folders/${folderId}`, { body: { userid: userid } });
+    deleteFolder(folderId: string): Observable<any> {
+        const token = this.cookieService.get('token'); // Assuming you're using CookieService to get the token
+        const headers = new HttpHeaders({
+            'Authorization': `Bearer ${token}` // Pass the token in the Authorization header
+        });
+
+        return this.http.delete(`${this.apiUrl}/folders/${folderId}`, {
+            headers: headers
+        });
     }
 
+
     // Rename a folder
-    renameFolder(userid: string, folderId: string, newFolderName: string): Observable<any> {
-        const body = { folderName: newFolderName, userid: userid };
-        return this.http.put(`${this.apiUrl}/folders/${folderId}/rename`, body);
+    renameFolder(folderId: string, folderName: string): Observable<any> {
+        const token = this.cookieService.get('token'); // Get the token from cookies
+        const headers = new HttpHeaders({
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json' // Optional header
+        });
+
+        const body = { folderName: folderName }; // No need to include userid
+        return this.http.put(`${this.apiUrl}/folders/${folderId}/rename`, body, { headers });
     }
+
 }

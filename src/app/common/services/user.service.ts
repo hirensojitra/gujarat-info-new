@@ -56,19 +56,6 @@ export class UserService {
     this.userSubject.next(user);
   }
 
-  // Clear user details from the service and cookies, and navigate to home
-  clearUser(): void {
-    this.cookieService.delete('user');
-    this.cookieService.delete('token');
-    this.cookieService.deleteAll();  // Optionally delete all cookies if you have more than user/token stored
-
-    // Reset user subject to null
-    this.userSubject.next(null);
-
-    // Navigate to the home page after clearing user data
-    this.router.navigate(['/home']);
-  }
-
   // Update user data based on user ID
   updateUserData(userid: string, updatedData: Partial<User>): Observable<any> {
     const token = this.cookieService.get('token');

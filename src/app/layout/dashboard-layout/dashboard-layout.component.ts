@@ -29,7 +29,7 @@ export class DashboardLayoutComponent implements OnInit {
   }
 
   ngOnDestroy() {
-    
+
   }
 
   get isAuthenticated(): boolean {
@@ -41,7 +41,7 @@ export class DashboardLayoutComponent implements OnInit {
   }
 
   logout() {
-    this.userService.clearUser()
+    this.authService.logout()
   }
   isAdmin(): boolean {
     return this.authService.hasRole(['admin'])

@@ -4,6 +4,8 @@ import { ImageApiService } from '../../common/services/image-api.service';
 import { environment } from '../../../environments/environment';
 import { ToastService } from '../../common/services/toast.service';
 import { ActivatedRoute, Router } from '@angular/router';
+import { UserImageApiService } from '../../common/services/user-image-api.service';
+import { UserService } from '../../common/services/user.service';
 declare const bootstrap: any;
 
 @Component({
@@ -15,7 +17,7 @@ export class ImgComponent implements OnInit, AfterViewInit {
   folders: any[] = [];
   images: any[] = [];
   selectedFile: File | null = null;
-  selectedFolderId: number | null = null;
+  selectedFolderId: string | null = null;
   selectedFolderName: string = '';
   apiUrl = environment.MasterApi;
 
@@ -58,12 +60,20 @@ export class ImgComponent implements OnInit, AfterViewInit {
     private elementRef: ElementRef,
     private renderer: Renderer2,
     private router: Router,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private userImageService: UserImageApiService,
+    private userService: UserService
   ) {
     this.initializeForms();
   }
 
   async ngOnInit() {
+    await this.userService.getUser().subscribe(async data => {
+      if (this.userId !== data.id) {
+        this.userId = data.id; await this.loadFolderCount();
+        await this.fetchFolders();
+      }
+    });
     this.route.queryParams.subscribe(params => {
       const folderId = params['folder'];
       if (folderId) {
@@ -95,6 +105,9 @@ export class ImgComponent implements OnInit, AfterViewInit {
     this.folderLimit && this.imageService.getFolders(this.folderPage, this.folderLimit, searchTerm, sortBy, sortOrder).subscribe({
       next: (data: any) => {
         this.folders = data.folders;
+        this.folders.forEach((folder: any) => {
+          this.loadImageCount(folder.id); // Call loadImageCount with folder id
+        });
       },
       error: () => {
         this.toast.show('Error fetching folders!', { class: 'bg-danger' });
@@ -111,7 +124,7 @@ export class ImgComponent implements OnInit, AfterViewInit {
     }
   }
 
-  uploadImage(folderId: number): void {
+  uploadImage(folderId: string): void {
     if (this.selectedFile && folderId) {
       const metadata = { description: 'Sample Image' };
       this.imageService.uploadImage(folderId, this.selectedFile, metadata).subscribe({
@@ -121,7 +134,7 @@ export class ImgComponent implements OnInit, AfterViewInit {
     }
   }
 
-  fetchImages(folderId: number, page: number = 1, limit: number = 10): void {
+  fetchImages(folderId: string, page: number = 1, limit: number = 10): void {
     this.imageService.getImagesInFolder(folderId, page, limit).subscribe({
       next: (data: any) => {
         this.images = data.images;
@@ -140,21 +153,21 @@ export class ImgComponent implements OnInit, AfterViewInit {
       }
     });
   }
+  userId: string
 
-  deleteImage(folderId: number, imageId: number): void {
-    this.imageService.deleteImage(folderId, imageId).subscribe({
+  deleteImage(folderId: string, imageId: number): void {
+    this.userImageService.deleteImage(this.userId, folderId, imageId).subscribe({
       next: () => { this.fetchImages(folderId); },
       error: () => this.toast.show('Error deleting image!', { class: 'bg-danger' })
     });
   }
-
   // Bootstrap modals handling
   openAddFolderModal(): void {
     const addFolderModal = new bootstrap.Modal(document.getElementById('addFolderModal'));
     addFolderModal.show();
   }
 
-  openRenameFolderModal(folderId: number): void {
+  openRenameFolderModal(folderId: string): void {
     const folder = this.folders.find(f => f.id === folderId);
     if (folder) {
       this.selectedFolderId = folderId;
@@ -227,7 +240,7 @@ export class ImgComponent implements OnInit, AfterViewInit {
 
   }
 
-  refreshImage(imageId: number, folderId: number): void {
+  refreshImage(imageId: string, folderId: string): void {
     const fileInput = document.createElement('input');
     fileInput.type = 'file';
     fileInput.accept = 'image/*';
@@ -253,7 +266,7 @@ export class ImgComponent implements OnInit, AfterViewInit {
     fileInput.click(); // Open file dialog
   }
 
-  openFolderDeleteModal(folderId: number, folderName: string): void {
+  openFolderDeleteModal(folderId: string, folderName: string): void {
     this.selectedFolderId = folderId;
     this.selectedFolderName = folderName;
     this.confirmationTitle = 'Confirm Folder Deletion';
@@ -286,14 +299,14 @@ export class ImgComponent implements OnInit, AfterViewInit {
       }
     });
   }
-  loadImageCount(folderId: string): void {
-    this.imageService.getTotalImageCount(folderId).subscribe(
-      (response) => {
-        this.totalImagePages = response.count;
-      },
-      (error) => {
-        console.error('Error fetching image count', error);
-      }
-    );
+  imageCounts: { [key: string]: number } = {};
+  async loadImageCount(folderId: string): Promise<void> {
+    try {
+      const response = await this.userImageService.getTotalImageCount(folderId).toPromise();
+      this.imageCounts[folderId] = response.totalCount;
+    } catch (error) {
+      console.error('Error fetching image count', error);
+      this.imageCounts[folderId] = 0; // Fallback in case of error
+    }
   }
 }

@@ -155,7 +155,6 @@ export class EditProfileComponent implements OnInit, OnDestroy {
             this.userService.setUser(response.user);
             this.toastService.show(response.message, { class: 'bg-success' });
             this.userForm.setValue(formValue);
-            debugger;
           },
           error => {
             console.error('Error updating user:', error);

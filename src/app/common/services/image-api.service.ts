@@ -34,7 +34,7 @@ export class ImageApiService {
 
 
   // Upload an image to a specific folder
-  uploadImage(folderId: number, imageFile: File, metadata: any): Observable<any> {
+  uploadImage(folderId: string, imageFile: File, metadata: any): Observable<any> {
     const formData = new FormData();
     formData.append('image', imageFile); // File to upload
     formData.append('metadata', JSON.stringify(metadata)); // Additional metadata
@@ -43,7 +43,7 @@ export class ImageApiService {
   }
 
   // Get images within a folder with pagination, search, and sorting
-  getImagesInFolder(folderId: number, page: number = 1, limit: number = 10, search: string = '', sortBy: string = 'created_at', order: string = 'asc'): Observable<any> {
+  getImagesInFolder(folderId: string, page: number = 1, limit: number = 10, search: string = '', sortBy: string = 'created_at', order: string = 'asc'): Observable<any> {
     const params = new HttpParams()
       .set('page', page)
       .set('limit', limit)
@@ -58,22 +58,22 @@ export class ImageApiService {
   deleteImage(folderId: number, imageId: number): Observable<any> {
     return this.http.delete(`${this.apiUrl}/folders/${folderId}/images/${imageId}`);
   }
-  getImage(imageUrl: string, quality?: number, format?: string, thumb?: boolean): Observable<any> {
+  getImage(imageId: string, quality?: number, format?: string, thumb?: boolean): Observable<any> {
     let params: any = {};
     if (quality) params.quality = quality.toString();
     if (format) params.format = format;
     if (thumb) params.thumb = 'true';
-    return this.http.get(`${this.apiUrl}${imageUrl}`, { params, responseType: 'blob' });
+    return this.http.get(`${this.apiUrl}/uploads/${imageId}`, { params, responseType: 'blob' });
   }
   // Rename an existing folder
-  renameFolder(folderId: number, newFolderName: string): Observable<any> {
+  renameFolder(folderId: string, newFolderName: string): Observable<any> {
     const body = { folderName: newFolderName };
     return this.http.put(`${this.apiUrl}/folders/${folderId}/rename`, body);
   }
-  deleteFolder(folderId: number): Observable<any> {
+  deleteFolder(folderId: string): Observable<any> {
     return this.http.delete(`${this.apiUrl}/folders/${folderId}`);
   }
-  refreshImage(folderId: number, imageId: number, formData: FormData): Observable<any> {
+  refreshImage(folderId: string, imageId: string, formData: FormData): Observable<any> {
     return this.http.post(`${this.apiUrl}/folders/${folderId}/images/${imageId}/refresh`, formData);
   }
   getTotalFolderCount(search: string = ''): Observable<{ count: number }> {
