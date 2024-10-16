@@ -167,7 +167,6 @@ export class EditProfileComponent implements OnInit, OnDestroy {
         ;
       }
     } else {
-      // Mark all form controls as touched to trigger validation errors
       this.DS.markFormGroupTouched(this.userForm);
     }
   }

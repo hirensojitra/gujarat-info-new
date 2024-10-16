@@ -6,7 +6,7 @@ const routes: Routes = [
   {
     path: '',
     component: UserProfileComponent,
-    data: { title: 'User Profile', breadcrumb:'User Profile' },
+    data: { title: 'User Profile', breadcrumb: 'User Profile' },
     children: [
       { path: '', pathMatch: 'full', redirectTo: 'view' },
       { path: 'view', loadChildren: () => import('./view-profile/view-profile.module').then(m => m.ViewProfileModule) },

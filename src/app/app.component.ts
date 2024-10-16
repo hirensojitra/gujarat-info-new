@@ -18,8 +18,8 @@ import { LoaderService } from './common/services/loader';
   ]
 })
 export class AppComponent {
-  constructor(private seoService: SEOService, public loaderService: LoaderService, private router: Router) { }
-
+  constructor(private seoService: SEOService, public loaderService: LoaderService, private router: Router) {
+  }
   ngOnInit(): void {
     this.seoService.initSEO();
     this.router.events.subscribe((event) => {

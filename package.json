@@ -5,6 +5,7 @@
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
+    "build:ssr": "ng build --configuration production && npm run serve:ssr:gujarat-uvach",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "serve:ssr:gujarat-uvach": "node dist/gujarat-uvach/server/server.mjs"

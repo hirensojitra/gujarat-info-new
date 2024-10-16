@@ -10,7 +10,6 @@ export class DependencyListPipe implements PipeTransform {
                 result.push({ title: selectData[k].title, value: k });
             }
         }
-        console.log(result)
         return result;
     }
 }

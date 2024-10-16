@@ -25,10 +25,6 @@ export class ImageApiService {
       .set('search', search)
       .set('sortBy', sortBy)
       .set('order', order);
-
-    const completeUrl = `${this.apiUrl}/folders?${params.toString()}`;  // Combine URL and query parameters
-    console.log(completeUrl);  // Log the complete URL to the console
-
     return this.http.get(`${this.apiUrl}/folders`, { params });
   }
 

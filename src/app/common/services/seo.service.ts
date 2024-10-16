@@ -1,4 +1,5 @@
-import { Injectable } from '@angular/core';
+import { Injectable, Inject, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { Title } from '@angular/platform-browser';
 import { Meta } from '@angular/platform-browser';
 import { ActivatedRoute, Router, NavigationEnd } from '@angular/router';
@@ -12,7 +13,8 @@ export class SEOService {
     private titleService: Title,
     private metaService: Meta,
     private router: Router,
-    private activatedRoute: ActivatedRoute
+    private activatedRoute: ActivatedRoute,
+    @Inject(PLATFORM_ID) private platformId: Object
   ) { }
 
   initSEO() {
@@ -28,8 +30,14 @@ export class SEOService {
         })
       )
       .subscribe((data) => {
-        this.updateTitle(data['title']);
-        this.updateMetaTags(data);
+        if (isPlatformBrowser(this.platformId)) {
+          this.updateTitle(data['title']);
+          this.updateMetaTags(data);
+        } else {
+          // If server-side, you can set up your meta tags here.
+          this.updateTitle(data['title']);
+          this.updateMetaTags(data);
+        }
       });
   }
 
@@ -54,5 +62,4 @@ export class SEOService {
       this.metaService.updateTag({ property: 'twitter:image', content: data['image'] });
     }
   }
-
 }

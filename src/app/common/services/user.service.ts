@@ -2,7 +2,6 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { User } from '../interfaces/commonInterfaces';
-import { Router } from '@angular/router';
 import { environment } from '../../../environments/environment';
 import { CookieService } from 'ngx-cookie-service';
 
@@ -12,11 +11,9 @@ import { CookieService } from 'ngx-cookie-service';
 export class UserService {
   private userSubject: BehaviorSubject<User | null> = new BehaviorSubject<User | null>(null);
   private apiUrl = environment.MasterApi + '/auth';
-  private token: string | null = this.cookieService.get('token'); // Retrieve token from cookies
 
   constructor(
     private http: HttpClient,
-    private router: Router,
     private cookieService: CookieService
   ) {
     // Initialize the user subject based on stored user details in cookies
@@ -27,7 +24,6 @@ export class UserService {
         this.userSubject.next(parsedUser);
       } catch (error) {
         console.error('Error parsing stored user:', error);
-        // Handle the error, clear the stored user details in cookies
         this.cookieService.delete('user');
       }
     }

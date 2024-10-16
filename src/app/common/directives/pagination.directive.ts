@@ -98,7 +98,7 @@ export class PaginationDirective implements OnInit, OnDestroy {
       const li = this.renderer.createElement('li');
       this.renderer.addClass(li, 'page-item');
       if (isDisabled) this.renderer.addClass(li, 'disabled');
-      const a = this.renderer.createElement('a');
+      const a = this.renderer.createElement('button');
       this.renderer.addClass(a, 'btn');
       this.renderer.addClass(a, isActive ? 'btn-dark' : isDisabled ? 'btn-flat' : 'btn-outline-dark');
       this.renderer.addClass(a, !isActive && isDisabled ? 'opacity-50' : 'opacity-1');

@@ -295,7 +295,7 @@ export class ImgComponent implements OnInit, AfterViewInit {
         console.error('Error fetching folder count:', error);
       },
       complete: () => {
-        console.log('Folder count request completed.');
+
       }
     });
   }

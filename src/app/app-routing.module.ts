@@ -55,6 +55,17 @@ const routes: Routes = [
     ],
   },
   {
+    path: 'poster',
+    component: LayoutComponent,
+    data: { layout: 'empty-layout' },
+    children: [
+      {
+        path: '',
+        loadChildren: () => import('./module/poster/poster.module').then((m) => m.PosterModule)
+      },
+    ],
+  },
+  {
     path: 'user-profile',
     component: LayoutComponent,
     data: { layout: 'dashboard-layout' },

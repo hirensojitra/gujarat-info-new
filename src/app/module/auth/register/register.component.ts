@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { Md5 } from 'ts-md5/dist/md5';
 import { UserService } from '../../../common/services/user.service';
 import { ToastService } from '../../../common/services/toast.service';
 
@@ -34,7 +33,6 @@ export class RegisterComponent implements OnInit {
   // Method to register a user
   register(): void {
     const pass = this.registrationForm.get('password')?.value;
-    const md5 = new Md5();
     // this.registrationForm.get('password')?.setValue(md5.appendStr(pass).end() as string);
 
     if (this.registrationForm.valid) {
@@ -54,7 +52,6 @@ export class RegisterComponent implements OnInit {
     }
     this.registrationForm.get('password')?.setValue(pass);
   }
-
   // Method to mark form controls as touched for validation feedback
   private markFormGroupTouched(formGroup: FormGroup) {
     Object.keys(formGroup.controls).forEach((key) => {
