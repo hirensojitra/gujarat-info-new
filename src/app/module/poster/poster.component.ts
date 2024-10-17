@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, ElementRef, OnInit, Renderer2, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, Inject, OnInit, PLATFORM_ID, Renderer2, ViewChild } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Title, Meta } from '@angular/platform-browser';
 import { ImageElement, PostDetails } from '../../common/interfaces/image-element';
@@ -14,6 +14,8 @@ import { ToastService } from '../../common/services/toast.service';
 import { LoaderService } from '../../common/services/loader';
 import { FontService } from '../../common/services/fonts.service';
 import { BaseUrlService } from '../../common/services/baseuri.service';
+import { SEOService } from 'src/app/common/services/seo.service';
+import { isPlatformBrowser, isPlatformServer } from '@angular/common';
 
 interface MatchObject {
   components: string;
@@ -44,7 +46,7 @@ interface data {
   templateUrl: './poster.component.html',
   styleUrls: ['./poster.component.scss']
 })
-export class PosterComponent {
+export class PosterComponent implements OnInit {
   postDetailsDefault: PostDetails | undefined;
   postDetails: PostDetails | undefined;
   imgParam: string;
@@ -101,7 +103,10 @@ export class PosterComponent {
     private loaderService: LoaderService,
     private fontService: FontService,
     private elementRef: ElementRef,
-    private baseUrlService: BaseUrlService
+    private baseUrlService: BaseUrlService,
+    private seoService: SEOService,
+    @Inject(PLATFORM_ID) private platformId: Object
+
   ) {
     this.inputTextForm = this.fb.group({
       text: ['', Validators.required]
@@ -114,28 +119,46 @@ export class PosterComponent {
   }
 
   async ngOnInit(): Promise<void> {
-    await this.route.data.subscribe(async data => {
-      !data['title'] && this.titleService.setTitle(data['title'] || 'Poster Download');
-      !data['description'] && this.metaService.updateTag({ name: 'description', content: data['description'] || 'Discover our web application for generating election campaign posters, festival posts, and other promotional activities. Customize posters with photos, names, addresses, designations, and contact details for efficient and personalized promotional material.' });
-      !data['keywords'] && this.metaService.updateTag({ name: 'keywords', content: data['keywords'] || 'poster generation, campaign posters, election posters, festival posts, promotional activities, customization, Gujarat Uvach, web application' });
-      !data['robots'] && this.metaService.updateTag({ name: 'robots', content: data['robots'] || 'index, follow' });
-      !data['og:title'] && this.metaService.updateTag({ property: 'og:title', content: data['og:title'] || 'Default OG title' });
-      !data['og:description'] && this.metaService.updateTag({ property: 'og:description', content: data['og:description'] || 'Default OG description' });
-      !data['og:image'] && this.metaService.updateTag({ property: 'og:image', content: data['og:image'] || 'https://vmi2070714.contaboserver.net/api/v1/img/uploads/wLmyK?quality=30' });
-    });
-    await this.route.queryParams.subscribe(async params => {
-      if (params['img'] == undefined) return;
-      this.imgParam = params['img'] || '5';
-      this.postDetailsDefault = await this.PS.getPostById(this.imgParam.toString()).toPromise() as PostDetails;
-      if (this.postDetailsDefault && !this.postDetailsDefault.deleted) {
-        await this.changeMetadataDynamically();
-      }
-    });
+    if (isPlatformBrowser(this.platformId)) {
+      console.log('Running on the browser');
+      await this.route.paramMap.subscribe(async params => {
+        this.imgParam = params.get('img');
+        if (this.imgParam) {
+          this.postDetailsDefault = await this.PS.getPostById(this.imgParam.toString()).toPromise() as PostDetails;
+          if (this.postDetailsDefault && !this.postDetailsDefault.deleted) {
+            this.getPostById();
+          }
+        }
+      })
+    }
+
+    if (isPlatformServer(this.platformId)) {
+      this.route.data.subscribe(async data => {
+        !data['title'] && this.titleService.setTitle(data['title'] || 'Poster Download');
+        !data['description'] && this.metaService.updateTag({ name: 'description', content: data['description'] || 'Discover our web application for generating election campaign posters, festival posts, and other promotional activities. Customize posters with photos, names, addresses, designations, and contact details for efficient and personalized promotional material.' });
+        !data['keywords'] && this.metaService.updateTag({ name: 'keywords', content: data['keywords'] || 'poster generation, campaign posters, election posters, festival posts, promotional activities, customization, Gujarat Uvach, web application' });
+        !data['robots'] && this.metaService.updateTag({ name: 'robots', content: data['robots'] || 'index, follow' });
+        !data['og:title'] && this.metaService.updateTag({ property: 'og:title', content: data['og:title'] || 'Default OG title' });
+        !data['og:description'] && this.metaService.updateTag({ property: 'og:description', content: data['og:description'] || 'Default OG description' });
+        !data['og:image'] && this.metaService.updateTag({ property: 'og:image', content: data['og:image'] || 'https://vmi2070714.contaboserver.net/api/v1/img/uploads/wLmyK?quality=30' });
+      })
+      await this.seoService.initSEO();
+      await this.route.paramMap.subscribe(async params => {
+        this.imgParam = params.get('img');
+        if (this.imgParam) {
+          this.postDetailsDefault = await this.PS.getPostById(this.imgParam.toString()).toPromise() as PostDetails;
+          if (this.postDetailsDefault && !this.postDetailsDefault.deleted) {
+            await this.changeMetadataDynamically();
+          }
+        }
+      });
+    }
+    await new Promise(resolve => setTimeout(resolve, 1500));
+
   }
   async changeMetadataDynamically(): Promise<void> {
     this.titleService.setTitle(this.postDetailsDefault.title);
     this.metaService.updateTag({ name: 'description', content: this.postDetailsDefault.info });
-    await this.getPostById();
   }
   async getPostById(): Promise<void> {
     const post: PostDetails = this.postDetailsDefault;

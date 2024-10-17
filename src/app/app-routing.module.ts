@@ -55,7 +55,7 @@ const routes: Routes = [
     ],
   },
   {
-    path: 'poster',
+    path: 'poster/:img',
     component: LayoutComponent,
     data: { layout: 'empty-layout' },
     children: [

@@ -17,22 +17,26 @@ export function app(): express.Express {
   server.set('view engine', 'html');
   server.set('views', browserDistFolder);
 
-  // Example Express Rest API endpoints
-  // server.get('/api/**', (req, res) => { });
-  // Serve static files from /browser
+  // Serve static files from /browser without appending a trailing slash
   server.get('*.*', express.static(browserDistFolder, {
-    maxAge: '1y'
+    maxAge: '1y',
+    redirect: false // Prevents redirecting to trailing slash versions of static files
   }));
+
+  // Middleware to handle removing trailing slashes and redirecting
+  server.use((req, res, next) => {
+    if (req.url.length > 1 && req.url.endsWith('/')) {
+      // Redirect if URL ends with a trailing slash
+      const newUrl = req.url.slice(0, -1);
+      res.redirect(301, newUrl);
+    } else {
+      next();
+    }
+  });
 
   // All regular routes use the Angular engine
   server.get('*', (req, res, next) => {
     const { protocol, originalUrl, baseUrl, headers } = req;
-    alert(originalUrl)
-    // Remove trailing slash from URL (except for root URL "/")
-    if (originalUrl.length > 1 && originalUrl.endsWith('/')) {
-      const redirectUrl = originalUrl.slice(0, -1) + req.url.slice(originalUrl.length);
-      return res.redirect(301, redirectUrl);
-    }
 
     commonEngine
       .render({
