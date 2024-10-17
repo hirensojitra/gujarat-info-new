@@ -1,7 +1,0 @@
-{
-  "version": 3,
-  "sources": ["src/app/common/services/platform.service.ts"],
-  "sourcesContent": ["import { Injectable, Inject, PLATFORM_ID } from '@angular/core';\r\nimport { isPlatformBrowser } from '@angular/common';\r\n\r\n@Injectable({\r\n  providedIn: 'root'\r\n})\r\nexport class PlatformService {\r\n  constructor(@Inject(PLATFORM_ID) private platformId: Object) { }\r\n\r\n  public isBrowser(): boolean {\r\n    return isPlatformBrowser(this.platformId);\r\n  }\r\n}\r\n"],
-  "mappings": ";;;;;;;;;AAMM,IAAO,kBAAP,MAAO,iBAAe;EAC1B,YAAyC,YAAkB;AAAlB,SAAA,aAAA;EAAsB;EAExD,YAAS;AACd,WAAO,kBAAkB,KAAK,UAAU;EAC1C;;;uBALW,kBAAe,mBACN,WAAW,CAAA;IAAA;EAAA;;4EADpB,kBAAe,SAAf,iBAAe,WAAA,YAFd,OAAM,CAAA;EAAA;;",
-  "names": []
-}

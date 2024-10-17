@@ -1,7 +1,0 @@
-{
-  "version": 3,
-  "sources": ["src/app/app.component.scss"],
-  "sourcesContent": [".toast-container {\r\n    z-index: 99999;\r\n}\r\n\r\n.loader-container {\r\n    z-index: 9999;\r\n    position: relative;\r\n    pointer-events: none;\r\n\r\n    &.show {\r\n        pointer-events: all;\r\n    }\r\n}"],
-  "mappings": ";AAAA,CAAA;AACI,WAAA;;AAGJ,CAAA;AACI,WAAA;AACA,YAAA;AACA,kBAAA;;AAEA,CALJ,gBAKI,CAAA;AACI,kBAAA;;",
-  "names": []
-}

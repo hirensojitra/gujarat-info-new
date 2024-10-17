@@ -1,7 +1,0 @@
-{
-  "version": 3,
-  "sources": ["src/app/module/about-us/about-us.component.scss"],
-  "sourcesContent": [".main-container {\r\n    height: 100vh;\r\n    display: flex;\r\n    position: relative;\r\n    overflow: hidden;\r\n    background: #FFF;\r\n\r\n    .main-back {\r\n        height: 100%;\r\n        width: 70%;\r\n        background: linear-gradient(120deg, #408253 0%, #81c784 100%) !important;\r\n        color: #FFF;\r\n        position: relative;\r\n        z-index: 0;\r\n        display: flex;\r\n        align-items: center;\r\n        justify-content: center;\r\n\r\n        .main-back-content {\r\n            width: 100%;\r\n            position: relative;\r\n\r\n            img {\r\n                width: 500px;\r\n                max-width: 50%;\r\n                margin: 0 auto 2rem;\r\n                display: block;\r\n            }\r\n        }\r\n    }\r\n\r\n    .main-content {\r\n        position: relative;\r\n        width: 100%;\r\n        height: 100%;\r\n        overflow-x: hidden;\r\n        overflow-y: auto;\r\n    }\r\n}\r\n"],
-  "mappings": ";AAAA,CAAA;AACI,UAAA;AACA,WAAA;AACA,YAAA;AACA,YAAA;AACA,cAAA;;AAEA,CAPJ,eAOI,CAAA;AACI,UAAA;AACA,SAAA;AACA;IAAA;MAAA,MAAA;MAAA,QAAA,EAAA;MAAA,QAAA;AACA,SAAA;AACA,YAAA;AACA,WAAA;AACA,WAAA;AACA,eAAA;AACA,mBAAA;;AAEA,CAlBR,eAkBQ,CAXJ,UAWI,CAAA;AACI,SAAA;AACA,YAAA;;AAEA,CAtBZ,eAsBY,CAfR,UAeQ,CAJJ,kBAII;AACI,SAAA;AACA,aAAA;AACA,UAAA,EAAA,KAAA;AACA,WAAA;;AAKZ,CA/BJ,eA+BI,CAAA;AACI,YAAA;AACA,SAAA;AACA,UAAA;AACA,cAAA;AACA,cAAA;;",
-  "names": []
-}

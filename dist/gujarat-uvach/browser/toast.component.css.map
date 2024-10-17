@@ -1,7 +1,0 @@
-{
-  "version": 3,
-  "sources": ["src/app/common/component/toast/toast.component.scss"],
-  "sourcesContent": [".toast {\r\n    color: #fff;\r\n    min-width: 320px;\r\n    border-radius: 0.5rem;\r\n    overflow: hidden;\r\n    z-index: 999 !important;\r\n  }"],
-  "mappings": ";AAAA,CAAA;AACI,SAAA;AACA,aAAA;AACA,iBAAA;AACA,YAAA;AACA,WAAA;;",
-  "names": []
-}
