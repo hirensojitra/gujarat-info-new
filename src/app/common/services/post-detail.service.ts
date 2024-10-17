@@ -1,6 +1,6 @@
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable, catchError, map, of, throwError } from 'rxjs';
+import { Observable, map } from 'rxjs';
 import { PostDetails } from '../interfaces/image-element';
 import { environment } from '../../../environments/environment';
 
@@ -29,16 +29,7 @@ export class PostDetailService {
     }
 
     getPostById(id: string): Observable<PostDetails> {
-        return this.http.get<PostDetails>(`${this.baseUrl}/get/${id}`).pipe(
-            catchError((error: HttpErrorResponse) => {
-                if (error.status === 404) {
-                    return null
-                } else {
-                    // Handle other errors (e.g., server errors)
-                    return []
-                }
-            })
-        );
+        return this.http.get<PostDetails>(`${this.baseUrl}/get/${id}`);
     }
 
     updatePost(newData: PostDetails): Observable<any> {

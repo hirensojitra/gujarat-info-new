@@ -1,4 +1,4 @@
-import { Component, ElementRef, OnInit, Renderer2, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, OnInit, Renderer2, ViewChild } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Title, Meta } from '@angular/platform-browser';
 import { ImageElement, PostDetails } from '../../common/interfaces/image-element';
@@ -44,14 +44,12 @@ interface data {
   templateUrl: './poster.component.html',
   styleUrls: ['./poster.component.scss']
 })
-export class PosterComponent implements OnInit {
+export class PosterComponent {
   postDetailsDefault: PostDetails | undefined;
   postDetails: PostDetails | undefined;
   imgParam: string;
-
   isDeleted: boolean | undefined;
   postStatus: string | undefined = 'loading';
-
   dataset: data[] = [];
   apiData: { [key: string]: any[] } = {};
   selectData: { [key: string]: { lang: string, value: string, api: string, dependency: string, text: SVGAElement } } = {};
@@ -79,15 +77,12 @@ export class PosterComponent implements OnInit {
   pageLink: string = '';
 
   @ViewChild('imageDraw') imageDraw!: ElementRef<SVGElement | HTMLElement>;
-
   @ViewChild('textInput') textInput!: ElementRef;
-
-
+  @ViewChild('imageInput') imageInput!: ElementRef;
 
   imgModalTitle: string = '';
   cropper!: Cropper;
   cropperModalTitle: string | undefined = '';
-  @ViewChild('imageInput') imageInput!: ElementRef;
 
   constructor(
     private route: ActivatedRoute,
@@ -119,8 +114,8 @@ export class PosterComponent implements OnInit {
   }
 
   async ngOnInit(): Promise<void> {
-    this.postDetailsDefault == undefined && await this.route.data.subscribe(data => {
-      !data['title'] && this.titleService.setTitle(data['title'] || 'Default Title');
+    await this.route.data.subscribe(async data => {
+      !data['title'] && this.titleService.setTitle(data['title'] || 'Poster Download');
       !data['description'] && this.metaService.updateTag({ name: 'description', content: data['description'] || 'Discover our web application for generating election campaign posters, festival posts, and other promotional activities. Customize posters with photos, names, addresses, designations, and contact details for efficient and personalized promotional material.' });
       !data['keywords'] && this.metaService.updateTag({ name: 'keywords', content: data['keywords'] || 'poster generation, campaign posters, election posters, festival posts, promotional activities, customization, Gujarat Uvach, web application' });
       !data['robots'] && this.metaService.updateTag({ name: 'robots', content: data['robots'] || 'index, follow' });
@@ -128,65 +123,19 @@ export class PosterComponent implements OnInit {
       !data['og:description'] && this.metaService.updateTag({ property: 'og:description', content: data['og:description'] || 'Default OG description' });
       !data['og:image'] && this.metaService.updateTag({ property: 'og:image', content: data['og:image'] || 'https://vmi2070714.contaboserver.net/api/v1/img/uploads/wLmyK?quality=30' });
     });
-    this.postDetailsDefault == undefined && await this.route.queryParams.subscribe(async params => {
+    await this.route.queryParams.subscribe(async params => {
+      if (params['img'] == undefined) return;
       this.imgParam = params['img'] || '5';
       this.postDetailsDefault = await this.PS.getPostById(this.imgParam.toString()).toPromise() as PostDetails;
       if (this.postDetailsDefault && !this.postDetailsDefault.deleted) {
         await this.changeMetadataDynamically();
       }
     });
-    if (this.platformService.isBrowser()) {
-      this.textModal = new bootstrap.Modal(document.getElementById('textModal')!, { focus: false, keyboard: false, static: false });
-      this.textModal._element.addEventListener('hide.bs.modal', () => {
-        this.inputTextForm.reset();
-      });
-      this.textModal._element.addEventListener('show.bs.modal', () => {
-      });
-      this.textModal._element.addEventListener('shown.bs.modal', () => {
-        this.textInput.nativeElement.focus();
-      });
-
-      this.myInfo = new bootstrap.Modal(document.getElementById('myInfo')!, { focus: false, keyboard: false, static: false });
-
-      this.cropperModal = new bootstrap.Modal(document.getElementById('cropperModal')!, { focus: false, keyboard: false, static: false });
-      this.cropperModal._element.addEventListener('hide.bs.modal', () => {
-        if (this.cropper) {
-          this.cropper.destroy();
-        }
-      });
-      this.cropperModal._element.addEventListener('show.bs.modal', () => {
-
-      });
-      this.imageCropper = new bootstrap.Modal(document.getElementById('imageCropper')!, { focus: false, keyboard: false, static: false });
-      this.imageCropper._element.addEventListener('hide.bs.modal', () => {
-        if (this.cropper) {
-          this.cropper.destroy();
-        }
-      });
-      this.imageCropper._element.addEventListener('show.bs.modal', () => {
-
-      });
-      await this.getPostById();
-      !this.downloaded && await this.PS.updateDownloadCounter(this.imgParam)
-        .subscribe(
-          post => {
-            if (post) {
-              const p = JSON.parse(JSON.stringify(post));
-              this.postStatus = 'Total Download: ' + post.download_counter;
-            } else {
-
-            }
-          },
-          error => {
-            this.postStatus = undefined;
-            console.error('Error fetching post:', error);
-          }
-        );
-    }
   }
-  changeMetadataDynamically(): void {
+  async changeMetadataDynamically(): Promise<void> {
     this.titleService.setTitle(this.postDetailsDefault.title);
     this.metaService.updateTag({ name: 'description', content: this.postDetailsDefault.info });
+    await this.getPostById();
   }
   async getPostById(): Promise<void> {
     const post: PostDetails = this.postDetailsDefault;
@@ -207,6 +156,17 @@ export class PosterComponent implements OnInit {
     } else if (post.deleted && post.msg) {
       this.postStatus = post.msg;
     }
+    this.textModal = new bootstrap.Modal(document.getElementById('textModal')!, { focus: false, keyboard: false, static: false });
+    this.textModal._element.addEventListener('hide.bs.modal', () => { this.inputTextForm.reset(); });
+    this.textModal._element.addEventListener('show.bs.modal', () => { });
+    this.textModal._element.addEventListener('shown.bs.modal', () => { this.textInput.nativeElement.focus(); });
+    this.myInfo = new bootstrap.Modal(document.getElementById('myInfo')!, { focus: false, keyboard: false, static: false });
+    this.cropperModal = new bootstrap.Modal(document.getElementById('cropperModal')!, { focus: false, keyboard: false, static: false });
+    this.cropperModal._element.addEventListener('hide.bs.modal', () => { if (this.cropper) { this.cropper.destroy(); } });
+    this.cropperModal._element.addEventListener('show.bs.modal', () => { });
+    this.imageCropper = new bootstrap.Modal(document.getElementById('imageCropper')!, { focus: false, keyboard: false, static: false });
+    this.imageCropper._element.addEventListener('hide.bs.modal', () => { if (this.cropper) { this.cropper.destroy(); } });
+    this.imageCropper._element.addEventListener('show.bs.modal', () => { });
   }
   async getImageDataUrl(imageUrl: string): Promise<string> {
     try {
@@ -238,6 +198,7 @@ export class PosterComponent implements OnInit {
       const backgroundurl = this.postDetails.backgroundurl;
       const svg = this.imageDraw.nativeElement;
       const svgDefs = document.createElementNS('http://www.w3.org/2000/svg', 'defs') as SVGDefsElement;
+      this.postStatus = 'Total Download: ' + this.postDetails.download_counter;
       while (svg.firstChild) {
         svg.removeChild(svg.firstChild);
       }
@@ -861,6 +822,21 @@ export class PosterComponent implements OnInit {
       });
       this.downloaded = true;
       !share && link.click();
+      !this.downloaded && await this.PS.updateDownloadCounter(this.imgParam)
+        .subscribe(
+          post => {
+            if (post) {
+              const p = JSON.parse(JSON.stringify(post));
+              this.postStatus = 'Total Download: ' + post.download_counter;
+            } else {
+
+            }
+          },
+          error => {
+            this.postStatus = undefined;
+            console.error('Error fetching post:', error);
+          }
+        )
       this.loaderService.hide();
     };
   }

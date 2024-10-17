@@ -1,0 +1,20 @@
+{
+  "routes": [
+    "/about-us",
+    "/admin",
+    "/admin/users",
+    "/auth",
+    "/auth/login",
+    "/auth/register",
+    "/broken-pages",
+    "/broken-pages/unauthorized",
+    "/dashboard",
+    "/img",
+    "/poster",
+    "/user-img",
+    "/user-profile",
+    "/user-profile/edit",
+    "/user-profile/view",
+    "/verify-email"
+  ]
+}

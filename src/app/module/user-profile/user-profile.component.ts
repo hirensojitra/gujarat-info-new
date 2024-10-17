@@ -2,11 +2,12 @@ import { AfterViewInit, Component, ElementRef, OnInit, ViewChild } from '@angula
 import Cropper from 'cropperjs';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Subscription } from 'rxjs';
-import { User, Village } from '../../common/interfaces/commonInterfaces';
-import { UserService } from '../../common/services/user.service';
-import { DevelopmentService } from '../../common/services/development.service';
-import { VillageService } from '../../common/services/village.service';
-import { environment } from '../../../environments/environment';
+import { environment } from 'src/environments/environment';
+import { User, Village } from 'src/app/common/interfaces/commonInterfaces';
+import { UserService } from 'src/app/common/services/user.service';
+import { DevelopmentService } from 'src/app/common/services/development.service';
+import { VillageService } from 'src/app/common/services/village.service';
+
 declare const bootstrap: any;
 
 
