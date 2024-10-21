@@ -120,7 +120,6 @@ export class PosterComponent implements OnInit {
 
   async ngOnInit(): Promise<void> {
     if (isPlatformBrowser(this.platformId)) {
-      console.log('Running on the browser');
       await this.route.paramMap.subscribe(async params => {
         this.imgParam = params.get('img');
         if (this.imgParam) {

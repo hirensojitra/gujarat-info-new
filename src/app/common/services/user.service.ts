@@ -1,4 +1,4 @@
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { User } from '../interfaces/commonInterfaces';
@@ -51,7 +51,36 @@ export class UserService {
     });
     this.userSubject.next(user);
   }
+  getAllUsers(
+    paramsObj: {
+      page?: number;
+      limit?: number;
+      search?: string;
+      sortBy?: string;
+      order?: string;
+    } = {}
+  ): Observable<any> {
+    // Set default values if not provided in the paramsObj
+    const {
+      page = 1,
+      limit = 10,
+      search = '',
+      sortBy = 'created_at',
+      order = 'asc',
+    } = paramsObj;
 
+    let params = new HttpParams()
+      .set('page', page.toString())
+      .set('limit', limit.toString())
+      .set('search', search)
+      .set('sortBy', sortBy)
+      .set('order', order);
+    const token = this.cookieService.get('token');
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`
+    });
+    return this.http.get(`${this.apiUrl}/users`, { headers, params });
+  }
   // Update user data based on user ID
   updateUserData(userid: string, updatedData: Partial<User>): Observable<any> {
     const token = this.cookieService.get('token');
