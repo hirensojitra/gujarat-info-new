@@ -1,7 +1,7 @@
 <div class="container mt-4">
     <h2 class="mb-4">User Management</h2>
 
-    <table class="table table-striped table-hover">
+    <!-- <table class="table table-striped table-hover">
         <thead>
             <tr>
                 <th scope="col">#</th>
@@ -35,40 +35,53 @@
                 <td colspan="7" class="text-center">No users found.</td>
             </tr>
         </tbody>
-    </table>
-    <div class="row g-3">
+    </table> -->
+    <div class="row g-3 align-items-stretch">
         <div class="col-md-4 col-sm-6 col-12 col-lg-4 col-xl-3" *ngFor="let user of users; let i = index">
-            <div class="profile-widget border rounded">
-                <div class="profile-img">
-                    <img [src]="validateImage(user.username)" [alt]="user.firstname?user.firstname+' '+user.lastname:'User'" class="w-100 rounded-circle">
-                </div>
-                <div class="dropdown profile-action">
-                    <a href="#" class="action-icon dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false"><i class="fa fa-ellipsis-v"></i></a>
-                    <div class="dropdown-menu dropdown-menu-right">
-                        <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#edit_employee"><i class="fa fa-pencil m-r-5"></i> Edit</a>
-                        <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#delete_employee"><i class="fa fa-trash m-r-5"></i> Delete</a>
+            <div class="profile-widget p-3 h-100 bg-light bg-opacity-25 d-flex flex-column">
+                <div class="flex-grow-1 d-flex flex-column mb-3">
+                    <div class="row g-2">
+                        <div class="col-5 mx-auto">
+                            <img [src]="validateImage(user.username)" [alt]="user.firstname?user.firstname+' '+user.lastname:'User'" class="w-100 rounded-circle border-5 shadow border border-white">
+                        </div>
+                        <div class="col-12 text-center">
+                            <div class="dropdown profile-action">
+                                <a href="#" class="action-icon dropdown-toggle btn btn-flat" data-bs-toggle="dropdown" aria-expanded="false"><i class="fa fa-ellipsis-v"></i></a>
+                                <div class="dropdown-menu dropdown-menu-right">
+                                    <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#edit_employee"><i class="fa fa-pencil me-2"></i> Edit</a>
+                                    <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#delete_employee"><i class="fa fa-trash me-2"></i> Delete</a>
+                                </div>
+                            </div>
+                            <h5 class="text-truncate fw-bold mb-0 text-primary mt-3" [title]="user.fullname">{{user.fullname}}</h5>
+                            <h6 class="text-truncate m-0" [title]="user.username"><i>{{user.username}}</i></h6>
+                            <div class="text-secondary" *ngIf="user.roles">( {{user.roles}} )</div>
+                        </div>
                     </div>
                 </div>
-                <h4 class="user-name m-t-10 mb-0 text-ellipsis"><a href="#" (click)="false">{{user.username}}</a></h4>
-                <div class="small text-muted">Team Leader</div>
+                <div class="row g-2">
+                    <button *ngIf="user.email" class="col-12 text-start btn btn-sm btn-outline-dark text-nowrap" type="button" (click)="sendMail(user.email)"><i class="fa fa-envelope me-2"></i>{{user.email}}</button>
+                    <button *ngIf="user.mobile" class="col-12 text-start btn btn-sm btn-outline-dark text-nowrap" type="button" (click)="makeCall(user.mobile)"><i class="fa fa-phone me-2"></i>{{user.mobile}}</button>
+                </div>
             </div>
         </div>
+        <div class="col-12">
+            <nav aria-label="Page navigation">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item" [class.disabled]="currentPage === 1">
+                        <a class="page-link" (click)="changePage(currentPage - 1)" aria-label="Previous">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+                    <li class="page-item" *ngFor="let page of [].constructor(pagination.totalPages); let i = index" [class.active]="currentPage === i + 1">
+                        <a class="page-link" (click)="changePage(i + 1)">{{ i + 1 }}</a>
+                    </li>
+                    <li class="page-item" [class.disabled]="currentPage === pagination.totalPages">
+                        <a class="page-link" (click)="changePage(currentPage + 1)" aria-label="Next">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
     </div>
-    <nav aria-label="Page navigation">
-        <ul class="pagination justify-content-center">
-            <li class="page-item" [class.disabled]="currentPage === 1">
-                <a class="page-link" (click)="changePage(currentPage - 1)" aria-label="Previous">
-                    <span aria-hidden="true">&laquo;</span>
-                </a>
-            </li>
-            <li class="page-item" *ngFor="let page of [].constructor(pagination.totalPages); let i = index" [class.active]="currentPage === i + 1">
-                <a class="page-link" (click)="changePage(i + 1)">{{ i + 1 }}</a>
-            </li>
-            <li class="page-item" [class.disabled]="currentPage === pagination.totalPages">
-                <a class="page-link" (click)="changePage(currentPage + 1)" aria-label="Next">
-                    <span aria-hidden="true">&raquo;</span>
-                </a>
-            </li>
-        </ul>
-    </nav>
 </div>

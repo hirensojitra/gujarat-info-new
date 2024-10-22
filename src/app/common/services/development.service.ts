@@ -18,21 +18,21 @@ export class DevelopmentService {
   }
 
   markFormGroupTouched(formGroup: FormGroup) {
-  Object.keys(formGroup.controls).forEach(controlName => {
-    const control = formGroup?.get(controlName);
+    Object.keys(formGroup.controls).forEach(controlName => {
+      const control = formGroup?.get(controlName);
 
-    if (control instanceof FormControl) {
-      if (!control.touched) {
-        control.markAsTouched();
-        control.updateValueAndValidity();
+      if (control instanceof FormControl) {
+        if (!control.touched) {
+          control.markAsTouched();
+          control.updateValueAndValidity();
+        }
+      } else if (control instanceof FormGroup) {
+        this.markFormGroupTouched(control);
+      } else if (control instanceof FormArray) {
+        this.markFormArrayTouched(control);
       }
-    } else if (control instanceof FormGroup) {
-      this.markFormGroupTouched(control);
-    } else if (control instanceof FormArray) {
-      this.markFormArrayTouched(control);
-    }
-  });
-}
+    });
+  }
   markFormArrayTouched(formArray: FormArray) {
     formArray.controls.forEach(control => {
       if (control instanceof FormGroup) {
@@ -104,5 +104,13 @@ export class DevelopmentService {
     }
 
     return { w, h, cW, cH };
+  }
+  makeCall(mobile: string) {
+    const phoneUrl = `tel:+91${mobile}`;
+    window.location.href = phoneUrl;  // Initiates the phone call
+  }
+  sendMail(email: string, subject: string = '', body: string = '') {
+    const mailtoLink = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    window.location.href = mailtoLink;
   }
 }

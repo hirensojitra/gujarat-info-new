@@ -50,13 +50,14 @@ export class UserImageApiService {
     }
 
     // Get images within a specific user's folder with pagination, search, and sorting
-    getImagesInFolder(userid: string, folderId: string, page: number = 1, limit: number = 10, search: string = '', sort: string = 'asc'): Observable<any> {
+    getImagesInFolder(userid: string, folderId: string, page: number = 1, limit: number = 10, search: string = '', sortBy: string = 'created_at', order: string = 'asc'): Observable<any> {
         const params = new HttpParams()
             .set('userid', userid)
             .set('page', page)
             .set('limit', limit)
             .set('search', search)
-            .set('sort', sort);
+            .set('sortBy', sortBy)
+            .set('order', order);
 
         return this.http.get(`${this.apiUrl}/folders/${folderId}/images`, { params });
     }

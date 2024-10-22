@@ -29,14 +29,16 @@ export class UserImgComponent implements OnInit, AfterViewInit {
 
   // Image pagination properties
   imagePage: number = 1;
-  imageLimit: number = 10;
   imageItems: number = 0;
-  totalImagePages: number = 1;
+  imageLimit: number = 8;
+  searchImage: string;
+  sortImageBy: string;
+  sortImageOrder: string;
 
   // Folder pagination properties
   folderPage: number = 1;
   folderItems: number = 0;
-  folderLimit: number = 30;
+  folderLimit: number = 5;
   searchFolder: string = '';
   sortFolderBy: string;
   sortFolderOrder: string;
@@ -52,6 +54,19 @@ export class UserImgComponent implements OnInit, AfterViewInit {
       this.folderLimit = newSize;
       this.folderPage = 1;
       this.fetchFolders();
+    }
+  }
+  async onImagePageChange(pageIndex: number): Promise<void> {
+    if (this.imagePage !== pageIndex) {
+      this.imagePage = pageIndex;
+      this.fetchImages();
+    }
+  }
+  async onImagePageSizeChange(newSize: number): Promise<void> {
+    if (this.imageLimit !== newSize) {
+      this.imageLimit = newSize;
+      this.imagePage = 1;
+      this.fetchImages();
     }
   }
 
@@ -81,9 +96,14 @@ export class UserImgComponent implements OnInit, AfterViewInit {
     });
     this.route.queryParams.subscribe(params => {
       const folderId = params['folder'];
+      const page = params['page'] ? +params['page'] : 1;
+      const limit = params['limit'] ? +params['limit'] : 8;
       if (folderId) {
-        this.fetchImages(folderId);
+        this.selectedFolderId = folderId;
       }
+      this.imagePage = page; // Update current page
+      this.imageLimit = limit;
+      this.fetchImages();
     });
   }
 
@@ -103,7 +123,6 @@ export class UserImgComponent implements OnInit, AfterViewInit {
     const searchTerm = this.searchFolder.trim();
     const sortBy = this.sortFolderBy || 'created_at';
     const sortOrder = this.sortFolderOrder || 'asc';
-
     this.folderLimit && this.userImageService.getFolders(this.userId, this.folderPage, this.folderLimit, searchTerm, sortBy, sortOrder).subscribe({
       next: (data: any) => {
         this.folders = data.folders;
@@ -126,23 +145,29 @@ export class UserImgComponent implements OnInit, AfterViewInit {
     if (this.selectedFile && folderId) {
       const metadata = { description: 'Sample Image' };
       this.userImageService.uploadImage(this.userId, folderId, this.selectedFile, metadata).subscribe({
-        next: () => { this.fetchImages(folderId); this.loadFolderCount(); },
+        next: () => { this.fetchImages(); this.loadFolderCount(); this.loadImageCount(folderId) },
         error: () => this.toast.show('Error uploading image!', { class: 'bg-danger' })
       });
     }
   }
 
-  fetchImages(folderId: string, page: number = 1, limit: number = 10): void {
-    this.userImageService.getImagesInFolder(this.userId, folderId, page, limit).subscribe({
+  fetchImages(): void {
+    const searchTerm = this.searchImage?.trim() || ''; // Similar to folder search term
+    const sortBy = this.sortImageBy || 'created_at'; // Default to sorting by created_at
+    const sortOrder = this.sortImageOrder || 'asc'; // Default sort order is ascending
+    const actualFolderId = this.selectedFolderId || ''; // Use selected folderId or empty for root
+
+    // Ensure both userId and actualFolderId are present before making the API call
+    actualFolderId && this.imageLimit && this.userImageService.getImagesInFolder(this.userId, actualFolderId, this.imagePage, this.imageLimit, searchTerm, sortBy, sortOrder).subscribe({
       next: (data: any) => {
-        this.images = data.images;
-        this.selectedFolderId = folderId;
-        this.selectedFolderName = this.folders.find(folder => folder.id === folderId)?.name || '';
-        this.loadImageCount(folderId);
+        this.images = data.images || [];
+        this.selectedFolderId = actualFolderId;
+        this.selectedFolderName = this.folders.find(folder => folder.id === actualFolderId)?.name || 'All Images';
+        this.loadImageCount(actualFolderId);
         this.router.navigate([], {
           relativeTo: this.route,
-          queryParams: { folder: folderId },
-          queryParamsHandling: 'merge',
+          queryParams: { folder: actualFolderId || null, page: this.imagePage, limit: this.imageLimit },
+          queryParamsHandling: 'merge', // Merge the new query params with the existing ones
         });
       },
       error: () => {
@@ -151,9 +176,13 @@ export class UserImgComponent implements OnInit, AfterViewInit {
     });
   }
 
+
+
+
+
   deleteImage(folderId: string, imageId: number): void {
     this.userImageService.deleteImage(this.userId, folderId, imageId).subscribe({
-      next: () => { this.fetchImages(folderId); },
+      next: () => { this.fetchImages(); },
       error: () => this.toast.show('Error deleting image!', { class: 'bg-danger' })
     });
   }
@@ -249,7 +278,7 @@ export class UserImgComponent implements OnInit, AfterViewInit {
 
         this.userImageService.refreshImage(this.userId, folderId, imageId, formData).subscribe({
           next: () => {
-            this.fetchImages(this.selectedFolderId);
+            this.fetchImages();
             this.toast.show('Image replaced successfully!', { class: 'bg-success' });
           },
           error: () => {

@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { User } from 'src/app/common/interfaces/commonInterfaces';
+import { DevelopmentService } from 'src/app/common/services/development.service';
 import { ToastService } from 'src/app/common/services/toast.service';
 import { UserService } from 'src/app/common/services/user.service';
 import { environment } from 'src/environments/environment';
@@ -15,7 +16,7 @@ export class UsersComponent implements OnInit {
   currentPage: number = 1; // Track current page for pagination
   limit: number = 10; // Number of users per page
   availableRoles: string[] = ['master', 'admin', 'moderator', 'curator', 'poster creator', 'premium user', 'free user', 'guest'];
-  constructor(private userService: UserService, private toastService: ToastService) { }
+  constructor(private userService: UserService, private toastService: ToastService, private DS: DevelopmentService) { }
 
   ngOnInit(): void {
     this.loadUsers();
@@ -56,5 +57,13 @@ export class UsersComponent implements OnInit {
       ? `${this.apiUrl + username}`
       : `https://dummyimage.com/300x300/F4F4F4/000000&text=USER`;
     return imageUrl;
+  }
+  makeCall(number: string) {
+    this.DS.makeCall(number)
+    return false;
+  }
+  sendMail(email: string, subject: string = '', body: string = '') {
+    this.DS.sendMail(email, subject, body);
+    return false;
   }
 }

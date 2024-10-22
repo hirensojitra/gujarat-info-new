@@ -18,7 +18,7 @@
                         </div>
                         <div>
                             <p class="fs-14 fw-medium mb-1 lh-1">
-                                <a href="#" class="link fw-bold text-decoration-none" [ngClass]="{'active pe-none text-white': selectedFolderId == folder.id}" (click)="fetchImages(folder.id);false;">{{ folder.name }}</a>
+                                <a href="#" class="link fw-bold text-decoration-none" [ngClass]="{'active pe-none text-white': selectedFolderId == folder.id}" (click)="selectedFolderId = folder.id;fetchImages();false;">{{ folder.name }}</a>
                             </p>
                             <span class="fs-12">{{ imageCounts[folder.id] }} Files</span>
                         </div>
@@ -45,10 +45,9 @@
             </div>
         </li>
     </ul>
-    <div pagination [currentPage]="folderPage" [totalItems]="folderItems" [pageSize]="folderLimit" [pageSizes]="[30, 50, 100]" (currentPageChange)="onFolderPageChange($event)" (pageSizeChange)="onFolderPageSizeChange($event)"></div>
-
+    <div pagination [currentPage]="folderPage" [totalItems]="folderItems" [pageSize]="folderLimit" [pageSizes]="[5,10,15]" (currentPageChange)="onFolderPageChange($event)" (pageSizeChange)="onFolderPageSizeChange($event)"></div>
     <ng-container *ngIf="selectedFolderId">
-        <div class="card shadow">
+        <div class="card shadow mb-3">
             <div class="card-header d-flex align-items-center">
                 <h6 class="fw-bold m-0">{{ selectedFolderName }}({{ imageCounts[selectedFolderId] }})</h6>
                 <div class="ms-auto">
@@ -82,8 +81,12 @@
                     </li>
                 </ul>
             </div>
+            <div class="card-footer p-0">
+                <div pagination [currentPage]="imagePage" [totalItems]="imageCounts[selectedFolderId]" [pageSize]="imageLimit" [pageSizes]="[8,16,32]" (currentPageChange)="onImagePageChange($event)" (pageSizeChange)="onImagePageSizeChange($event)" class="m-0"></div>
+            </div>
         </div>
     </ng-container>
+
 </div>
 
 <!-- Add Folder Modal -->

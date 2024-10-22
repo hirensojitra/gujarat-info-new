@@ -12,10 +12,16 @@ const routes: Routes = [
     data: { layout: 'dashboard-layout' },
     canActivate: [AuthGuard],
     children: [
-      {
-        path: '',
-        loadChildren: () => import('./module/dashboard/dashboard.module').then((m) => m.DashboardModule)
-      },
+      { path: '', loadChildren: () => import('./module/dashboard/dashboard.module').then((m) => m.DashboardModule) },
+    ],
+  },
+  {
+    path: 'images',
+    component: LayoutComponent,
+    data: { layout: 'dashboard-layout' },
+    canActivate: [AuthGuard],
+    children: [
+      { path: '', loadChildren: () => import('./module/canvas-generator/canvas-generator.module').then(m => m.CanvasGeneratorModule) }
     ],
   },
   {
@@ -29,6 +35,13 @@ const routes: Routes = [
         loadChildren: () => import('./module/img/img.module').then((m) => m.ImgModule)
       },
     ],
+  },
+  {
+    path: 'view',
+    component: LayoutComponent,
+    data: { layout: 'dashboard-layout' },
+    canActivate: [AuthGuard],
+    children: [{ path: '', loadChildren: () => import('./module/view/view.module').then(m => m.ViewModule), canActivate: [RoleGuard], data: { role: ['master'] } },],
   },
   {
     path: 'user-img',

@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { SEOService } from './common/services/seo.service';
 import { NavigationEnd, NavigationError, NavigationStart, Router } from '@angular/router';
 import { animate, state, style, transition, trigger } from '@angular/animations';
@@ -15,7 +15,8 @@ import { LoaderService } from './common/services/loader';
       transition('false => true', animate('0ms ease-in')),
       transition('true => false', animate('100ms ease-in-out'))
     ]),
-  ]
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AppComponent {
   constructor(private seoService: SEOService, public loaderService: LoaderService, private router: Router) {

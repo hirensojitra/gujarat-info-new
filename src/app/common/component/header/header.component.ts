@@ -70,14 +70,31 @@ export class HeaderComponent {
   menu: MenuItem[] = []
   originalMenu: MenuItem[] = [
     {
+      label: 'Master Data',
+      icon: 'fa-database',
+      link: '/view',
+      role: ['master'],
+      subItems: [{
+        label: 'Districts',
+        link: '/view/district',
+      }, {
+        label: 'Talukas',
+        link: '/view/taluka',
+      }, {
+        label: 'Villages',
+        link: '/view/village',
+      }]
+    },
+    {
       label: 'Dashboard',
       icon: 'fa-tachometer',
-      link: '/dashboard'
+      link: '/dashboard',
+      role: ['master'],
     }, {
       label: 'Admin',
       icon: 'fa-users',
       link: '/admin',
-      role: ['admin'],
+      role: ['master'],
       subItems: [{
         label: 'Users',
         link: '/admin/users'
@@ -95,6 +112,25 @@ export class HeaderComponent {
       label: 'User Images',
       icon: 'fa-image',
       link: '/user-img'
+    },
+    {
+      label: 'Canvas Generator',
+      icon: 'fa-image',
+      link: '/images',
+      role: ['admin'],
+      subItems: [{
+        label: 'Image List',
+        link: '/images/list'
+      }, {
+        label: 'Image Editor',
+        link: '/images/generate'
+      }, {
+        label: 'Upload Images',
+        link: '/images/uploaded-images'
+      }, {
+        label: 'Image Deleted',
+        link: '/images/deleted'
+      }]
     }
   ];
   user!: User;
@@ -152,6 +188,9 @@ export class HeaderComponent {
   isAdmin(): boolean {
     return this.authService.hasRole(['admin'])
   }
+  isMaster(): boolean {
+    return this.authService.hasRole(['master'])
+  }
   isUser(): boolean {
     return this.authService.hasRole(['user'])
   }
@@ -161,6 +200,9 @@ export class HeaderComponent {
       this.menu = this.originalMenu.filter(menuItem => {
         if (menuItem.role && menuItem.role.length > 0) {
           if (menuItem.role.includes('admin') && this.isAdmin()) {
+            return true;
+          }
+          if (menuItem.role.includes('master') && this.isMaster()) {
             return true;
           }
           if (menuItem.role.includes('user') && this.isUser()) {

@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
-declare const colorthief: any;
+import ColorThief from 'colorthief';
+
 @Injectable({
   providedIn: 'root'
 })
@@ -9,7 +10,7 @@ export class ColorService {
 
   async getColors(image: string, colorCounts: number): Promise<string[]> {
     try {
-      const colorThief = new colorthief.ColorThief();
+      const colorThief = new ColorThief();
       const img = new Image();
       img.src = image;
       img.crossOrigin = "Anonymous";

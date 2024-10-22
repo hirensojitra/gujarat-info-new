@@ -9,11 +9,21 @@
     "/broken-pages",
     "/broken-pages/unauthorized",
     "/dashboard",
+    "/images",
+    "/images/deleted",
+    "/images/generate",
+    "/images/list",
+    "/images/uploaded-images",
+    "/images/view",
     "/img",
     "/user-img",
     "/user-profile",
     "/user-profile/edit",
     "/user-profile/view",
-    "/verify-email"
+    "/verify-email",
+    "/view",
+    "/view/district",
+    "/view/taluka",
+    "/view/village"
   ]
 }
