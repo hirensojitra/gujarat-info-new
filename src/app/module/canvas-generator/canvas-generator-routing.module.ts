@@ -1,6 +1,8 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { CanvasGeneratorComponent } from './canvas-generator.component';
+import { AuthGuard } from 'src/app/common/guards/auth.guard';
+import { RoleGuard } from 'src/app/common/guards/role.guard';
 
 const routes: Routes = [{
   path: '',
@@ -11,10 +13,9 @@ const routes: Routes = [{
   children: [
     { path: '', pathMatch: 'full', redirectTo: 'list' },
     { path: 'list', loadChildren: () => import('./image-list/image-list.module').then(m => m.ImageListModule) },
-    { path: 'view', loadChildren: () => import('./image-view/image-view.module').then(m => m.ImageViewModule) },
-    { path: 'generate', loadChildren: () => import('./image-generate/image-generate.module').then(m => m.ImageGenerateModule) },
-    { path: 'deleted', loadChildren: () => import('./image-deleted/image-deleted.module').then(m => m.ImageDeletedModule) },
-    { path: 'uploaded-images', loadChildren: () => import('./image-data/image-data.module').then(m => m.ImageDataModule) },
+    { path: 'generate', data: { role: ['master', 'admin'] }, canActivate: [AuthGuard, RoleGuard], loadChildren: () => import('./image-generate/image-generate.module').then(m => m.ImageGenerateModule) },
+    { path: 'deleted', data: { role: ['master', 'admin'] }, canActivate: [AuthGuard, RoleGuard], loadChildren: () => import('./image-deleted/image-deleted.module').then(m => m.ImageDeletedModule) },
+    { path: 'uploaded-images', data: { role: ['master', 'admin'] }, canActivate: [AuthGuard, RoleGuard], loadChildren: () => import('./image-data/image-data.module').then(m => m.ImageDataModule) },
   ]
 }];
 

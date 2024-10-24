@@ -58,10 +58,10 @@ export class HttpLoaderInterceptor implements HttpInterceptor {
   private isExcludedUrl(url: string): boolean {
     // Define URLs that should be excluded from showing the loader
     const excludedUrls = [
-      '/api/Auth/GetRefreshAccessToken',
-      '/api/excluded-url-2',
-      '/api/Notification/GetCitizenUserNotificationviewmore',
-      '/api/Notification/UpdateCitizenUserReadNotification'
+      // '/api/auth',
+      // '/api/excluded-url-2',
+      // '/api/Notification/GetCitizenUserNotificationviewmore',
+      // '/api/Notification/UpdateCitizenUserReadNotification'
       // Add more excluded URLs as needed
     ];
     // Check if the request URL matches any of the excluded URLs

@@ -162,21 +162,47 @@ export class PosterComponent implements OnInit {
   async getPostById(): Promise<void> {
     const post: PostDetails = this.postDetailsDefault;
     if (!post) return;
-    this.postDetails = post;
-    const p = JSON.parse(JSON.stringify(post));
-    this.isDeleted = post.deleted;
-    if (!post.deleted) {
-      this.postStatus = 'loading';
-      const bg = await this.getImageDataUrl(post.backgroundurl);
-      post.backgroundurl = bg;
-      post.data.map(async (item) => {
-        if (item.image && item.image.imageUrl) {
-          item.image.imageUrl = await this.getImageDataUrl(item.image.imageUrl);
+    try {
+      this.postDetails = post;
+      const p = JSON.parse(JSON.stringify(post));
+      this.isDeleted = post.deleted;
+
+      if (!post.deleted) {
+        this.postStatus = 'loading';
+        try {
+          const bg = await this.getImageDataUrl(post.backgroundurl);
+          post.backgroundurl = bg;
+        } catch (err) {
+          console.error('Error fetching background image URL:', err);
         }
-      });
-      this.initialize()
-    } else if (post.deleted && post.msg) {
-      this.postStatus = post.msg;
+
+        // Handle images in post.data
+        for (const item of post.data) {
+          if (item.image && item.image.imageUrl) {
+            try {
+              item.image.imageUrl = await this.getImageDataUrl(item.image.imageUrl);
+            } catch (err) {
+              console.error('Error fetching image URL:', err);
+            }
+          }
+        }
+
+        // Update post status with download counter
+        if (this.postDetails.download_counter) {
+          this.postStatus = 'Total Download: ' + this.postDetails.download_counter;
+        } else {
+          this.postStatus = 'No download counter available';
+        }
+
+        // Initialize post UI
+        this.initialize();
+
+      } else if (post.deleted && post.msg) {
+        this.postStatus = post.msg;
+      }
+    } catch (error) {
+      console.error('Error in getPostById:', error);
+      this.postStatus = 'Error loading post';
     }
     this.textModal = new bootstrap.Modal(document.getElementById('textModal')!, { focus: false, keyboard: false, static: false });
     this.textModal._element.addEventListener('hide.bs.modal', () => { this.inputTextForm.reset(); });
@@ -220,7 +246,6 @@ export class PosterComponent implements OnInit {
       const backgroundurl = this.postDetails.backgroundurl;
       const svg = this.imageDraw.nativeElement;
       const svgDefs = document.createElementNS('http://www.w3.org/2000/svg', 'defs') as SVGDefsElement;
-      this.postStatus = 'Total Download: ' + this.postDetails.download_counter;
       while (svg.firstChild) {
         svg.removeChild(svg.firstChild);
       }
@@ -844,12 +869,13 @@ export class PosterComponent implements OnInit {
       });
       this.downloaded = true;
       !share && link.click();
-      !this.downloaded && await this.PS.updateDownloadCounter(this.imgParam)
+      await this.PS.updateDownloadCounter(this.imgParam)
         .subscribe(
           post => {
             if (post) {
               const p = JSON.parse(JSON.stringify(post));
               this.postStatus = 'Total Download: ' + post.download_counter;
+              this.resetForm();
             } else {
 
             }

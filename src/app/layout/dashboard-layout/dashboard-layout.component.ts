@@ -11,9 +11,6 @@ import { UserService } from '../../common/services/user.service';
   styleUrls: ['./dashboard-layout.component.scss']
 })
 export class DashboardLayoutComponent implements OnInit {
-  username: string | null = null;
-  name: string | null = null;
-  private userSubscription: Subscription;
 
   constructor(
     private authService: AuthService,
@@ -22,25 +19,10 @@ export class DashboardLayoutComponent implements OnInit {
   ) { }
 
   ngOnInit() {
-    this.userSubscription = this.userService.getUser().subscribe((user) => {
-      this.username = user?.username || null;
-      this.name = this.userService.getFullName();
-    });
+
   }
 
   ngOnDestroy() {
 
-  }
-
-  get isAuthenticated(): boolean {
-    return this.authService.isAuthenticated();
-  }
-
-  login() {
-    this.router.navigate(['/auth/login']);
-  }
-
-  logout() {
-    this.authService.logout()
   }
 }

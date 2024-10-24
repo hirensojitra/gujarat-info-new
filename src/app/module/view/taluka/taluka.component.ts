@@ -69,21 +69,28 @@ export class TalukaComponent implements OnInit, AfterViewInit {
     this.filterTaluka = this.fb.group({
       district: ['', Validators.required]
     });
-    this.route.queryParams.subscribe((params) => {
-      const districtParam = params['district'];
-      if (districtParam) {
-        this.paramDist = districtParam;
+    this.route.params.subscribe((params) => {
+      this.paramDist = params['distId'] || 1;
+      if (this.paramDist) {
+        this.loadDistrict();
       }
     });
-
   }
   ngOnInit(): void {
 
+  }
+  updateDistId(distId: number): void {
+    this.router.navigate(['../', distId], {
+      relativeTo: this.route,
+      queryParamsHandling: 'merge',
+      replaceUrl: true
+    });
   }
   ngAfterViewInit() {
     this.loadDistrict();
     this.filterTaluka.get('district')?.valueChanges.subscribe((value): any => {
       if (!value) { this.selectedDistrict = null; return false; }
+      this.updateDistId(value)
       this.districtService.getDistrictById(value).subscribe((data) => {
         if (data) {
           this.loadTaluka();
@@ -182,7 +189,7 @@ export class TalukaComponent implements OnInit, AfterViewInit {
       this.districts = data;
       if (data.length) {
         data.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
-        this.selectedDistrict = this.paramDist !== undefined ? data.find(district => district.id === this.paramDist) || data[0] : data[0];
+        this.selectedDistrict = this.paramDist !== undefined ? data.find(district => district.id == this.paramDist) || data[0] : data[0];
         this.filterTaluka.get('district')?.setValue(this.selectedDistrict?.id);
       }
     });

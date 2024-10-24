@@ -8,10 +8,9 @@ const routes: Routes = [
     component: ViewComponent,
     children: [
       { path: '', pathMatch: 'full', redirectTo: 'district' },
-      // { path: 'state', loadChildren: () => import('./state/state.module').then(m => m.StateModule) },
       { path: 'district', loadChildren: () => import('./district/district.module').then(m => m.DistrictModule) },
-      { path: 'taluka', loadChildren: () => import('./taluka/taluka.module').then(m => m.TalukaModule) },
-      { path: 'village', loadChildren: () => import('./village/village.module').then(m => m.VillageModule) }
+      { path: 'taluka/:distId', loadChildren: () => import('./taluka/taluka.module').then(m => m.TalukaModule) },
+      { path: 'village/:distId/:talukaId', loadChildren: () => import('./village/village.module').then(m => m.VillageModule) }
     ]
   }
 ];

@@ -27,7 +27,7 @@
             <div class="form-group form-check mb-3">
                 <input type="checkbox" id="rememberMe" class="form-check-input" />
                 <label for="rememberMe" class="form-check-label">Remember me</label>
-                <a href="#" class="float-end text-decoration-none">Forgot password?</a>
+                <a [routerLink]="'/auth/forgot-password'" class="float-end text-decoration-none">Forgot password?</a>
             </div>
 
             <button type="submit" class="btn btn-dark w-100 mb-3" [disabled]="loginForm.invalid">Sign in</button>

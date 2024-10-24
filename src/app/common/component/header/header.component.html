@@ -1,5 +1,5 @@
 <div class="header-container d-flex flex-md-row">
-  <abs [menuData]="menu" [menuHover]="true" [toggleOutside]="true" [logo]="'assets/images/svg/logo.svg'" [compactLogo]="'assets/images/svg/logo.svg'"></abs>
+  <abs [menuData]="filteredMenu$ | async" [menuHover]="true" [toggleOutside]="true" [logo]="'assets/images/svg/logo.svg'" [compactLogo]="'assets/images/svg/logo.svg'"></abs>
   <button class="btn btn-primary menu-toggle m-0" (click)="toggleMenu()" aria-label="Menu">
     <span class="fa fa-bars" [style.transform]="(menuStatus | async) ? 'rotate(-45deg)' : 'none'"></span>
   </button>

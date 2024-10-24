@@ -10,6 +10,7 @@ import { TalukaService } from '../../../common/services/taluka.service';
 import { VillageService } from '../../../common/services/village.service';
 import { DevelopmentService } from '../../../common/services/development.service';
 import { ToastService } from '../../../common/services/toast.service';
+
 @Component({
   selector: 'app-edit-profile',
   templateUrl: './edit-profile.component.html',
@@ -28,7 +29,6 @@ export class EditProfileComponent implements OnInit, OnDestroy {
   userSubscription: Subscription;
   private destroy$: Subject<void> = new Subject<void>();
 
-
   constructor(
     private fb: FormBuilder,
     private userService: UserService,
@@ -46,7 +46,9 @@ export class EditProfileComponent implements OnInit, OnDestroy {
       taluka_id: [null, Validators.required],
       village_id: [null, Validators.required]
     });
+  }
 
+  ngOnInit(): void {
     this.userSubscription = this.userService.getUser().subscribe((user: User | null) => {
       if (user) {
         this.user = user;
@@ -58,81 +60,70 @@ export class EditProfileComponent implements OnInit, OnDestroy {
           taluka_id: user.taluka_id || '',
           village_id: user.village_id || ''
         };
-        this.userForm.setValue(filteredValue);
-        this.loadDistricts();
+        const currentFormValue = Object.keys(this.userForm.value).reduce((acc, key) => {
+          acc[key] = this.userForm.value[key]?.toString() || '';
+          return acc;
+        }, {});
+        const isEqual = JSON.stringify(currentFormValue) === JSON.stringify(filteredValue);
+        if (!isEqual) {
+          this.userForm.patchValue(filteredValue, { emitEvent: false });
+          this.loadDistricts();
+        }
       }
     });
-  }
-
-  ngOnInit(): void {
     this.userForm.get('district_id')?.valueChanges.pipe(
       takeUntil(this.destroy$)
-    ).subscribe((districtId) => {
-      this.userForm.get('taluka_id')?.markAsUntouched;
-      this.userForm.get('village_id')?.markAsUntouched;
+    ).subscribe(async (districtId) => {
+      this.userForm.get('taluka_id')?.markAsUntouched();
+      this.userForm.get('village_id')?.markAsUntouched();
       this.selectedDistrict = this.districts.find(district => district.id === districtId);
       this.talukas = [];
       this.villages = [];
-      this.loadTalukas();
       this.userForm.get('taluka_id')?.setValue(null);
+      await this.loadTalukas();
     });
 
     this.userForm.get('taluka_id')?.valueChanges.pipe(
       takeUntil(this.destroy$)
-    ).subscribe((talukaId) => {
-      this.userForm.get('village_id')?.markAsUntouched;
+    ).subscribe(async (talukaId) => {
+      this.userForm.get('village_id')?.markAsUntouched();
       this.selectedTaluka = this.talukas.find(taluka => taluka.id === talukaId);
       this.villages = [];
-      this.loadVillages();
       this.userForm.get('village_id')?.setValue(null);
+      await this.loadVillages();
     });
   }
 
-  loadDistricts(): void {
-    this.districtService.getDistrict().pipe(
-      takeUntil(this.destroy$)
-    ).subscribe((districts: District[]) => {
-      this.districts = districts;
-      if (districts.length) {
-        this.selectedDistrict = districts.find(district => district.id === this.user?.district_id);
-        this.userForm.get('district_id')?.setValue(this.selectedDistrict?.id || null);
-      }
-    });
-
-
+  async loadDistricts(): Promise<void> {
+    this.districts = await this.districtService.getDistrict().toPromise();
+    if (this.districts.length) {
+      this.selectedDistrict = this.districts.find(district => district.id === this.user?.district_id);
+      this.userForm.get('district_id')?.setValue(this.selectedDistrict?.id || null);
+    }
   }
 
-  loadTalukas(): void {
+  async loadTalukas(): Promise<void> {
     const districtId = this.userForm.get('district_id')?.value;
     if (districtId) {
-      this.talukaService.getTalukaByDistrict(districtId).pipe(
-        takeUntil(this.destroy$)
-      ).subscribe((talukas: Taluka[]) => {
-        this.talukas = talukas;
-        if (talukas.length) {
-          this.selectedTaluka = talukas.find(taluka => taluka.id === this.user?.taluka_id);
-          this.userForm.get('taluka_id')?.setValue(this.selectedTaluka?.id || null);
-        }
-      });
+      this.talukas = await this.talukaService.getTalukaByDistrict(districtId).toPromise();
+      if (this.talukas.length) {
+        const selectedTaluka = this.talukas.find(taluka => taluka.id == this.user.taluka_id);
+        this.userForm.get('taluka_id')?.setValue(selectedTaluka.id || null);
+      }
     }
   }
 
-  loadVillages(): void {
+  async loadVillages(): Promise<void> {
     const talukaId = this.userForm.get('taluka_id')?.value;
-    const districtId = this.userForm.get('district_id')?.value;
-    if (talukaId && districtId) {
-      this.villageService.getVillageByTaluka(talukaId).pipe(
-        takeUntil(this.destroy$)
-      ).subscribe((villages: Village[]) => {
-        this.villages = villages;
-        if (villages.length) {
-          this.selectedVillage = villages.find(village => village.id === this.user?.village_id);
-          this.userForm.get('village_id')?.setValue(this.selectedVillage?.id || null);
-        }
-      });
+    if (talukaId) {
+      this.villages = await this.villageService.getVillageByTaluka(talukaId).toPromise();
+      if (this.villages.length) {
+        // Set the default value for Village from the user's profile
+        const selectedVillage = this.villages.find(village => village.id == this.user?.village_id);
+        this.userForm.get('village_id')?.setValue(selectedVillage?.id || null);
+      }
     }
   }
-
 
   saveUser(): void {
     if (this.userForm.valid) {
@@ -148,13 +139,10 @@ export class EditProfileComponent implements OnInit, OnDestroy {
           this.toastService.show('Invalid userid.', { class: 'bg-danger' });
           return;
         }
-        this.userForm.setValue(formValue);
-        const updateUser$ = this.userService.updateUserData(userid, formValue);
-        updateUser$.subscribe(
+        this.userService.updateUserData(userid, formValue).subscribe(
           (response: any) => {
             this.userService.setUser(response.user);
             this.toastService.show(response.message, { class: 'bg-success' });
-            this.userForm.setValue(formValue);
           },
           error => {
             console.error('Error updating user:', error);
@@ -164,27 +152,12 @@ export class EditProfileComponent implements OnInit, OnDestroy {
             this.toastService.show(errorMessage, { class: 'bg-danger' });
           }
         );
-        ;
       }
     } else {
       this.DS.markFormGroupTouched(this.userForm);
     }
   }
 
-
-
-  validateImage(imageUrl: string): string {
-    return imageUrl || `https://dummyimage.com/300x300/F4F4F4/000000&text=${this.imageText()}`;
-  }
-  imageText(): string {
-    if (this.user && this.user.firstname && this.user.lastname) {
-      const firstCharFirstName = this.user.firstname.charAt(0);
-      const firstCharLastName = this.user.lastname.charAt(0);
-      return `${firstCharFirstName}${firstCharLastName}`;
-    } else {
-      return 'USER';
-    }
-  }
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();

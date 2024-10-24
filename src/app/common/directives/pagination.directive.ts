@@ -240,11 +240,8 @@ export class PaginationDirective implements OnInit, OnDestroy {
     // Store the new listener for future removal
     this.selectChangeListeners.push(selectChangeListener);
 
-    const itemsPerPageText = this.renderer.createText('Show');
-    this.renderer.appendChild(dropdownDiv, itemsPerPageText);
+
     this.renderer.appendChild(dropdownDiv, select);
-    const itemsPostPageText = this.renderer.createText(' Items Per Page');
-    this.renderer.appendChild(dropdownDiv, itemsPostPageText);
     this.renderer.appendChild(paginationContainer, dropdownDiv);
 
     // Item range text

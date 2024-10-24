@@ -18,6 +18,7 @@ import { SvgResponseDirective } from '../directives/svg-response.directive';
 import { ScrollCenterDirective } from '../directives/scroll-center.directive';
 import { DecimalDirective } from '../directives/decimal.directive';
 import { ConfirmationModalComponent } from '../component/confirmation-modal/confirmation-modal.component';
+import { RemSizeDirective } from '../directives/rem-size.directive';
 
 @NgModule({
   imports: [
@@ -41,7 +42,8 @@ import { ConfirmationModalComponent } from '../component/confirmation-modal/conf
     PaginationDirective,
     SvgResponseDirective,
     ScrollCenterDirective,
-    ConfirmationModalComponent
+    ConfirmationModalComponent,
+    RemSizeDirective
   ],
   exports: [
     CaptchaDirective,
@@ -59,8 +61,9 @@ import { ConfirmationModalComponent } from '../component/confirmation-modal/conf
     PaginationDirective,
     SvgResponseDirective,
     ScrollCenterDirective,
-    ConfirmationModalComponent
+    ConfirmationModalComponent,
+    RemSizeDirective
   ],
-  providers: [KeysPipe, ColorService, ColorPickerComponent, DependencyListPipe]
+  providers: [KeysPipe, ColorService, ColorPickerComponent, DependencyListPipe, RemSizeDirective]
 })
 export class SharedModule { }

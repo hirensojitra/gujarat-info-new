@@ -7,6 +7,7 @@ import { TalukaService } from 'src/app/common/services/taluka.service';
 import { VillageService } from 'src/app/common/services/village.service';
 import { ToastService } from 'src/app/common/services/toast.service';
 import { MemberService } from 'src/app/common/services/member.service';
+import { ActivatedRoute } from '@angular/router';
 declare const bootstrap: any;
 @Component({
   selector: 'app-village',
@@ -50,7 +51,7 @@ export class VillageComponent implements OnInit, AfterViewInit {
     private DS: DevelopmentService,
     private el: ElementRef,
     private toastService: ToastService,
-    private memberService: MemberService
+    private route: ActivatedRoute
   ) {
     const newForm = this.fb.group({
       name: ['', [Validators.required]],
@@ -75,8 +76,39 @@ export class VillageComponent implements OnInit, AfterViewInit {
       district: ['', Validators.required],
       taluka: ['', Validators.required]
     })
+    this.route.params.subscribe((params) => {
+      this.paramDist = params['distId'] || 1;
+      this.paramTaluka = params['talukaId'] || 1;
+    });
   }
+  paramDist: any;
+  paramTaluka: any;
   ngAfterViewInit() {
+
+    this.loadDistrict();
+    this.filterVillage.get('district')?.valueChanges.subscribe((data) => {
+      if (data) {
+        this.districtService.getDistrictById(data).subscribe((value) => {
+          if (value) {
+            this.selectedDistrict = value;
+          }
+        });
+        this.loadTaluka();
+      }
+    })
+    this.filterVillage.get('taluka')?.valueChanges.subscribe((data) => {
+      console.log(data)
+      if (data) {
+        this.talukaService.getTalukaById(data).subscribe((value) => {
+          if (value) {
+            this.selectedTaluka = value.data[0];
+            console.log(this.selectedTaluka)
+          }
+        });
+        this.loadVillage();
+      }
+    })
+
     this.villageModalElement = this.el.nativeElement.querySelector('#villageModal');
     this.villageModalOptions = {
       backdrop: false,
@@ -158,53 +190,34 @@ export class VillageComponent implements OnInit, AfterViewInit {
       this.toastService.show(msg, { class: 'bg-danger' });
     }
   }
-  ngOnInit(): void {
-    this.loadDistrict();
-    this.filterVillage.get('district')?.valueChanges.subscribe((data) => {
-      if (data) {
-        this.districtService.getDistrictById(data).subscribe((value) => {
-          if (value) {
-            this.selectedDistrict = value;
-          }
-        });
-        this.loadTaluka();
-      }
-    })
-    this.filterVillage.get('taluka')?.valueChanges.subscribe((data) => {
-      console.log(data)
-      if (data) {
-        this.talukaService.getTalukaById(data).subscribe((value) => {
-          if (value) {
-            this.selectedTaluka = value.data[0];
-            console.log(this.selectedTaluka)
-          }
-        });
-        this.loadVillage();
-      }
-    })
-  }
+  ngOnInit(): void { }
   loadDistrict(): void {
     this.districtService.getDistrict().subscribe((data) => {
       this.districts = data;
       if (data.length) {
         data.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
-        this.selectedDistrict = data[0];
-        this.filterVillage.get('district')?.setValue(this.selectedDistrict?.id)
+        const matchedDistrict = data.find(d => d.id == +this.paramDist);
+        this.selectedDistrict = matchedDistrict || data[0];
+        this.filterVillage.get('district')?.setValue(this.selectedDistrict?.id);
       }
     });
   }
   loadTaluka(): void {
-    const value = this.filterVillage.get('district')?.value
-    this.talukaService.getTalukaByDistrict(value).subscribe((response) => {
-      this.talukas = response;
-      response.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
-      this.selectedTaluka = response[0];
-      this.filterVillage.get('taluka')?.setValue(this.selectedTaluka?.id)
-    }, (error) => {
-      this.filterVillage.get('taluka')?.setValue('')
-      this.talukas = [];
-      this.villages = [];
-    });
+    const districtId = this.paramDist;
+    this.talukaService.getTalukaByDistrict(districtId).subscribe(
+      (response) => {
+        this.talukas = response;
+        response.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+        const talukaFromRoute = response.find(taluka => taluka.id == this.paramTaluka);
+        this.selectedTaluka = talukaFromRoute || response[0];
+        this.filterVillage.get('taluka')?.setValue(this.selectedTaluka?.id);
+      },
+      (error) => {
+        this.filterVillage.get('taluka')?.setValue('');
+        this.talukas = [];
+        this.villages = [];
+      }
+    );
   }
   loadVillage(): void {
     const talukaId = this.filterVillage.get('taluka')?.value;
@@ -221,7 +234,7 @@ export class VillageComponent implements OnInit, AfterViewInit {
     this.loadDeletedVillageLength();
   }
   addNewVillage(): void {
-    
+
     this.villageService.addVillage(this.newVillage).subscribe(
       (response) => {
         console.log('Village name updated successfully:', response);

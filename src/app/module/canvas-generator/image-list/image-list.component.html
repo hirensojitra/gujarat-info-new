@@ -12,7 +12,7 @@
                                 <svg class="svg-content max-w-100-p max-h-100-p img-fluid m-auto d-block" preserveAspectRatio="xMidYMid meet" svgDraw [postDataSet]="post" [loadOnly]="true"></svg>
                                 <div class="d-flex flex-column position-absolute start-0 top-0 h-100 w-100 p-3 ">
                                     <div class="d-flex mb-auto">
-                                        <a class="btn btn-secondary btn-sm me-auto" href="#" (click)="window.open('/images/generate?img=' + post.id, '_blank');false"><i class="fa fa-edit"></i>Edit</a>
+                                        <a class="btn btn-secondary btn-sm me-auto" href="#" (click)="window.open('/images/generate?img=' + post.id, '_blank');false" *ngIf="isAdmin()"><i class="fa fa-edit"></i>Edit</a>
                                         <a class="btn btn-secondary btn-sm ms-auto" href="#" (click)="window.open('/poster/' + post.id);false"><i class="fa fa-eye"></i>View</a>
                                     </div>
                                 </div>

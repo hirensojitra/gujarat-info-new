@@ -5,7 +5,7 @@ import { ABSService } from '../../../../../projects/angular-bootstrap-sidebar/sr
 import { UserService } from '../../services/user.service';
 import { AuthService } from '../../services/auth.service';
 import { environment } from '../../../../environments/environment';
-import { Subscription } from 'rxjs';
+import { Observable, of, Subscription } from 'rxjs';
 
 export interface MenuItem {
   label: string;
@@ -67,7 +67,6 @@ export class HeaderComponent {
   //     }]
   //   }
   // ];
-  menu: MenuItem[] = []
   originalMenu: MenuItem[] = [
     {
       label: 'Master Data',
@@ -79,17 +78,16 @@ export class HeaderComponent {
         link: '/view/district',
       }, {
         label: 'Talukas',
-        link: '/view/taluka',
+        link: '/view/taluka/1',
       }, {
         label: 'Villages',
-        link: '/view/village',
+        link: '/view/village/1/1',
       }]
     },
     {
       label: 'Dashboard',
       icon: 'fa-tachometer',
       link: '/dashboard',
-      role: ['master'],
     }, {
       label: 'Admin',
       icon: 'fa-users',
@@ -117,22 +115,21 @@ export class HeaderComponent {
       label: 'Canvas Generator',
       icon: 'fa-image',
       link: '/images',
-      role: ['admin'],
       subItems: [{
         label: 'Image List',
         link: '/images/list'
       }, {
         label: 'Image Editor',
-        link: '/images/generate'
-      }, {
-        label: 'Upload Images',
-        link: '/images/uploaded-images'
+        link: '/images/generate',
+        role: ['admin'],
       }, {
         label: 'Image Deleted',
-        link: '/images/deleted'
+        link: '/images/deleted',
+        role: ['admin'],
       }]
     }
   ];
+  filteredMenu$: Observable<MenuItem[]>;
   user!: User;
   breadcrumbs: { label: string, link: string }[] = [];
   userFullName: string = "User Name";
@@ -180,8 +177,10 @@ export class HeaderComponent {
       if (user) {
         this.user = user;
         this.validateImage(this.user.username);
-        this.filterMenuByRole();
-        this.userFullName = this.US.getFullName()
+        this.userFullName = this.US.getFullName();
+        const trimmedRoles = user.roles.split(',').map(role => role.trim());
+        console.log(trimmedRoles)
+        this.filteredMenu$ = of(this.filterMenuItemsByRole(trimmedRoles));
       }
     });
   }
@@ -189,30 +188,37 @@ export class HeaderComponent {
     return this.authService.hasRole(['admin'])
   }
   isMaster(): boolean {
+    console.log(this.authService.hasRole(['master']))
     return this.authService.hasRole(['master'])
   }
   isUser(): boolean {
     return this.authService.hasRole(['user'])
   }
-  // Filter the menu based on the user's role
-  filterMenuByRole(): void {
-    if (this.user && this.user.roles) {
-      this.menu = this.originalMenu.filter(menuItem => {
-        if (menuItem.role && menuItem.role.length > 0) {
-          if (menuItem.role.includes('admin') && this.isAdmin()) {
-            return true;
-          }
-          if (menuItem.role.includes('master') && this.isMaster()) {
-            return true;
-          }
-          if (menuItem.role.includes('user') && this.isUser()) {
-            return true;
-          }
-          return false;
-        }
-        return true;
-      });
-    }
+
+  private filterMenuItemsByRole(userRoles: string[]): MenuItem[] {
+    return this.originalMenu
+      .map(menuItem => this.filterMenuItem(menuItem, userRoles))
+      .filter(item => item !== null) as MenuItem[];
   }
 
+  private filterMenuItem(menuItem: MenuItem, userRoles: string[]): MenuItem | null {
+    const hasAccessToMenuItem = this.hasAccess(menuItem.role, userRoles);
+    if (hasAccessToMenuItem) {
+      const filteredSubItems = menuItem.subItems ? menuItem.subItems.map(subItem => this.filterMenuItem(subItem, userRoles)).filter(item => item !== null) as MenuItem[] : [];
+      if (hasAccessToMenuItem || filteredSubItems.length > 0) {
+        return {
+          ...menuItem,
+          subItems: filteredSubItems.length > 0 ? filteredSubItems : undefined
+        };
+      }
+    }
+    return null;
+  }
+
+  private hasAccess(requiredRoles?: string[], userRoles?: string[]): boolean {
+    if (!requiredRoles || requiredRoles.length === 0) {
+      return true;
+    }
+    return requiredRoles.some(role => userRoles.includes(role));
+  }
 }

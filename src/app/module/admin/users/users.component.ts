@@ -11,6 +11,9 @@ import { environment } from 'src/environments/environment';
   styleUrls: ['./users.component.scss'] // Fixed typo from 'styleUrl' to 'styleUrls'
 })
 export class UsersComponent implements OnInit {
+  changePageSize($event: number) {
+    throw new Error('Method not implemented.');
+  }
   users: any[] = [];
   pagination: any = {};
   currentPage: number = 1; // Track current page for pagination
@@ -27,6 +30,7 @@ export class UsersComponent implements OnInit {
       (response) => {
         this.users = response.users;
         this.pagination = response.pagination;
+        console.log(response.pagination)
         this.currentPage = response.pagination.currentPage; // Update current page
       },
       (error) => {
@@ -54,7 +58,7 @@ export class UsersComponent implements OnInit {
   private apiUrl = environment.MasterApi + '/auth/profile-image/';
   validateImage(username: string): string {
     const imageUrl = username
-      ? `${this.apiUrl + username}`
+      ? `${this.apiUrl + username}?format=png&quality=10`
       : `https://dummyimage.com/300x300/F4F4F4/000000&text=USER`;
     return imageUrl;
   }

@@ -4,16 +4,22 @@
     .dropdown.profile-action {
         text-align: right;
         position: absolute;
-        top: 10px;
-        right: 10px;
+        top: 0px;
+        right: 0px;
+        padding-right: 10px;
+        padding-top: 10px;
+        pointer-events: none;
 
         .action-icon {
             color: var(--bs-secondary-600);
             font-size: var(--bs-font-size-18);
             display: inline-block;
+            pointer-events: auto;
         }
 
         .dropdown-toggle {
+            pointer-events: auto;
+
             &::after {
                 display: none;
             }
