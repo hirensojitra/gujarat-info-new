@@ -7,7 +7,7 @@ import { TalukaService } from 'src/app/common/services/taluka.service';
 import { VillageService } from 'src/app/common/services/village.service';
 import { ToastService } from 'src/app/common/services/toast.service';
 import { MemberService } from 'src/app/common/services/member.service';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 declare const bootstrap: any;
 @Component({
   selector: 'app-village',
@@ -51,7 +51,8 @@ export class VillageComponent implements OnInit, AfterViewInit {
     private DS: DevelopmentService,
     private el: ElementRef,
     private toastService: ToastService,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private router: Router
   ) {
     const newForm = this.fb.group({
       name: ['', [Validators.required]],
@@ -91,21 +92,23 @@ export class VillageComponent implements OnInit, AfterViewInit {
         this.districtService.getDistrictById(data).subscribe((value) => {
           if (value) {
             this.selectedDistrict = value;
+            this.paramDist = value.id;
+            this.talukas = [];
+            this.villages = [];
+            this.loadTaluka();
           }
         });
-        this.loadTaluka();
       }
     })
     this.filterVillage.get('taluka')?.valueChanges.subscribe((data) => {
-      console.log(data)
       if (data) {
         this.talukaService.getTalukaById(data).subscribe((value) => {
           if (value) {
             this.selectedTaluka = value.data[0];
-            console.log(this.selectedTaluka)
+            this.updateRoute();
           }
+          this.loadVillage();
         });
-        this.loadVillage();
       }
     })
 
@@ -196,20 +199,21 @@ export class VillageComponent implements OnInit, AfterViewInit {
       this.districts = data;
       if (data.length) {
         data.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
-        const matchedDistrict = data.find(d => d.id == +this.paramDist);
-        this.selectedDistrict = matchedDistrict || data[0];
+        this.selectedDistrict = this.paramDist !== undefined ? data.find(district => district.id == this.paramDist) || data[0] : data[0];
         this.filterVillage.get('district')?.setValue(this.selectedDistrict?.id);
+        this.talukas = [];
+        this.villages = [];
       }
     });
   }
   loadTaluka(): void {
-    const districtId = this.paramDist;
-    this.talukaService.getTalukaByDistrict(districtId).subscribe(
-      (response) => {
-        this.talukas = response;
-        response.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
-        const talukaFromRoute = response.find(taluka => taluka.id == this.paramTaluka);
-        this.selectedTaluka = talukaFromRoute || response[0];
+    const districtId = this.selectedDistrict.id;
+    console.log(this.selectedDistrict)
+    !!districtId && this.talukaService.getTalukaByDistrict(districtId).subscribe(
+      (data) => {
+        this.talukas = data;
+        data.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+        this.selectedTaluka = this.paramTaluka !== undefined ? data.find(taluka => taluka.id == this.paramTaluka) || data[0] : data[0];
         this.filterVillage.get('taluka')?.setValue(this.selectedTaluka?.id);
       },
       (error) => {
@@ -224,12 +228,10 @@ export class VillageComponent implements OnInit, AfterViewInit {
     const districtId = this.filterVillage.get('district')?.value;
     this.villages = [];
     if (districtId && talukaId) {
-      this.villageService.getVillageByTaluka(talukaId).subscribe(
-        (response) => {
-          response.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
-          this.villages = response;
-        }
-      );
+      this.villageService.getVillageByTaluka(talukaId).subscribe((response) => {
+        response.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+        this.villages = response;
+      });
     }
     this.loadDeletedVillageLength();
   }
@@ -313,4 +315,12 @@ export class VillageComponent implements OnInit, AfterViewInit {
     this.loadDeletedVillage();
     this.villageDeletedModal.show();
   }
+  updateRoute(): void {
+    this.router.navigate(['../../', this.selectedDistrict?.id, this.selectedTaluka?.id], {
+      relativeTo: this.route,
+      queryParamsHandling: 'merge',
+      replaceUrl: true
+    });
+  }
+
 }
