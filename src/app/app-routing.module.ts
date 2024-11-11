@@ -5,7 +5,6 @@ import { AuthGuard } from './common/guards/auth.guard';
 import { RoleGuard } from './common/guards/role.guard';
 
 const routes: Routes = [
-  // Route for dashboard-layout
   {
     path: 'dashboard',
     component: LayoutComponent,

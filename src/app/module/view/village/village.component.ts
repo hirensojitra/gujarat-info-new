@@ -208,7 +208,6 @@ export class VillageComponent implements OnInit, AfterViewInit {
   }
   loadTaluka(): void {
     const districtId = this.selectedDistrict.id;
-    console.log(this.selectedDistrict)
     !!districtId && this.talukaService.getTalukaByDistrict(districtId).subscribe(
       (data) => {
         this.talukas = data;

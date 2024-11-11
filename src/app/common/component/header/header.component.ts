@@ -179,7 +179,6 @@ export class HeaderComponent {
         this.validateImage(this.user.username);
         this.userFullName = this.US.getFullName();
         const trimmedRoles = user.roles.split(',').map(role => role.trim());
-        console.log(trimmedRoles)
         this.filteredMenu$ = of(this.filterMenuItemsByRole(trimmedRoles));
       }
     });
