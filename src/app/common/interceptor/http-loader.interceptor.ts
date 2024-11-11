@@ -9,6 +9,7 @@ import {
 import { Observable } from 'rxjs';
 import { finalize, tap } from 'rxjs/operators';
 import { LoaderService } from '../services/loader';
+import { environment } from 'src/environments/environment';
 
 @Injectable()
 export class HttpLoaderInterceptor implements HttpInterceptor {
@@ -63,6 +64,7 @@ export class HttpLoaderInterceptor implements HttpInterceptor {
       // '/api/Notification/GetCitizenUserNotificationviewmore',
       // '/api/Notification/UpdateCitizenUserReadNotification'
       // Add more excluded URLs as needed
+      environment.MasterApi + '/images'
     ];
     // Check if the request URL matches any of the excluded URLs
     return excludedUrls.some(excludedUrl => url.includes(excludedUrl));

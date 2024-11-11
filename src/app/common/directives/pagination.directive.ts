@@ -82,7 +82,6 @@ export class PaginationDirective implements OnInit, OnDestroy {
     this.renderer.addClass(paginationContainer, 'flex-wrap');
     this.renderer.addClass(paginationContainer, 'align-items-center');
     this.renderer.addClass(paginationContainer, 'justify-content-center');
-    this.renderer.addClass(paginationContainer, 'my-3');
     this.sticky && this.renderer.addClass(paginationContainer, 'sticky-bottom');
     this.renderer.addClass(paginationContainer, 'bg-body');
     this.renderer.addClass(paginationContainer, 'p-2');

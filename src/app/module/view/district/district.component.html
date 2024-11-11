@@ -14,6 +14,7 @@
                 <table class="table w-100 m-0 max-h-100-p max-w-100-p bg-white text-nowrap">
                     <thead class="sticky-top bg-light">
                         <tr>
+                            <th [width]="50" class="text-center"></th>
                             <th>No.</th>
                             <th>Code</th>
                             <th>Name</th>
@@ -23,8 +24,9 @@
                     </thead>
                     <tbody>
                         <tr *ngFor="let district of districts; let i = index" class="align-middle">
+                            <td><button class="btn btn-success btn-sm text-white" [routerLink]="'/view/taluka/'+district.id"><i class="fa fa-plus"></i></button></td>
                             <td>{{ i + 1 }}</td>
-                            <td><a [routerLink]="'/view/taluka/'+district.id">{{ district.id }}</a></td>
+                            <td>{{ district.id }}</td>
                             <td>{{ district.name }}</td>
                             <td>{{ district.gu_name }}</td>
                             <td class="text-center">

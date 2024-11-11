@@ -161,6 +161,7 @@ export class AuthService {
     return this.http.post(`${this.apiUrl}/reset-password`, { token, email, password });
   }
   validateResetToken(token: string, email: string): Observable<TokenValidationResponse> {
+    alert(`${this.apiUrl}/validate-reset-token` + ' ' + token + ' ' + email)
     return this.http.post<TokenValidationResponse>(`${this.apiUrl}/validate-reset-token`, { token, email })
       .pipe(
         catchError((error) => {

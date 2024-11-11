@@ -323,6 +323,14 @@ body::-webkit-scrollbar-track {
 
 html {
     font-size: 14px;
+
+    @include media-query(xs) {
+        font-size: 10px;
+    }
+
+    @include media-query(sm) {
+        font-size: 11px;
+    }
 }
 
 body {

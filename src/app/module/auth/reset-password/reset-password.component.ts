@@ -1,7 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { AfterViewInit, Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { finalize } from 'rxjs';
+import { finalize, firstValueFrom } from 'rxjs';
 import { TokenValidationResponse } from 'src/app/common/interfaces/auth.types';
 import { AuthService } from 'src/app/common/services/auth.service';
 import { PlatformService } from 'src/app/common/services/platform.service';
@@ -12,7 +12,7 @@ import { ToastService } from 'src/app/common/services/toast.service';
   templateUrl: './reset-password.component.html',
   styleUrls: ['./reset-password.component.scss']
 })
-export class ResetPasswordComponent implements OnInit {
+export class ResetPasswordComponent implements OnInit, AfterViewInit {
   resetPasswordForm: FormGroup;
   token: string;
   email: string;
@@ -28,35 +28,32 @@ export class ResetPasswordComponent implements OnInit {
     private platformService: PlatformService
   ) { }
 
-  ngOnInit(): void {
-    this.token = this.route.snapshot.queryParams['token'];
-    this.email = this.route.snapshot.queryParams['email'];
+  async ngOnInit(): Promise<void> {
 
-    this.resetPasswordForm = this.fb.group({
-      password: ['', [Validators.required, Validators.minLength(6)]],
-      confirmPassword: ['', [Validators.required]]
-    }, { validator: this.passwordsMatchValidator });
+  }
+  async ngAfterViewInit(): Promise<void> {
     if (this.platformService.isBrowser()) {
-      this.validateToken();
+      debugger;
+      this.token = this.route.snapshot.queryParams['token'];
+      this.email = this.route.snapshot.queryParams['email'];
+
+      await this.validateToken();
+      this.resetPasswordForm = this.fb.group({
+        password: ['', [Validators.required, Validators.minLength(6)]],
+        confirmPassword: ['', [Validators.required]]
+      }, { validator: this.passwordsMatchValidator });
     }
   }
-
   async validateToken(): Promise<void> {
-    await this.authService.validateResetToken(this.token, this.email)
-      .pipe(
-        finalize(() => {
-          this.isTokenChecked = true;
-        })
-      )
-      .subscribe(
-        (response: TokenValidationResponse) => {
-          this.isTokenValid = response.success; // Set to true if token is valid
-        },
-        (error) => {
-          this.toast.show(error, { class: 'bg-danger' });
-          this.isTokenValid = false; // Set to false if token validation fails
-        }
+    try {
+      const response: TokenValidationResponse = await firstValueFrom(
+        this.authService.validateResetToken(this.token, this.email).pipe(finalize(() => this.isTokenChecked = true))
       );
+      this.isTokenValid = response.success;
+    } catch (error) {
+      this.toast.show(error, { class: 'bg-danger' });
+      this.isTokenValid = false;
+    }
   }
 
   passwordsMatchValidator(form: FormGroup) {

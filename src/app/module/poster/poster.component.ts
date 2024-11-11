@@ -806,7 +806,7 @@ export class PosterComponent implements OnInit {
     this.formData.reset();
   }
   async checkDownload(t: string): Promise<boolean> {
-    const baseUrl = `${this.baseUrl}poster?img=${this.postDetails?.id}`;
+    const baseUrl = `${this.baseUrl}poster/${this.postDetails?.id}`;
     const title = this.postDetails?.title.trim();
     const info = this.postDetails?.info.trim();
     switch (t) {

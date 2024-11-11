@@ -167,7 +167,8 @@ export class UserImgComponent implements OnInit, AfterViewInit {
         this.router.navigate([], {
           relativeTo: this.route,
           queryParams: { folder: actualFolderId || null, page: this.imagePage, limit: this.imageLimit },
-          queryParamsHandling: 'merge', // Merge the new query params with the existing ones
+          queryParamsHandling: 'merge',
+          replaceUrl: true
         });
       },
       error: () => {

@@ -1,92 +1,104 @@
-<div class="container">
-  <button (click)="openAddFolderModal()" class="btn btn-success btn-sm my-2">
-    <i class="fa fa-plus me-2"></i>Add Folder
-  </button>
-  <ul class="row g-2 list-unstyled">
-    <li *ngFor="let folder of folders" class="col-lg-3 col-md-4 col-sm-6 col-6">
-      <div class="card border shadow-none" [ngClass]="{'bg-dark text-white': selectedFolderId == folder.id}">
-        <div class="card-body">
-          <div class="mb-0 folder-svg-container d-flex flex-wrap align-items-center">
-            <div class="me-3 bg-lighter avatar avatar-lg border h-40-px w-40-px p-1 rounded" [ngClass]="{'bg-opacity-25': selectedFolderId == folder.id}">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
-                <rect width="256" height="256" fill="none"></rect>
-                <path d="M69.77,112H208V88a8,8,0,0,0-8-8H130.67a8,8,0,0,1-4.8-1.6L98.13,57.6a8,8,0,0,0-4.8-1.6H40a8,8,0,0,0-8,8V208l30.18-90.53A8,8,0,0,1,69.77,112Z" opacity="0.2"></path>
-                <path d="M32,208V64a8,8,0,0,1,8-8H93.33a8,8,0,0,1,4.8,1.6l27.74,20.8a8,8,0,0,0,4.8,1.6H200a8,8,0,0,1,8,8v24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16">
-                </path>
-                <path d="M32,208l30.18-90.53A8,8,0,0,1,69.77,112H232a8,8,0,0,1,7.59,10.53L211.09,208Z" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"></path>
-              </svg>
-            </div>
-            <div>
-              <p class="fs-14 fw-medium mb-1 lh-1">
-                <a href="#" class="link fw-bold text-decoration-none" [ngClass]="{'active pe-none text-white': selectedFolderId == folder.id}" (click)="fetchImages(folder.id);false;">{{ folder.name }}</a>
-              </p>
-              <span class="fs-12">{{ imageCounts[folder.id] }} Files</span>
-            </div>
-            <div class="float-end ms-auto">
-              <div class="dropdown">
-                <a href="#" data-bs-toggle="dropdown" aria-expanded="false" class="btn btn-flat btn-sm" aria-label="More Option">
-                  <i class="fa fa-ellipsis-v" [ngClass]="{'text-white': selectedFolderId == folder.id}"></i>
-                </a>
-                <ul class="dropdown-menu  dropdown-menu-end bg-dark dropdown-menu-dark">
-                  <li><a class="dropdown-item" href="#" (click)="openFolderDeleteModal(folder.id, folder.name);false"><i class="w-20-px text-center fa fa-trash me-2 text-danger"></i>Delete</a> </li>
-                  <li><a class="dropdown-item" href="#" (click)="openRenameFolderModal(folder.id);false"><i class="w-20-px text-center fa fa-pencil me-2 text-primary"></i>Rename</a> </li>
-                  <li><a href="#" class="dropdown-item" (click)="false;">
-                      <i class="w-20-px text-center fa fa-eye-slash me-2 text-mute"></i>Hide Folder
-                    </a></li>
-                </ul>
-              </div>
-            </div>
-          </div>
-          <div>
-            <div class="progress progress-xs mt-3">
-              <div class="progress-bar bg-primary progress-bar-striped" role="progressbar" [style]="'width: '+imageCounts[folder.id]+'%'" [attr.aria-valuenow]="imageCounts[folder.id]" aria-valuemin="0" aria-valuemax="100" [attr.aria-label]="'Image Folder capacity: ' + imageCounts[folder.id] + '%'">
-              </div>
-
-            </div>
-          </div>
-        </div>
-      </div>
-    </li>
-  </ul>
-  <div pagination [currentPage]="folderPage" [totalItems]="folderItems" [pageSize]="folderLimit" [pageSizes]="[30, 50, 100]" (currentPageChange)="onFolderPageChange($event)" (pageSizeChange)="onFolderPageSizeChange($event)"></div>
-  <ng-container *ngIf="selectedFolderId">
-    <div class="card shadow">
-      <div class="card-header d-flex align-items-center">
-        <h6 class="fw-bold m-0">{{ selectedFolderName }}</h6>
-        <div class="ms-auto">
-          <label for="uploadImage" class="btn btn-success ms-2 btn-sm"><i class="fa fa-image me-2"></i>Upload
-            Image</label>
-          <input class="d-none" type="file" (change)="onFileSelected($event)" id="uploadImage" />
-        </div>
-      </div>
-      <div class="card-body">
-        <ul class="row g-2 list-unstyled align-items-stretch">
-          <li *ngFor="let image of images" class="col-lg-2 col-md-3 col-sm-4 col-6 d-flex flex-column">
-            <div class="d-flex mt-auto flex-column p-2 border rounded shadow-sm w-100">
-              <div class="img-container flex-grow-1 d-flex align-items-end mb-2">
-                <img [src]="apiUrl + '/img' + getImagePath(image) + '?quality=30'" alt="Image" class="img-fluid rounded mx-auto" />
-              </div>
-              <div class="row g-2">
-                <div class="col-4">
-                  <button (click)="refreshImage(image.id, selectedFolderId)" class="btn btn-sm btn-outline-success w-100" aria-label="Replace">
-                    <i class="fa fa-refresh"></i>
-                  </button>
+<div class="h-100 w-100 d-flex flex-column">
+  <div class="container">
+    <button (click)="openAddFolderModal()" class="btn btn-success btn-sm my-2">
+      <i class="fa fa-plus me-2"></i>Add Folder
+    </button>
+  </div>
+  <div class="flex-grow-1 overflow-y-auto position-relative">
+    <div class="position-absolute h-100 w-100">
+      <div class="container pb-3 min-h-100-p d-flex flex-column">
+        <ul class="row g-2 list-unstyled mb-0">
+          <li *ngFor="let folder of folders" class="col-lg-3 col-md-4 col-sm-6 col-6">
+            <div class="card border shadow-none" [ngClass]="{'bg-dark text-white': selectedFolderId == folder.id}">
+              <div class="card-body">
+                <div class="mb-0 folder-svg-container d-flex flex-wrap align-items-center">
+                  <div class="me-3 bg-lighter avatar avatar-lg border p-1 rounded" remSize [wPX]="40" [hPX]="40" [ngClass]="{'bg-opacity-25': selectedFolderId == folder.id}">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+                      <rect width="256" height="256" fill="none"></rect>
+                      <path d="M69.77,112H208V88a8,8,0,0,0-8-8H130.67a8,8,0,0,1-4.8-1.6L98.13,57.6a8,8,0,0,0-4.8-1.6H40a8,8,0,0,0-8,8V208l30.18-90.53A8,8,0,0,1,69.77,112Z" opacity="0.2"></path>
+                      <path d="M32,208V64a8,8,0,0,1,8-8H93.33a8,8,0,0,1,4.8,1.6l27.74,20.8a8,8,0,0,0,4.8,1.6H200a8,8,0,0,1,8,8v24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16">
+                      </path>
+                      <path d="M32,208l30.18-90.53A8,8,0,0,1,69.77,112H232a8,8,0,0,1,7.59,10.53L211.09,208Z" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"></path>
+                    </svg>
+                  </div>
+                  <div>
+                    <p class="fs-14 fw-medium mb-1 lh-1">
+                      <a href="#" class="link fw-bold text-decoration-none" [ngClass]="{'active pe-none text-white': selectedFolderId == folder.id}" (click)="selectedFolderId=folder.id;fetchImages();false;">{{ folder.name }}</a>
+                    </p>
+                    <span class="fs-12">{{ imageCounts[folder.id] }} Files</span>
+                  </div>
+                  <div class="float-end ms-auto">
+                    <div class="dropdown">
+                      <a href="#" data-bs-toggle="dropdown" aria-expanded="false" class="btn btn-flat btn-sm" aria-label="More Option">
+                        <i class="fa fa-ellipsis-v" [ngClass]="{'text-white': selectedFolderId == folder.id}"></i>
+                      </a>
+                      <ul class="dropdown-menu  dropdown-menu-end bg-dark dropdown-menu-dark">
+                        <li><a class="dropdown-item" href="#" (click)="openFolderDeleteModal(folder.id, folder.name);false"><i class="w-20-px text-center fa fa-trash me-2 text-danger"></i>Delete</a> </li>
+                        <li><a class="dropdown-item" href="#" (click)="openRenameFolderModal(folder.id);false"><i class="w-20-px text-center fa fa-pencil me-2 text-primary"></i>Rename</a> </li>
+                        <li><a href="#" class="dropdown-item" (click)="false;">
+                            <i class="w-20-px text-center fa fa-eye-slash me-2 text-mute"></i>Hide Folder
+                          </a></li>
+                      </ul>
+                    </div>
+                  </div>
                 </div>
-                <div class="col-4">
-                  <a href="{{getImagePath(image)}}" class="btn btn-sm btn-outline-dark w-100" (click)="copyHrefToClipboard($event, getImagePath(image))" aria-label="Copy">{{image.url}}<i class="fa fa-copy"></i></a>
-                </div>
-                <div class="col-4">
-                  <button (click)="deleteImage(selectedFolderId, image.id)" class="btn btn-sm btn-outline-danger w-100" aria-label="Delete">
-                    <i class="fa fa-trash"></i>
-                  </button>
+                <div>
+                  <div class="progress progress-xs mt-3">
+                    <div class="progress-bar bg-primary progress-bar-striped" role="progressbar" [style]="'width: '+imageCounts[folder.id]+'%'" [attr.aria-valuenow]="imageCounts[folder.id]" aria-valuemin="0" aria-valuemax="100" [attr.aria-label]="'Image Folder capacity: ' + imageCounts[folder.id] + '%'">
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
           </li>
         </ul>
+        <div pagination [currentPage]="folderPage" [totalItems]="folderItems" [pageSize]="folderLimit" [pageSizes]="[8,16,32]" (currentPageChange)="onFolderPageChange($event)" (pageSizeChange)="onFolderPageSizeChange($event)" class="rounded-3"></div>
+        <ng-container *ngIf="selectedFolderId">
+          <div class="card shadow flex-grow-1" remSize [minHPX]="400">
+            <div class="card-header d-flex align-items-center">
+              <h6 class="fw-bold m-0">{{ selectedFolderName }}</h6>
+              <div class="ms-auto">
+                <label for="uploadImage" class="btn btn-success ms-2 btn-sm"><i class="fa fa-image me-2"></i>Upload
+                  Image</label>
+                <input class="d-none" type="file" (change)="onFileSelected($event)" id="uploadImage" />
+              </div>
+            </div>
+            <div class="card-body position-relative p-0">
+              <div class="p-sm-3 p-1 position-absolute h-100 w-100 overflow-y-auto">
+                <ul class="row g-1 g-sm-2 list-unstyled align-items-stretch m-0 justify-content-center">
+                  <li *ngFor="let image of images" class="col-lg-3 col-md-4 col-sm-6 col-4">
+                    <div class="d-flex h-100 flex-column p-0">
+                      <div class="img-container flex-grow-1 d-flex align-items-end">
+                        <img [src]="apiUrl + '/img' + getImagePath(image) + '?quality=30'" alt="Image" class="img-fluid mx-auto" />
+                      </div>
+                      <div class="row g-0">
+                        <div class="col-4">
+                          <button (click)="refreshImage(image.id, selectedFolderId)" class="btn btn-sm btn-success w-100 text-white rounded-0" aria-label="Replace">
+                            <i class="fa fa-refresh"></i>
+                          </button>
+                        </div>
+                        <div class="col-4">
+                          <a href="{{getImagePath(image)}}" class="btn btn-sm btn-dark w-100 text-white rounded-0" (click)="copyHrefToClipboard($event, getImagePath(image))" aria-label="Copy">{{image.url}}<i class="fa fa-copy"></i></a>
+                        </div>
+                        <div class="col-4">
+                          <button (click)="deleteImage(selectedFolderId, image.id)" class="btn btn-sm btn-danger w-100 text-white rounded-0" aria-label="Delete">
+                            <i class="fa fa-trash"></i>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </li>
+                </ul>
+              </div>
+            </div>
+            <div class="card-footer p-0">
+              <div pagination [currentPage]="imagePage" [totalItems]="imageCounts[selectedFolderId]" [pageSize]="imageLimit" [pageSizes]="[8,16,32]" (currentPageChange)="onImagePageChange($event)" (pageSizeChange)="onImagePageSizeChange($event)" class="rounded-3"></div>
+            </div>
+          </div>
+        </ng-container>
       </div>
     </div>
-  </ng-container>
+  </div>
 </div>
 
 <!-- Add Folder Modal -->

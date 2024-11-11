@@ -86,8 +86,6 @@ const routes: Routes = [
       { path: '', loadChildren: () => import('./module/user-profile/user-profile.module').then(m => m.UserProfileModule) },
     ],
   },
-
-  // Route for empty-layout (auth-related)
   {
     path: 'auth',
     component: LayoutComponent,
@@ -129,8 +127,6 @@ const routes: Routes = [
     pathMatch: 'full',
   }
 ];
-
-
 @NgModule({
   imports: [RouterModule.forRoot(routes, {
     initialNavigation: 'enabledBlocking',
