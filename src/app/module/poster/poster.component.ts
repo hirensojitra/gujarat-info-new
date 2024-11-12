@@ -139,7 +139,7 @@ export class PosterComponent implements OnInit {
         this.metaService.updateTag({ name: 'robots', content: data['robots'] || 'index, follow' });
         this.metaService.updateTag({ property: 'og:title', content: data['og:title'] || 'Default OG title' });
         this.metaService.updateTag({ property: 'og:description', content: data['og:description'] || 'Default OG description' });
-        this.metaService.updateTag({ property: 'og:image', content: data['og:image'] || 'https://vmi2070714.contaboserver.net/api/v1/img/uploads/wLmyK?quality=30' });
+        this.metaService.updateTag({ property: 'og:image', content: data['og:image'] || 'https://api.postnew.in/api/v1/img/uploads/wLmyK?quality=30' });
       })
       await this.seoService.initSEO();
       await this.route.paramMap.subscribe(async params => {
