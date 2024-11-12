@@ -132,7 +132,7 @@ export class PosterComponent implements OnInit {
     }
 
     if (isPlatformServer(this.platformId)) {
-      await this.route.data.subscribe(async data => {
+      this.route.data.subscribe(async data => {
         this.titleService.setTitle(data['title'] || 'Poster Download');
         this.metaService.updateTag({ name: 'description', content: data['description'] || 'Discover our web application for generating election campaign posters, festival posts, and other promotional activities. Customize posters with photos, names, addresses, designations, and contact details for efficient and personalized promotional material.' });
         this.metaService.updateTag({ name: 'keywords', content: data['keywords'] || 'poster generation, campaign posters, election posters, festival posts, promotional activities, customization, Gujarat Uvach, web application' });
