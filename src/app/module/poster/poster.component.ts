@@ -161,7 +161,7 @@ export class PosterComponent implements OnInit {
     this.metaService.updateTag({ name: 'description', content: this.postDetailsDefault.info });
     this.metaService.updateTag({ property: 'og:title', content: this.postDetailsDefault.title || 'Default OG title' });
     this.metaService.updateTag({ property: 'og:description', content: this.postDetailsDefault.info || 'Default OG description' });
-    this.metaService.updateTag({ property: 'og:image', content: this.postDetailsDefault.backgroundurl || 'https://api.postnew.in/api/v1/img/uploads/defaultImage?quality=30' });
+    this.metaService.updateTag({ property: 'og:image', content: this.postDetailsDefault.backgroundurl ? this.postDetailsDefault.backgroundurl + '?quality=30' : 'https://api.postnew.in/api/v1/img/uploads/defaultImage?quality=30' });
   }
   async getPostById(): Promise<void> {
     const post: PostDetails = this.postDetailsDefault;
