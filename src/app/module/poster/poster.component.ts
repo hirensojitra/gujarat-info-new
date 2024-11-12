@@ -162,6 +162,12 @@ export class PosterComponent implements OnInit {
     this.metaService.updateTag({ property: 'og:title', content: this.postDetailsDefault.title || 'Default OG title' });
     this.metaService.updateTag({ property: 'og:description', content: this.postDetailsDefault.info || 'Default OG description' });
     this.metaService.updateTag({ property: 'og:image', content: this.postDetailsDefault.backgroundurl ? this.postDetailsDefault.backgroundurl + '?quality=30' : 'https://api.postnew.in/api/v1/img/uploads/defaultImage?quality=30' });
+
+    this.metaService.updateTag({ property: 'twitter:card', content: 'summary_large_image' })
+    this.metaService.updateTag({ property: 'twitter:url', content: 'https://www/postnew.in/poster/' + this.postDetailsDefault.id })
+    this.metaService.updateTag({ property: 'twitter:title', content: this.postDetailsDefault.title })
+    this.metaService.updateTag({ property: 'twitter:description', content: this.postDetailsDefault.info })
+    this.metaService.updateTag({ property: 'twitter:image', content: this.postDetailsDefault.backgroundurl ? this.postDetailsDefault.backgroundurl + '?quality=30' : 'https://api.postnew.in/api/v1/img/uploads/defaultImage?quality=30' })
   }
   async getPostById(): Promise<void> {
     const post: PostDetails = this.postDetailsDefault;
