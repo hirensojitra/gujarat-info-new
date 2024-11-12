@@ -132,7 +132,7 @@ export class PosterComponent implements OnInit {
     }
 
     if (isPlatformServer(this.platformId)) {
-      this.route.data.subscribe(async data => {
+      await this.route.data.subscribe(async data => {
         this.titleService.setTitle(data['title'] || 'Poster Download');
         this.metaService.updateTag({ name: 'description', content: data['description'] || 'Discover our web application for generating election campaign posters, festival posts, and other promotional activities. Customize posters with photos, names, addresses, designations, and contact details for efficient and personalized promotional material.' });
         this.metaService.updateTag({ name: 'keywords', content: data['keywords'] || 'poster generation, campaign posters, election posters, festival posts, promotional activities, customization, Gujarat Uvach, web application' });
@@ -141,7 +141,6 @@ export class PosterComponent implements OnInit {
         this.metaService.updateTag({ property: 'og:description', content: data['og:description'] || 'Default OG description' });
         this.metaService.updateTag({ property: 'og:image', content: data['og:image'] || 'https://api.postnew.in/api/v1/img/uploads/wLmyK?quality=30' });
       })
-      await this.seoService.initSEO();
       await this.route.paramMap.subscribe(async params => {
         this.imgParam = params.get('img');
         if (this.imgParam) {
@@ -151,6 +150,8 @@ export class PosterComponent implements OnInit {
           }
         }
       });
+
+      await this.seoService.initSEO();
     }
     await new Promise(resolve => setTimeout(resolve, 1500));
 
@@ -158,6 +159,9 @@ export class PosterComponent implements OnInit {
   async changeMetadataDynamically(): Promise<void> {
     this.titleService.setTitle(this.postDetailsDefault.title);
     this.metaService.updateTag({ name: 'description', content: this.postDetailsDefault.info });
+    this.metaService.updateTag({ property: 'og:title', content: this.postDetailsDefault.title || 'Default OG title' });
+    this.metaService.updateTag({ property: 'og:description', content: this.postDetailsDefault.info || 'Default OG description' });
+    this.metaService.updateTag({ property: 'og:image', content: this.postDetailsDefault.backgroundurl || 'https://api.postnew.in/api/v1/img/uploads/defaultImage?quality=30' });
   }
   async getPostById(): Promise<void> {
     const post: PostDetails = this.postDetailsDefault;
