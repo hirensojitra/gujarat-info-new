@@ -6,9 +6,9 @@ const routes: Routes = [{
   path: '',
   component: RegisterComponent,
   data: {
-    title: 'Gujarat Uvach | Register',
-    description: 'Login or register to Gujarat Uvach portal for accessing services',
-    keywords: 'Gujarat Uvach, login, register, portal',
+    title: 'PostNew | Register',
+    description: 'Login or register to PostNew portal for accessing services',
+    keywords: 'PostNew, login, register, portal',
     robots: 'index, follow',
     image: 'https://test-ssr-hiren.netlify.app/assets/images/jpg/register.jpg'
   }

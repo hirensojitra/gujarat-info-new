@@ -135,7 +135,7 @@ export class PosterComponent implements OnInit {
       this.route.data.subscribe(async data => {
         this.titleService.setTitle(data['title'] || 'Poster Download');
         this.metaService.updateTag({ name: 'description', content: data['description'] || 'Discover our web application for generating election campaign posters, festival posts, and other promotional activities. Customize posters with photos, names, addresses, designations, and contact details for efficient and personalized promotional material.' });
-        this.metaService.updateTag({ name: 'keywords', content: data['keywords'] || 'poster generation, campaign posters, election posters, festival posts, promotional activities, customization, Gujarat Uvach, web application' });
+        this.metaService.updateTag({ name: 'keywords', content: data['keywords'] || 'poster generation, campaign posters, election posters, festival posts, promotional activities, customization, PostNew, web application' });
         this.metaService.updateTag({ name: 'robots', content: data['robots'] || 'index, follow' });
         this.metaService.updateTag({ property: 'og:title', content: data['og:title'] || 'Default OG title' });
         this.metaService.updateTag({ property: 'og:description', content: data['og:description'] || 'Default OG description' });
