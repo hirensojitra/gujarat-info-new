@@ -126,12 +126,14 @@ export class PosterComponent implements OnInit {
           this.postDetailsDefault = await this.PS.getPostById(this.imgParam.toString()).toPromise() as PostDetails;
           if (this.postDetailsDefault && !this.postDetailsDefault.deleted) {
             this.getPostById();
+            await this.changeMetadataDynamically();
           }
         }
       })
     }
 
     if (isPlatformServer(this.platformId)) {
+      await this.seoService.initSEO();
       this.route.data.subscribe(async data => {
         this.titleService.setTitle(data['title'] || 'Poster Download');
         this.metaService.updateTag({ name: 'description', content: data['description'] || 'Discover our web application for generating election campaign posters, festival posts, and other promotional activities. Customize posters with photos, names, addresses, designations, and contact details for efficient and personalized promotional material.' });
@@ -151,24 +153,55 @@ export class PosterComponent implements OnInit {
         }
       });
 
-      await this.seoService.initSEO();
+
     }
     await new Promise(resolve => setTimeout(resolve, 1500));
 
   }
   async changeMetadataDynamically(): Promise<void> {
-    this.titleService.setTitle(this.postDetailsDefault.title);
-    this.metaService.updateTag({ name: 'description', content: this.postDetailsDefault.info });
-    this.metaService.updateTag({ property: 'og:title', content: this.postDetailsDefault.title || 'Default OG title' });
-    this.metaService.updateTag({ property: 'og:description', content: this.postDetailsDefault.info || 'Default OG description' });
-    this.metaService.updateTag({ property: 'og:image', content: this.postDetailsDefault.backgroundurl ? this.postDetailsDefault.backgroundurl + '?quality=30' : 'https://api.postnew.in/api/v1/img/uploads/defaultImage?quality=30' });
+    const {
+      title = 'Default Title',
+      info = 'Default Description',
+      backgroundurl = 'https://api.postnew.in/api/v1/img/uploads/defaultImage',
+      id = 'defaultID',
 
-    this.metaService.updateTag({ property: 'twitter:card', content: 'summary_large_image' })
-    this.metaService.updateTag({ property: 'twitter:url', content: 'https://www/postnew.in/poster/' + this.postDetailsDefault.id })
-    this.metaService.updateTag({ property: 'twitter:title', content: this.postDetailsDefault.title })
-    this.metaService.updateTag({ property: 'twitter:description', content: this.postDetailsDefault.info })
-    this.metaService.updateTag({ property: 'twitter:image', content: this.postDetailsDefault.backgroundurl ? this.postDetailsDefault.backgroundurl + '?quality=30' : 'https://api.postnew.in/api/v1/img/uploads/defaultImage?quality=30' })
+    } = this.postDetailsDefault || {};
+    const author = 'Hiren Sojitra';
+    const siteName = 'PostNew';
+    const twitterUsername = '@Sojitra_Hiren';
+    const imageUrl = `${backgroundurl}?quality=30`;
+    const postUrl = `https://www.postnew.in/poster/${id}`;
+    const locale = 'en_US';
+
+    // Set the document title and description
+    this.titleService.setTitle(title);
+    this.metaService.updateTag({ name: 'description', content: info });
+
+    // Open Graph metadata
+    this.metaService.updateTag({ property: 'og:title', content: title });
+    this.metaService.updateTag({ property: 'og:description', content: info });
+    this.metaService.updateTag({ property: 'og:image', content: imageUrl });
+    this.metaService.updateTag({ property: 'og:url', content: postUrl });
+    this.metaService.updateTag({ property: 'og:type', content: 'poster' }); // Assuming the content is an article
+    this.metaService.updateTag({ property: 'og:site_name', content: siteName });
+    this.metaService.updateTag({ property: 'og:locale', content: locale });
+
+    // Additional article-specific Open Graph tags
+    this.metaService.updateTag({ property: 'article:author', content: author });
+
+    // Twitter metadata
+    this.metaService.updateTag({ property: 'twitter:card', content: 'summary_large_image' });
+    this.metaService.updateTag({ property: 'twitter:url', content: postUrl });
+    this.metaService.updateTag({ property: 'twitter:title', content: title });
+    this.metaService.updateTag({ property: 'twitter:description', content: info });
+    this.metaService.updateTag({ property: 'twitter:image', content: imageUrl });
+    this.metaService.updateTag({ property: 'twitter:site', content: twitterUsername });
+    this.metaService.updateTag({ property: 'twitter:creator', content: twitterUsername });
+
+    // Canonical URL (SEO best practice)
+    this.metaService.updateTag({ rel: 'canonical', href: postUrl });
   }
+
   async getPostById(): Promise<void> {
     const post: PostDetails = this.postDetailsDefault;
     if (!post) return;
