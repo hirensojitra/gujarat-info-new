@@ -706,8 +706,8 @@ export class ImageGenerateComponent implements OnInit, AfterViewInit {
   async fetchDataFromAPI(apiUrl: string, controlName: string): Promise<void> {
     await this.http.get<any[]>(apiUrl).subscribe({
       next: data => {
-        console.log(data)
-        this.apiData[controlName] = data;
+        this.apiData[controlName] = data['data'] || data;
+        console.log(this.apiData[controlName])
       },
       error: () => {
 

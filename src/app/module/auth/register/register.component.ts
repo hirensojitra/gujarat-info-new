@@ -20,12 +20,20 @@ export class RegisterComponent implements OnInit {
   ) {
     // Initialize the registration form with validators
     this.registrationForm = this.fb.group({
-      username: ['', [Validators.required]],
+      username: ['',
+        [
+          Validators.required,
+          Validators.minLength(5),          // Minimum length for the username
+          Validators.maxLength(20),         // Maximum length for the username
+          Validators.pattern('^[a-zA-Z][a-zA-Z0-9_]*$') // Must start with a letter, allows alphanumeric and underscores
+        ]
+      ],
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(6)]],
-      roles: ['user'], // Default role, adjust as necessary
-      emailVerified: [false], // Default value
+      roles: ['user'], // Default role
+      emailVerified: [false] // Default value
     });
+
   }
 
   ngOnInit(): void { }
