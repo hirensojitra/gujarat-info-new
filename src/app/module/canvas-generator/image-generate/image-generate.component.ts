@@ -706,6 +706,7 @@ export class ImageGenerateComponent implements OnInit, AfterViewInit {
   async fetchDataFromAPI(apiUrl: string, controlName: string): Promise<void> {
     await this.http.get<any[]>(apiUrl).subscribe({
       next: data => {
+        console.log(data)
         this.apiData[controlName] = data;
       },
       error: () => {
@@ -1042,7 +1043,7 @@ export class ImageGenerateComponent implements OnInit, AfterViewInit {
       data.control.setValue(data.title, { emitEvent: true })
     });
   }
-  
+
   onSubmit(clone?: boolean) {
     if (this.postDetailsForm?.valid) {
       const formData = this.postDetailsForm?.value;

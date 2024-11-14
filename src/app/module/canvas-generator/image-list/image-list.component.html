@@ -1,4 +1,4 @@
-<div class="h-100 d-flex flex-column p-3">
+<div class="h-100 d-flex flex-column p-3" *ngIf="isBrowser">
     <div class="flex-grow-1 position-relative overflow-hidden">
         <div class="position-absolute h-100 w-100 d-flex overflow-auto flex-column">
             <div class="container h-100 w-100">
@@ -10,16 +10,19 @@
                         <div class="col-12 px-3">
                             <div class="row g-3" data-masonry="{'percentPosition': true }" id="masonry-grid">
                                 <div class="col-lg-2 col-md-3 col-sm-4 col-6 masonry-box" *ngFor="let post of posts; let i= index">
-                                    <div class="position-relative">
+                                    <div class="position-relative border">
                                         <svg class="svg-content max-w-100-p max-h-100-p img-fluid m-auto d-block" preserveAspectRatio="xMidYMid meet" svgDraw [postDataSet]="post" [loadOnly]="true" (backgroundLoaded)="onSvgLoad()"></svg>
-                                        <div class="d-flex flex-column position-absolute start-0 top-0 h-100 w-100 p-3 ">
-                                            <div class="d-flex mb-auto">
-                                                <a class="btn btn-secondary btn-sm me-auto" (click)="navigateToEdit(post.id);false;" target="_blank" *ngIf="isAdmin()" (click)="false"><i class="fa fa-edit"></i>Edit</a>
-                                                <a class="btn btn-secondary btn-sm ms-auto" [routerLink]="'/poster/' + post.id" target="_blank"><i class="fa fa-eye"></i>View</a>
-                                            </div>
+                                        <div class="btn-group w-100" role="group">
+                                            <a class="btn btn-secondary btn-sm rounded-0" (click)="navigateToEdit(post.id); false;" target="_blank" *ngIf="isAdmin()">
+                                                <i class="fa fa-edit me-2"></i>Edit
+                                            </a>
+                                            <a class="btn btn-secondary btn-sm rounded-0" [routerLink]="'/poster/' + post.id" target="_blank">
+                                                <i class="fa fa-eye me-2"></i>View
+                                            </a>
                                         </div>
-                                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                                            {{post.download_counter}}
+
+                                        <span class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-danger">
+                                            Download: {{post.download_counter}}
                                             <span class="visually-hidden">unread messages</span>
                                         </span>
                                     </div>

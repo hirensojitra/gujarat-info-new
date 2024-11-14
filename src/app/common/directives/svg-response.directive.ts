@@ -183,7 +183,6 @@ export class SvgResponseDirective implements OnChanges, AfterViewInit {
     if (backgroundurl) {
       const svg = this.el.nativeElement;
       const background = await this.getImageDataUrl(backgroundurl);
-      this.backgroundLoaded.emit();
       const b = this.renderer.createElement('image', 'http://www.w3.org/2000/svg');
       this.renderer.setAttribute(b, 'x', '0');
       this.renderer.setAttribute(b, 'data-type', 'background-img');
@@ -202,6 +201,9 @@ export class SvgResponseDirective implements OnChanges, AfterViewInit {
       } else {
         svg.appendChild(b);
       }
+      setTimeout(() => {
+        this.backgroundLoaded.emit();
+      }, 100);
     }
   }
 
