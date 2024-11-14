@@ -4,22 +4,26 @@
             <div class="container h-100 w-100">
                 <div class="row g-3">
                     <div class="col-12 pb-3">
-                        <button class="btn btn-success" (click)="window.open('/images/generate', '_blank');false"><i class="fa fa-plus me-2"></i>Image</button>
+                        <button class="btn btn-success" [routerLink]="'/images/generate'" target="_blank"><i class="fa fa-plus me-2"></i>Image</button>
                     </div>
                     <ng-container *ngIf="posts.length">
-                        <div class="col-lg-2 col-md-3 col-sm-4 col-6" *ngFor="let post of posts">
-                            <div class="position-relative">
-                                <svg class="svg-content max-w-100-p max-h-100-p img-fluid m-auto d-block" preserveAspectRatio="xMidYMid meet" svgDraw [postDataSet]="post" [loadOnly]="true"></svg>
-                                <div class="d-flex flex-column position-absolute start-0 top-0 h-100 w-100 p-3 ">
-                                    <div class="d-flex mb-auto">
-                                        <a class="btn btn-secondary btn-sm me-auto" href="#" (click)="window.open('/images/generate?img=' + post.id, '_blank');false" *ngIf="isAdmin()"><i class="fa fa-edit"></i>Edit</a>
-                                        <a class="btn btn-secondary btn-sm ms-auto" href="#" (click)="window.open('/poster/' + post.id);false"><i class="fa fa-eye"></i>View</a>
+                        <div class="col-12 px-3">
+                            <div class="row g-3" data-masonry="{'percentPosition': true }" id="masonry-grid">
+                                <div class="col-lg-2 col-md-3 col-sm-4 col-6 masonry-box" *ngFor="let post of posts; let i= index">
+                                    <div class="position-relative">
+                                        <svg class="svg-content max-w-100-p max-h-100-p img-fluid m-auto d-block" preserveAspectRatio="xMidYMid meet" svgDraw [postDataSet]="post" [loadOnly]="true" (backgroundLoaded)="onSvgLoad()"></svg>
+                                        <div class="d-flex flex-column position-absolute start-0 top-0 h-100 w-100 p-3 ">
+                                            <div class="d-flex mb-auto">
+                                                <a class="btn btn-secondary btn-sm me-auto" [routerLink]="'/images/generate?img=' + post.id" target="_blank" *ngIf="isAdmin()"><i class="fa fa-edit"></i>Edit</a>
+                                                <a class="btn btn-secondary btn-sm ms-auto" [routerLink]="'/poster/' + post.id" target="_blank"><i class="fa fa-eye"></i>View</a>
+                                            </div>
+                                        </div>
+                                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                            {{post.download_counter}}
+                                            <span class="visually-hidden">unread messages</span>
+                                        </span>
                                     </div>
                                 </div>
-                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                                    {{post.download_counter}}
-                                    <span class="visually-hidden">unread messages</span>
-                                </span>
                             </div>
                         </div>
                         <div class="col-12">

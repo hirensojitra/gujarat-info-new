@@ -47,6 +47,7 @@
               "./node_modules/cropperjs/dist/cropper.js",
               "./node_modules/colorthief/dist/color-thief.min.js",
               "./node_modules/colorthief/dist/color-thief.umd.js",
+              "./node_modules/masonry-layout/dist/masonry.pkgd.min.js",
               "./node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"
             ],
             "server": "src/main.server.ts",
@@ -129,6 +130,7 @@
               "./node_modules/cropperjs/dist/cropper.js",
               "./node_modules/colorthief/dist/color-thief.min.js",
               "./node_modules/colorthief/dist/color-thief.umd.js",
+              "./node_modules/masonry-layout/dist/masonry.pkgd.min.js",
               "./node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"
             ]
           }

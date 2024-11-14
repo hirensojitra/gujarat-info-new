@@ -1,37 +1,49 @@
-import { AfterViewInit, Component, OnInit } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router'; // Import Router
+import {
+  AfterViewInit,
+  Component,
+  OnInit,
+  Inject,
+  PLATFORM_ID,
+  Optional
+} from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
+import { ActivatedRoute, Router } from '@angular/router';
 import { PostDetails } from 'src/app/common/interfaces/image-element';
 import { AuthService } from 'src/app/common/services/auth.service';
-import { MetadataService } from 'src/app/common/services/metadata.service';
 import { PostDetailService } from 'src/app/common/services/post-detail.service';
-
+declare const Masonry: any;
 @Component({
   selector: 'app-image-list',
   templateUrl: './image-list.component.html',
   styleUrls: ['./image-list.component.scss']
 })
 export class ImageListComponent implements OnInit, AfterViewInit {
-
   posts: PostDetails[] = [];
+  imageUrls: string[] = [];
   currentPage: number = 1;
   totalPages: number = 0;
   totalLength: number = 0;
-  window!: Window & typeof globalThis;
+  isBrowser: boolean;
 
+  private masonryInstance: any;
   constructor(
     private PS: PostDetailService,
-    private metadataService: MetadataService,
     private route: ActivatedRoute,
     private router: Router,
-    private authService: AuthService
+    private authService: AuthService,
+    @Inject(PLATFORM_ID) private platformId: Object
   ) {
-    this.metadataService.setMetadata();
+    this.isBrowser = isPlatformBrowser(this.platformId);
   }
 
-  ngOnInit(): void {
-    this.window = window;
-    this.route.queryParams.subscribe(params => {
-      // Update current page based on query parameter
+  async ngOnInit(): Promise<void> {
+    if (this.isBrowser) {
+      // Dynamically load ngx-masonry only in the browser
+      const masonryModule = await import('ngx-masonry');
+      // You can use masonryModule.NgxMasonryModule as needed
+    }
+
+    this.route.queryParams.subscribe((params) => {
       this.currentPage = +params['page'] || 1;
       this.getAllPosts();
       this.getTotalPostLength();
@@ -39,23 +51,33 @@ export class ImageListComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit(): void {
-    // Any initialization after view initialization
+    setTimeout(() => {
+      if (this.isBrowser) {
+        const masonryGrid = document.getElementById("masonry-grid");
+        this.masonryInstance = new Masonry(masonryGrid, {
+          itemSelector: '.masonry-box',
+          percentPosition: true
+        });
+      };
+    }, 1500);
   }
 
   getAllPosts(): void {
-    this.PS.getAllPosts(this.currentPage)
-      .subscribe(posts => {
-        this.posts = posts;
-        console.log(this.posts)
-      });
+    this.PS.getAllPosts(this.currentPage).subscribe((posts) => {
+      this.posts = posts;
+      this.generateImageUrls();
+    });
+  }
+
+  generateImageUrls(): void {
+    this.imageUrls = this.posts.map(() => this.getRandomImage(1080, 1920));
   }
 
   getTotalPostLength(): void {
-    this.PS.getTotalPostLength()
-      .subscribe(data => {
-        this.totalLength = data.totalLength;
-        this.calculateTotalPages();
-      });
+    this.PS.getTotalPostLength().subscribe((data) => {
+      this.totalLength = data.totalLength;
+      this.calculateTotalPages();
+    });
   }
 
   calculateTotalPages(): void {
@@ -64,7 +86,7 @@ export class ImageListComponent implements OnInit, AfterViewInit {
   }
 
   onPageChange(pageNumber: number): void {
-    if (this.currentPage === pageNumber) { return }
+    if (this.currentPage === pageNumber) return;
     this.currentPage = pageNumber;
     this.updateUrlParams();
   }
@@ -77,11 +99,27 @@ export class ImageListComponent implements OnInit, AfterViewInit {
     this.router.navigate([], {
       relativeTo: this.route,
       queryParams: { page: this.currentPage },
-      queryParamsHandling: 'merge' // Merge with existing query params
+      queryParamsHandling: 'merge'
     });
   }
+
   isAdmin(): boolean {
-    return this.authService.hasRole(['admin', 'master'])
+    return this.authService.hasRole(['admin', 'master']);
   }
 
+  getRandomImage(min: number, max: number): string {
+    return (
+      'https://dummyimage.com/' +
+      (Math.floor(Math.random() * (max - min + 1)) + min) +
+      'x' +
+      (Math.floor(Math.random() * (max - min + 1)) + min) +
+      '/F5F5F5/000'
+    );
+  }
+  onSvgLoad(): void {
+    // Call layout on Masonry instance to update the grid
+    if (this.masonryInstance) {
+      this.masonryInstance.layout();
+    }
+  }
 }

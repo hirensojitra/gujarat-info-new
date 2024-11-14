@@ -34,6 +34,7 @@ export class SvgResponseDirective implements OnChanges, AfterViewInit {
   @Input() loadOnly: boolean = false;
   @Output() dataChanges = new EventEmitter<{ data: Data, index: number }>();
   @Output() getSelected = new EventEmitter<{ index: number }>();
+  @Output() backgroundLoaded = new EventEmitter<void>();
   formGroupValueChanges: Subject<any> = new Subject<any>();
   private eventListeners: (() => void)[] = [];
   private previousFormGroupValue: any;
@@ -182,6 +183,7 @@ export class SvgResponseDirective implements OnChanges, AfterViewInit {
     if (backgroundurl) {
       const svg = this.el.nativeElement;
       const background = await this.getImageDataUrl(backgroundurl);
+      this.backgroundLoaded.emit();
       const b = this.renderer.createElement('image', 'http://www.w3.org/2000/svg');
       this.renderer.setAttribute(b, 'x', '0');
       this.renderer.setAttribute(b, 'data-type', 'background-img');
