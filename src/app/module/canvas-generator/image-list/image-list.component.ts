@@ -7,7 +7,7 @@ import {
   Optional
 } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, NavigationExtras, Router, UrlTree } from '@angular/router';
 import { PostDetails } from 'src/app/common/interfaces/image-element';
 import { AuthService } from 'src/app/common/services/auth.service';
 import { PostDetailService } from 'src/app/common/services/post-detail.service';
@@ -121,5 +121,17 @@ export class ImageListComponent implements OnInit, AfterViewInit {
     if (this.masonryInstance) {
       this.masonryInstance.layout();
     }
+  }
+  navigateToEdit(postId: string): void {
+    const navigationExtras: NavigationExtras = {
+      queryParams: { img: postId }
+    };
+
+    // Generate the URL using the Angular Router's `createUrlTree`
+    const urlTree: UrlTree = this.router.createUrlTree(['/images/generate'], navigationExtras);
+    const url: string = this.router.serializeUrl(urlTree);
+
+    // Open the URL in a new tab or window
+    window.open(url, '_blank');
   }
 }
