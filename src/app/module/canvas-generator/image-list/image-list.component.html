@@ -3,13 +3,25 @@
         <div class="position-absolute h-100 w-100 d-flex overflow-auto flex-column">
             <div class="container h-100 w-100">
                 <div class="row g-3">
-                    <div class="col-12 pb-3">
+                    <div class="col-6 pb-3">
                         <button class="btn btn-success" [routerLink]="'/images/generate'" target="_blank" type="button"><i class="fa fa-plus me-2"></i>Image</button>
                     </div>
-                    {{this.deviceInfo|json}}
+                    <div class="col-6 pb-3">
+                        <div class="search-sort-container">
+                            <input [(ngModel)]="search" placeholder="Search posts" (input)="changePage(1)" />
+                            <select [(ngModel)]="sortBy" (change)="changePage(1)">
+                                <option value="created_at">Date Created</option>
+                                <option value="title">Title</option>
+                            </select>
+                            <select [(ngModel)]="order" (change)="changePage(1)">
+                                <option value="asc">Ascending</option>
+                                <option value="desc">Descending</option>
+                            </select>
+                        </div>
+                    </div>
                     <ng-container *ngIf="posts.length">
                         <div class="col-12 px-md-3 px-2">
-                            <div class="row g-md-3 g-2" data-masonry="{'percentPosition': true }" id="masonry-grid">
+                            <div class="row g-md-3 g-2" #masonryGrid data-masonry="{'percentPosition': true}">
                                 <div class="col-lg-2 col-md-3 col-sm-4 col-6 masonry-box" *ngFor="let post of posts; let i= index">
                                     <div class="position-relative border p-1">
                                         <svg class="svg-content max-w-100-p max-h-100-p img-fluid d-block m-1" preserveAspectRatio="xMidYMid meet" svgDraw [postDataSet]="post" [loadOnly]="true" (backgroundLoaded)="onSvgLoad()"></svg>
@@ -29,18 +41,10 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-12">
-                            <div class="btn-group btn-group-toggle py-3">
-                                <button class="btn btn-outline-dark" (click)="onPageChange(1)" [disabled]="currentPage === 1">First</button>
-                                <button class="btn btn-outline-dark" (click)="onPageChange(currentPage - 1)" [disabled]="currentPage === 1">Previous</button>
-                                <button class="btn" *ngFor="let page of getPaginationControls()" (click)="onPageChange(page)" [ngClass]="{'btn-outline-dark': page !== currentPage, 'btn-outline-primary active': page === currentPage}">
-                                    {{ page }}
-                                </button>
-                                <button class="btn btn-outline-dark" (click)="onPageChange(currentPage + 1)" [disabled]="currentPage === totalPages">Next</button>
-                                <button class="btn btn-outline-dark" (click)="onPageChange(totalPages)" [disabled]="currentPage === totalPages">Last</button>
-                            </div>
-                        </div>
+
                     </ng-container>
+                </div>
+                <div pagination [currentPage]="currentPage" [totalItems]="pagination.totalPosts" [pageSize]="limit" [pageSizes]="[12, 24, 48]" (currentPageChange)="changePage($event)" (pageSizeChange)="changePageSize($event)" class="mt-0 mb-0 px-3">
                 </div>
             </div>
         </div>

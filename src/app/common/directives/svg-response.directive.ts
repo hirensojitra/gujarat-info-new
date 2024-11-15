@@ -57,13 +57,18 @@ export class SvgResponseDirective implements OnChanges, AfterViewInit {
     this.apiData = {};
     this.subscription = new Subscription();
   }
-  ngAfterViewInit(): void {
+  async ngAfterViewInit(): Promise<void> {
     this.postDataSet$.pipe(
       takeUntil(this.destroy$)
     ).subscribe(async (value: PostDetails) => {
       this.drawSVG(value)
     })
-    this.loadOnly && this.drawSVG(this.postData)
+    if (this.loadOnly) {
+      await this.drawSVG(this.postData);
+      setTimeout(() => {
+        this.backgroundLoaded.emit();
+      }, 100);
+    }
   }
   private async drawSVG(value: PostDetails) {
     const currentValue: Partial<PostDetails> = value;
@@ -201,9 +206,6 @@ export class SvgResponseDirective implements OnChanges, AfterViewInit {
       } else {
         svg.appendChild(b);
       }
-      setTimeout(() => {
-        this.backgroundLoaded.emit();
-      }, 100);
     }
   }
 

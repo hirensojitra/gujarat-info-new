@@ -4,7 +4,10 @@ import {
   OnInit,
   Inject,
   PLATFORM_ID,
-  Optional
+  ElementRef,
+  ViewChild,
+  Renderer2,
+  ChangeDetectorRef,
 } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { ActivatedRoute, NavigationExtras, Router, UrlTree } from '@angular/router';
@@ -12,107 +15,131 @@ import { PostDetails } from 'src/app/common/interfaces/image-element';
 import { AuthService } from 'src/app/common/services/auth.service';
 import { PostDetailService } from 'src/app/common/services/post-detail.service';
 import { PlatformService } from 'src/app/common/services/platform.service';
+
 declare const Masonry: any;
+
 @Component({
   selector: 'app-image-list',
   templateUrl: './image-list.component.html',
-  styleUrls: ['./image-list.component.scss']
+  styleUrls: ['./image-list.component.scss'],
 })
 export class ImageListComponent implements OnInit, AfterViewInit {
   posts: PostDetails[] = [];
-  imageUrls: string[] = [];
   currentPage: number = 1;
-  totalPages: number = 0;
-  totalLength: number = 0;
+  limit: number = 12;
+  search: string = '';
+  sortBy: string = 'created_at';
+  order: string = 'desc';
+  pagination: any = { totalPosts: 0, currentPage: 1, totalPages: 0 };
   isBrowser: boolean;
-  deviceId: string | null = null;
   private masonryInstance: any;
+
+  @ViewChild('masonryGrid', { static: false }) masonryGridRef!: ElementRef;
+
   constructor(
     private PS: PostDetailService,
     private route: ActivatedRoute,
     private router: Router,
     private authService: AuthService,
     @Inject(PLATFORM_ID) private platformId: Object,
+    private cdr: ChangeDetectorRef,
     private platformService: PlatformService
   ) {
     this.isBrowser = isPlatformBrowser(this.platformId);
-
-    this.loadDeviceId();
   }
-  deviceFingerprint: any;
-  deviceInfo: any;
-  async ngOnInit(): Promise<void> {
-    if (this.isBrowser) {
-      // Dynamically load ngx-masonry only in the browser
-      const masonryModule = await import('ngx-masonry');
-      // You can use masonryModule.NgxMasonryModule as needed
-    }
 
-    this.route.queryParams.subscribe((params) => {
+  async ngOnInit(): Promise<void> {
+    this.route.queryParams.subscribe(async (params) => {
       this.currentPage = +params['page'] || 1;
-      this.getAllPosts();
-      this.getTotalPostLength();
+      this.limit = +params['limit'] || this.limit;
+      this.search = params['search'] || this.search;
+      this.sortBy = params['sortBy'] || this.sortBy;
+      this.order = params['order'] || this.order;
+      await this.getAllPosts();
     });
-    this.deviceFingerprint = await this.platformService.getDeviceFingerprint();
-    console.log('Device Fingerprint Information:', this.deviceFingerprint);
-    this.deviceInfo = this.platformService.getDeviceInfo();
-    console.log('Device Information:', this.deviceInfo);
   }
 
   ngAfterViewInit(): void {
-    setTimeout(() => {
-      if (this.isBrowser) {
-        const masonryGrid = document.getElementById("masonry-grid");
-        this.masonryInstance = new Masonry(masonryGrid, {
-          itemSelector: '.masonry-box',
-          percentPosition: true
-        });
-      };
-    }, 1500);
+    if (this.isBrowser) {
+      this.initializeMasonry();
+      window.addEventListener('resize', () => {
+        if (this.masonryInstance) {
+          this.masonryInstance.layout();
+        }
+      });
+    }
   }
+
+  private initializeMasonry(): void {
+    if (this.masonryGridRef && this.isBrowser) {
+      console.log('Initializing Masonry:', this.masonryGridRef.nativeElement);
+      this.masonryInstance = new Masonry(this.masonryGridRef.nativeElement, {
+        itemSelector: '.masonry-box',
+        percentPosition: true,
+      });
+    } else {
+      console.warn('Masonry grid reference is undefined.');
+    }
+  }
+  deviceId: any;
   private async loadDeviceId(): Promise<void> {
     if (this.isBrowser) {
       this.deviceId = await this.platformService.getDeviceId();
       console.log('Device ID:', this.deviceId);
     }
   }
-  getAllPosts(): void {
-    this.PS.getAllPosts(this.currentPage).subscribe((posts) => {
-      this.posts = posts;
-      this.generateImageUrls();
+
+  private async getAllPosts(): Promise<void> {
+    this.PS.getAllPosts({
+      page: this.currentPage,
+      limit: this.limit,
+      search: this.search,
+      sortBy: this.sortBy,
+      order: this.order,
+    }).subscribe((response) => {
+      this.posts = response.posts;
+      this.pagination = response.pagination;
+
+      // Trigger DOM updates and Masonry initialization
+      this.cdr.detectChanges();
+      setTimeout(() => {
+        if (this.masonryInstance) {
+          this.masonryInstance.reloadItems();
+          this.masonryInstance.layout();
+        } else {
+          this.initializeMasonry();
+        }
+      }, 100);
     });
   }
 
-  generateImageUrls(): void {
-    this.imageUrls = this.posts.map(() => this.getRandomImage(1080, 1920));
+  changePage(page: number): void {
+    if (this.currentPage != page) {
+      this.currentPage = page;
+      this.updateUrlParams();
+      this.getAllPosts();
+    }
   }
 
-  getTotalPostLength(): void {
-    this.PS.getTotalPostLength().subscribe((data) => {
-      this.totalLength = data.totalLength;
-      this.calculateTotalPages();
-    });
-  }
-
-  calculateTotalPages(): void {
-    const postLimitPerPage = 12;
-    this.totalPages = Math.ceil(this.totalLength / postLimitPerPage);
-  }
-
-  onPageChange(pageNumber: number): void {
-    if (this.currentPage === pageNumber) return;
-    this.currentPage = pageNumber;
-    this.updateUrlParams();
-  }
-
-  getPaginationControls(): number[] {
-    return Array.from({ length: this.totalPages }, (_, index) => index + 1);
+  changePageSize(newLimit: number): void {
+    if (this.limit != newLimit) {
+      this.limit = newLimit;
+      this.currentPage = 1;
+      this.updateUrlParams();
+      this.getAllPosts();
+    }
   }
 
   updateUrlParams(): void {
     this.router.navigate([], {
       relativeTo: this.route,
-      queryParams: { page: this.currentPage },
+      queryParams: {
+        page: this.currentPage,
+        limit: this.limit,
+        search: this.search,
+        sortBy: this.sortBy,
+        order: this.order
+      },
       queryParamsHandling: 'merge'
     });
   }
@@ -131,21 +158,17 @@ export class ImageListComponent implements OnInit, AfterViewInit {
     );
   }
   onSvgLoad(): void {
-    // Call layout on Masonry instance to update the grid
-    if (this.masonryInstance) {
-      this.masonryInstance.layout();
+    if (this.masonryInstance && this.isBrowser) {
+      window.dispatchEvent(new Event('resize'));
     }
   }
+
   navigateToEdit(postId: string): void {
     const navigationExtras: NavigationExtras = {
       queryParams: { img: postId }
     };
-
-    // Generate the URL using the Angular Router's `createUrlTree`
     const urlTree: UrlTree = this.router.createUrlTree(['/images/generate'], navigationExtras);
     const url: string = this.router.serializeUrl(urlTree);
-
-    // Open the URL in a new tab or window
     window.open(url, '_blank');
   }
 }

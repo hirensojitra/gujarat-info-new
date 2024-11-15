@@ -40,13 +40,13 @@ export class PlatformService {
     if (this.isBrowser()) {
       const userAgent = navigator.userAgent;
       const deviceInfo = this.deviceDetector.parse(userAgent);
-
-      // Return a custom object with the desired details
-      return {
-        device: deviceInfo.device, // e.g., device type, brand, model
-        os: deviceInfo.os,         // e.g., OS name, version
-        client: deviceInfo.client  // e.g., browser name, version
-      };
+      if (deviceInfo.device.type === 'desktop') {
+        return {
+          ...deviceInfo,
+          additionalPlatformInfo: navigator.platform || 'unknown'
+        };
+      }
+      return deviceInfo;
     }
     return null;
   }

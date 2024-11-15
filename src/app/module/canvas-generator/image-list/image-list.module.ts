@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { ImageListRoutingModule } from './image-list-routing.module';
 import { ImageListComponent } from './image-list.component';
 import { SharedModule } from 'src/app/common/shared/shared.module';
+import { FormsModule } from '@angular/forms';
 
 
 @NgModule({
@@ -13,7 +14,8 @@ import { SharedModule } from 'src/app/common/shared/shared.module';
   imports: [
     CommonModule,
     ImageListRoutingModule,
-    SharedModule
+    SharedModule,
+    FormsModule
   ]
 })
 export class ImageListModule { }

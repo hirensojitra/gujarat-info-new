@@ -30,8 +30,7 @@ export class UsersComponent implements OnInit {
       (response) => {
         this.users = response.users;
         this.pagination = response.pagination;
-        console.log(response.pagination)
-        this.currentPage = response.pagination.currentPage; // Update current page
+        this.currentPage = response.pagination.currentPage;
       },
       (error) => {
         this.toastService.show(error.error.error, { class: 'bg-danger', title: 'Error fetching users:' });
