@@ -6,6 +6,7 @@
                     <div class="col-12 pb-3">
                         <button class="btn btn-success" [routerLink]="'/images/generate'" target="_blank" type="button"><i class="fa fa-plus me-2"></i>Image</button>
                     </div>
+                    {{this.deviceInfo|json}}
                     <ng-container *ngIf="posts.length">
                         <div class="col-12 px-md-3 px-2">
                             <div class="row g-md-3 g-2" data-masonry="{'percentPosition': true }" id="masonry-grid">

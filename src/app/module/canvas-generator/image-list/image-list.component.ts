@@ -11,6 +11,7 @@ import { ActivatedRoute, NavigationExtras, Router, UrlTree } from '@angular/rout
 import { PostDetails } from 'src/app/common/interfaces/image-element';
 import { AuthService } from 'src/app/common/services/auth.service';
 import { PostDetailService } from 'src/app/common/services/post-detail.service';
+import { PlatformService } from 'src/app/common/services/platform.service';
 declare const Masonry: any;
 @Component({
   selector: 'app-image-list',
@@ -24,18 +25,22 @@ export class ImageListComponent implements OnInit, AfterViewInit {
   totalPages: number = 0;
   totalLength: number = 0;
   isBrowser: boolean;
-
+  deviceId: string | null = null;
   private masonryInstance: any;
   constructor(
     private PS: PostDetailService,
     private route: ActivatedRoute,
     private router: Router,
     private authService: AuthService,
-    @Inject(PLATFORM_ID) private platformId: Object
+    @Inject(PLATFORM_ID) private platformId: Object,
+    private platformService: PlatformService
   ) {
     this.isBrowser = isPlatformBrowser(this.platformId);
-  }
 
+    this.loadDeviceId();
+  }
+  deviceFingerprint: any;
+  deviceInfo: any;
   async ngOnInit(): Promise<void> {
     if (this.isBrowser) {
       // Dynamically load ngx-masonry only in the browser
@@ -48,6 +53,10 @@ export class ImageListComponent implements OnInit, AfterViewInit {
       this.getAllPosts();
       this.getTotalPostLength();
     });
+    this.deviceFingerprint = await this.platformService.getDeviceFingerprint();
+    console.log('Device Fingerprint Information:', this.deviceFingerprint);
+    this.deviceInfo = this.platformService.getDeviceInfo();
+    console.log('Device Information:', this.deviceInfo);
   }
 
   ngAfterViewInit(): void {
@@ -61,7 +70,12 @@ export class ImageListComponent implements OnInit, AfterViewInit {
       };
     }, 1500);
   }
-
+  private async loadDeviceId(): Promise<void> {
+    if (this.isBrowser) {
+      this.deviceId = await this.platformService.getDeviceId();
+      console.log('Device ID:', this.deviceId);
+    }
+  }
   getAllPosts(): void {
     this.PS.getAllPosts(this.currentPage).subscribe((posts) => {
       this.posts = posts;
