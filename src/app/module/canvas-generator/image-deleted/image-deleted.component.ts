@@ -40,7 +40,6 @@ export class ImageDeletedComponent implements OnInit, AfterViewInit {
   }
 
   ngOnInit(): void {
-    this.window = window;
 
     // Initialize query parameters
     this.route.queryParams.subscribe(params => {
@@ -48,6 +47,7 @@ export class ImageDeletedComponent implements OnInit, AfterViewInit {
       this.limit = +params['limit'] || this.limit;
       this.loadPosts();
     });
+    this.window = window;
 
     // Initialize Bootstrap modals
     this.confirmRecover = new bootstrap.Modal(document.getElementById('confirmRecover')!, {});
