@@ -1,8 +1,11 @@
-import { AfterViewInit, Component, OnInit } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { AfterViewInit, Component, OnInit, ViewChild, ElementRef, Inject, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { PostDetails } from 'src/app/common/interfaces/image-element';
 import { PostDetailService } from 'src/app/common/services/post-detail.service';
+import { ActivatedRoute, Router } from '@angular/router';
+
 declare const bootstrap: any;
+declare const Masonry: any;
 
 @Component({
   selector: 'app-image-deleted',
@@ -14,50 +17,75 @@ export class ImageDeletedComponent implements OnInit, AfterViewInit {
   posts: PostDetails[] = [];
   currentPage: number = 1;
   totalPages: number = 0;
-  totalLength: number = 0;
+  totalPosts: number = 0;
+  limit: number = 12;
+  isBrowser: boolean;
   window!: Window & typeof globalThis;
 
   confirmRecover: any;
   hardDeleteModal: any;
   selectedID: string | undefined;
+  post_msg = 'Loading deleted posts';
+
+  @ViewChild('masonryGrid', { static: false }) masonryGridRef!: ElementRef;
+  private masonryInstance: any;
 
   constructor(
     private PS: PostDetailService,
     private route: ActivatedRoute,
-    private router: Router
-  ) { }
+    private router: Router,
+    @Inject(PLATFORM_ID) private platformId: Object
+  ) {
+    this.isBrowser = isPlatformBrowser(this.platformId);
+  }
 
   ngOnInit(): void {
     this.window = window;
+
+    // Initialize query parameters
     this.route.queryParams.subscribe(params => {
       this.currentPage = +params['page'] || 1;
-      this.getAllPosts();
-      this.getTotalPostLength();
+      this.limit = +params['limit'] || this.limit;
+      this.loadPosts();
     });
-    this.confirmRecover = new bootstrap.Modal(document.getElementById('confirmRecover')!, { focus: false, keyboard: false, static: false });
-    this.confirmRecover._element.addEventListener('hide.bs.modal', () => {
-    });
-    this.confirmRecover._element.addEventListener('hidden.bs.modal', () => {
-      this.selectedID = undefined;
-    });
-    this.confirmRecover._element.addEventListener('show.bs.modal', () => {
 
-    });
-    this.confirmRecover._element.addEventListener('shown.bs.modal', () => {
-    });
-    this.hardDeleteModal = new bootstrap.Modal(document.getElementById('hardDeleteModal')!, { focus: false, keyboard: false, static: false });
-    this.hardDeleteModal._element.addEventListener('hide.bs.modal', () => {
-    });
-    this.hardDeleteModal._element.addEventListener('hidden.bs.modal', () => {
-      this.selectedID = undefined;
-    });
-    this.hardDeleteModal._element.addEventListener('show.bs.modal', () => {
+    // Initialize Bootstrap modals
+    this.confirmRecover = new bootstrap.Modal(document.getElementById('confirmRecover')!, {});
+    this.hardDeleteModal = new bootstrap.Modal(document.getElementById('hardDeleteModal')!, {});
+  }
 
-    });
-    this.hardDeleteModal._element.addEventListener('shown.bs.modal', () => {
+  ngAfterViewInit(): void {
+    if (this.isBrowser) {
+      window.addEventListener('resize', () => {
+        if (this.masonryInstance) {
+          this.masonryInstance.layout();
+        }
+      });
+    }
+  }
+
+  loadPosts(): void {
+    this.PS.getAllSoftDeletedPosts({
+      page: this.currentPage,
+      limit: this.limit
+    }).subscribe(response => {
+      this.posts = response.posts;
+      this.totalPosts = response.pagination.totalPosts;
+      this.totalPages = Math.ceil(this.totalPosts / this.limit);
+      setTimeout(() => this.initializeMasonry(), 0);
+      this.post_msg = 'No deleted posts available.';
     });
   }
-  ngAfterViewInit(): void { }
+
+  private initializeMasonry(): void {
+    if (this.masonryGridRef) {
+      this.masonryInstance = new Masonry(this.masonryGridRef.nativeElement, {
+        itemSelector: '.col-lg-2',
+        columnWidth: '.col-lg-2',
+        percentPosition: true
+      });
+    }
+  }
 
   selectRecoverId(id: any) {
     this.selectedID = id;
@@ -69,59 +97,42 @@ export class ImageDeletedComponent implements OnInit, AfterViewInit {
     id && this.hardDeleteModal.show();
   }
 
-  getAllPosts(): void {
-    this.PS.getAllSoftDeletedPosts(this.currentPage)
-      .subscribe(posts => {
-        this.posts = posts;
-        console.log(this.posts)
-      });
-  }
-
-  getTotalPostLength(): void {
-    this.PS.getTotalPostLength()
-      .subscribe(data => {
-        this.totalLength = data.totalLength;
-        this.calculateTotalPages();
-      });
-  }
-
   recoverPost(): void {
     this.selectedID && this.PS.recoverPost(this.selectedID)
-      .subscribe(
-        response => {
-          console.log('Restored successful:', response);
-          this.confirmRecover.hide();
-          this.getAllPosts();
-        },
-        error => {
-          console.error('Error during Restore:', error);
-        }
-      );
+      .subscribe(() => {
+        this.confirmRecover.hide();
+        this.loadPosts();
+      });
   }
 
   hardDelete(): void {
     this.selectedID && this.PS.hardDeletePost(this.selectedID)
-      .subscribe(
-        response => {
-          console.log('Hard deletion successful:', response);
-          this.hardDeleteModal.hide();
-          window.close();
-        },
-        error => {
-          console.error('Error during hard deletion:', error);
-        }
-      );
-  }
-
-  calculateTotalPages(): void {
-    const postLimitPerPage = 12;
-    this.totalPages = Math.ceil(this.totalLength / postLimitPerPage);
+      .subscribe(() => {
+        this.hardDeleteModal.hide();
+        this.loadPosts();
+      });
   }
 
   onPageChange(pageNumber: number): void {
-    if (this.currentPage == pageNumber) { return }
-    this.currentPage = pageNumber;
-    this.updateUrlParams();
+    if (this.currentPage !== pageNumber) {
+      this.currentPage = pageNumber;
+      this.updateUrlParams();
+    }
+  }
+
+  changePage(newPage: number): void {
+    if (this.currentPage != newPage) {
+      this.currentPage = newPage;
+      this.loadPosts();
+    }
+  }
+
+  changePageSize(newSize: number): void {
+    if (this.limit != newSize) {
+      this.limit = newSize;
+      this.currentPage = 1; // Reset to the first page
+      this.loadPosts();
+    }
   }
 
   getPaginationControls(): number[] {
@@ -130,9 +141,13 @@ export class ImageDeletedComponent implements OnInit, AfterViewInit {
 
   updateUrlParams(): void {
     this.router.navigate([], {
-      relativeTo: this.route,
-      queryParams: { page: this.currentPage },
+      queryParams: { page: this.currentPage, limit: this.limit },
       queryParamsHandling: 'merge'
     });
+  }
+  onSvgLoad(): void {
+    if (this.masonryInstance && this.isBrowser) {
+      window.dispatchEvent(new Event('resize'));
+    }
   }
 }

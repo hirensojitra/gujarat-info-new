@@ -63,9 +63,24 @@ export class PostDetailService {
         return this.http.get<any>(`${this.baseUrl}/update-download-counter/${id}`);
     }
 
-    getAllSoftDeletedPosts(page: number): Observable<PostDetails[]> {
-        return this.http.get<PostDetails[]>(`${this.baseUrl}/soft-deleted/?page=${page}`);
+    getAllSoftDeletedPosts(params: { page: number, limit?: number, search?: string, sortBy?: string, order?: string }): Observable<{ posts: PostDetails[], pagination: any }> {
+        // Build the query string from parameters
+        const queryParams = new HttpParams()
+            .set('page', params.page.toString())
+            .set('limit', (params.limit || 12).toString())
+            .set('search', params.search || '')
+            .set('sortBy', params.sortBy || 'created_at')
+            .set('order', params.order || 'desc');
+
+        // Construct the full URL for logging
+        const fullUrl = `${this.baseUrl}/soft-deleted?${queryParams.toString()}`;
+        console.log('Full URL:', fullUrl);
+
+        // Make the HTTP GET request with the constructed query string
+        return this.http.get<{ posts: PostDetails[], pagination: any }>(fullUrl);
     }
+
+
 
     getTotalPostLength(): Observable<{ totalLength: number }> {
         return this.http.get<{ totalLength: number }>(`${this.baseUrl}/post-length`);
