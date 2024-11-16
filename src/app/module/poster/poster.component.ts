@@ -625,7 +625,8 @@ export class PosterComponent implements OnInit {
     }
     this.downloaded = false;
     this.canDownload = false;
-    this.formData.reset();
+    this.formData.reset({}, { emitEvent: false });
+
     for (const key in this.selectData) {
       const data = this.selectData[key];
       if (data.dependency === 'none') {
@@ -689,25 +690,25 @@ export class PosterComponent implements OnInit {
     for (const key in selectData) {
       const s = selectData[key];
       console.log('Processing:', key); // Debugging log
-    
+
       // Ensure the dependency exists and has a control
       if (
         selectData[key].dependency !== 'none' &&
         selectData[key].dependency in selectData && // Check if dependency exists in selectData
         selectData[selectData[key].dependency].control // Ensure control exists
       ) {
-        console.log('In Dependency Handling:', key, selectData[key].dependency);
-        
         selectData[selectData[key].dependency].control.valueChanges.subscribe(async (value) => {
-          const dependentApi = `${s.api}${value}`;
-          console.log('Fetching data from API:', dependentApi); // Debugging log
-          await this.fetchDataFromAPI(dependentApi, key);
+          if (value) {
+            const dependentApi = `${s.api}${value}`;
+            console.log('Fetching data from API:', dependentApi); // Debugging log
+            await this.fetchDataFromAPI(dependentApi, key);
+          }
         });
       } else {
         console.warn(`Dependency "${selectData[key].dependency}" for "${key}" is invalid or not found.`);
       }
     }
-    
+
   }
   textFormat(text: string): string[] {
     const formattedText = text.replace(/\n/g, '\n').replace(/\n(?!\*{3})/g, '***\n');
@@ -768,8 +769,9 @@ export class PosterComponent implements OnInit {
   }
   async fetchDataFromAPI(apiUrl: string, controlName: string): Promise<void> {
     try {
+      const id = this.getIdByControlName(controlName);
       const data = await this.http.get<any[]>(apiUrl).toPromise();
-      if (controlName && data) { this.apiData[controlName] = data; } else { this.apiData[controlName] = [] }
+      if (controlName && data) { this.apiData[controlName] = data;} else { this.apiData[controlName] = [] }
     } catch (error) {
       console.error('Error fetching data from API:', error);
     }
@@ -797,7 +799,8 @@ export class PosterComponent implements OnInit {
       });
       await this.drawSVG();
       this.canDownload = true;
-      this.formData.reset();
+      this.formData.reset({}, { emitEvent: false });
+
     }
   }
   onFileChange(event: any, fieldName: string, index: string): void {
@@ -818,7 +821,6 @@ export class PosterComponent implements OnInit {
             let w = 320;
             let cH = 320;
             let cW = 320;
-            console.log(this.postDetails?.data, index)
             if (this.postDetails?.data[i].image) {
               const newWH = this.commonService.calculateWH(imageData as ImageElement)
               w = newWH.w;
@@ -859,7 +861,8 @@ export class PosterComponent implements OnInit {
   }
   resetForm() {
     this.canDownload = false;
-    this.formData.reset();
+    this.formData.reset({}, { emitEvent: false });
+
   }
   async checkDownload(t: string): Promise<boolean> {
     const baseUrl = `${this.baseUrl}poster/${this.postDetails?.id}`;
@@ -1170,5 +1173,9 @@ export class PosterComponent implements OnInit {
         }
       }
     }
+  }
+  getIdByControlName(controlName: string): string | null {
+    const item = this.dataset.find((field: any) => field.controlName === controlName);
+    return item ? item.id : null;
   }
 }
