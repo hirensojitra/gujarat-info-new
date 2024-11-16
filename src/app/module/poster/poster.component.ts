@@ -687,14 +687,27 @@ export class PosterComponent implements OnInit {
       }
     });
     for (const key in selectData) {
-      const s = selectData[key]
-      if (selectData[key].dependency !== 'none' && selectData[selectData[key].dependency].control) {
-        selectData[selectData[key].dependency].control.valueChanges.subscribe(async value => {
+      const s = selectData[key];
+      console.log('Processing:', key); // Debugging log
+    
+      // Ensure the dependency exists and has a control
+      if (
+        selectData[key].dependency !== 'none' &&
+        selectData[key].dependency in selectData && // Check if dependency exists in selectData
+        selectData[selectData[key].dependency].control // Ensure control exists
+      ) {
+        console.log('In Dependency Handling:', key, selectData[key].dependency);
+        
+        selectData[selectData[key].dependency].control.valueChanges.subscribe(async (value) => {
           const dependentApi = `${s.api}${value}`;
+          console.log('Fetching data from API:', dependentApi); // Debugging log
           await this.fetchDataFromAPI(dependentApi, key);
-        })
+        });
+      } else {
+        console.warn(`Dependency "${selectData[key].dependency}" for "${key}" is invalid or not found.`);
       }
     }
+    
   }
   textFormat(text: string): string[] {
     const formattedText = text.replace(/\n/g, '\n').replace(/\n(?!\*{3})/g, '***\n');
