@@ -689,8 +689,6 @@ export class PosterComponent implements OnInit {
     });
     for (const key in selectData) {
       const s = selectData[key];
-      console.log('Processing:', key); // Debugging log
-
       // Ensure the dependency exists and has a control
       if (
         selectData[key].dependency !== 'none' &&
@@ -700,7 +698,6 @@ export class PosterComponent implements OnInit {
         selectData[selectData[key].dependency].control.valueChanges.subscribe(async (value) => {
           if (value) {
             const dependentApi = `${s.api}${value}`;
-            console.log('Fetching data from API:', dependentApi); // Debugging log
             await this.fetchDataFromAPI(dependentApi, key);
           }
         });
