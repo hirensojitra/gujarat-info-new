@@ -104,6 +104,14 @@ const routes: Routes = [
     ],
   },
   {
+    path: 'latest',
+    component: LayoutComponent,
+    data: { layout: 'empty-layout' },
+    children: [
+      { path: '', loadChildren: () => import('./module/latest/latest.module').then(m => m.LatestModule) }
+    ],
+  },
+  {
     path: 'verify-email',
     component: LayoutComponent,
     data: { layout: 'empty-layout' },
@@ -123,7 +131,7 @@ const routes: Routes = [
   // Redirect unmatched paths to auth
   {
     path: '**',
-    redirectTo: 'auth/login',
+    redirectTo: 'latest',
     pathMatch: 'full',
   }
 ];

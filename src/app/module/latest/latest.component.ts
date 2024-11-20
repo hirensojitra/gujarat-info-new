@@ -1,29 +1,17 @@
-import {
-  AfterViewInit,
-  Component,
-  OnInit,
-  Inject,
-  PLATFORM_ID,
-  ElementRef,
-  ViewChild,
-  Renderer2,
-  ChangeDetectorRef,
-} from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
+import { ChangeDetectorRef, Component, ElementRef, Inject, PLATFORM_ID, ViewChild } from '@angular/core';
 import { ActivatedRoute, NavigationExtras, Router, UrlTree } from '@angular/router';
 import { PostDetails } from 'src/app/common/interfaces/image-element';
 import { AuthService } from 'src/app/common/services/auth.service';
-import { PostDetailService } from 'src/app/common/services/post-detail.service';
 import { PlatformService } from 'src/app/common/services/platform.service';
-
+import { PostDetailService } from 'src/app/common/services/post-detail.service';
 declare const Masonry: any;
-
 @Component({
-  selector: 'app-image-list',
-  templateUrl: './image-list.component.html',
-  styleUrls: ['./image-list.component.scss'],
+  selector: 'app-latest',
+  templateUrl: './latest.component.html',
+  styleUrl: './latest.component.scss'
 })
-export class ImageListComponent implements OnInit, AfterViewInit {
+export class LatestComponent {
   posts: PostDetails[] = [];
   currentPage: number = 1;
   limit: number = 12;
@@ -145,28 +133,11 @@ export class ImageListComponent implements OnInit, AfterViewInit {
   isAdmin(): boolean {
     return this.authService.hasRole(['admin', 'master']);
   }
-
-  getRandomImage(min: number, max: number): string {
-    return (
-      'https://dummyimage.com/' +
-      (Math.floor(Math.random() * (max - min + 1)) + min) +
-      'x' +
-      (Math.floor(Math.random() * (max - min + 1)) + min) +
-      '/F5F5F5/000'
-    );
-  }
   onSvgLoad(): void {
     if (this.masonryInstance && this.isBrowser) {
       window.dispatchEvent(new Event('resize'));
     }
   }
 
-  navigateToEdit(postId: string): void {
-    const navigationExtras: NavigationExtras = {
-      queryParams: { img: postId }
-    };
-    const urlTree: UrlTree = this.router.createUrlTree(['/images/generate'], navigationExtras);
-    const url: string = this.router.serializeUrl(urlTree);
-    window.open(url, '_blank');
-  }
+
 }

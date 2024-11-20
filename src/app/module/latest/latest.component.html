@@ -1,0 +1,34 @@
+<div class="h-100-vh d-flex flex-column" *ngIf="isBrowser">
+    <div class="flex-grow-1 position-relative overflow-hidden">
+        <div class="position-absolute h-100 w-100 d-flex overflow-auto flex-column">
+            <div class="container h-100 w-100 py-3">
+                <div class="row g-3">
+                    <ng-container *ngIf="posts.length">
+                        <div class="col-12 px-md-3 px-2">
+                            <div class="row g-md-3 g-2" #masonryGrid data-masonry="{'percentPosition': true}">
+                                <div class="col-lg-4 col-md-6 col-sm-4 col-3 masonry-box"
+                                    *ngFor="let post of posts; let i= index">
+                                    <a class="position-relative border p-1 text-decoration-none d-block" [routerLink]="'/poster/' + post.id"
+                                        target="_blank">
+                                        <svg class="svg-content max-w-100-p max-h-100-p img-fluid d-block m-1"
+                                            preserveAspectRatio="xMidYMid meet" svgDraw [postDataSet]="post"
+                                            [loadOnly]="true" (backgroundLoaded)="onSvgLoad()"></svg>
+                                        <span
+                                            class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-danger d-none d-md-block">
+                                            Download: {{post.download_counter}}
+                                            <span class="visually-hidden">unread messages</span>
+                                        </span>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </ng-container>
+                </div>
+                <div pagination [currentPage]="currentPage" [totalItems]="pagination.totalPosts" [pageSize]="limit"
+                    [pageSizes]="[12, 24, 48]" (currentPageChange)="changePage($event)"
+                    (pageSizeChange)="changePageSize($event)" class="mt-0 mb-0 px-3">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
