@@ -34,7 +34,8 @@ export class SvgResponseDirective implements OnChanges, AfterViewInit {
   @Input() loadOnly: boolean = false;
   @Output() dataChanges = new EventEmitter<{ data: Data, index: number }>();
   @Output() getSelected = new EventEmitter<{ index: number }>();
-  @Output() backgroundLoaded = new EventEmitter<void>();
+  @Output() backgroundLoaded: EventEmitter<Event> = new EventEmitter();
+
   formGroupValueChanges: Subject<any> = new Subject<any>();
   private eventListeners: (() => void)[] = [];
   private previousFormGroupValue: any;
@@ -66,7 +67,17 @@ export class SvgResponseDirective implements OnChanges, AfterViewInit {
     if (this.loadOnly) {
       await this.drawSVG(this.postData);
       setTimeout(() => {
-        this.backgroundLoaded.emit();
+        const event = new Event('backgroundLoaded', {
+          bubbles: true,
+          cancelable: false,
+          composed: true,
+        });
+      
+        // Dispatch event directly from the element
+        (this.el.nativeElement as SVGElement).dispatchEvent(event);
+      
+        // OR Emit via Angular's EventEmitter
+        this.backgroundLoaded.emit(event);
       }, 100);
     }
   }

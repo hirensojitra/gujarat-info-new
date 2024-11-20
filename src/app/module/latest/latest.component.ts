@@ -3,6 +3,7 @@ import { ChangeDetectorRef, Component, ElementRef, Inject, PLATFORM_ID, ViewChil
 import { ActivatedRoute, NavigationExtras, Router, UrlTree } from '@angular/router';
 import { PostDetails } from 'src/app/common/interfaces/image-element';
 import { AuthService } from 'src/app/common/services/auth.service';
+import { ColorService } from 'src/app/common/services/color.service';
 import { PlatformService } from 'src/app/common/services/platform.service';
 import { PostDetailService } from 'src/app/common/services/post-detail.service';
 declare const Masonry: any;
@@ -31,7 +32,8 @@ export class LatestComponent {
     private authService: AuthService,
     @Inject(PLATFORM_ID) private platformId: Object,
     private cdr: ChangeDetectorRef,
-    private platformService: PlatformService
+    private platformService: PlatformService,
+    private colorService: ColorService
   ) {
     this.isBrowser = isPlatformBrowser(this.platformId);
   }
@@ -133,11 +135,34 @@ export class LatestComponent {
   isAdmin(): boolean {
     return this.authService.hasRole(['admin', 'master']);
   }
-  onSvgLoad(): void {
+  onSvgLoad(post: PostDetails, event?: Event): void {
     if (this.masonryInstance && this.isBrowser) {
       window.dispatchEvent(new Event('resize'));
     }
+  
+    // Parent element of the SVG
+    const parentElement = (event?.target as SVGElement)?.parentElement;
+  console.log(post.backgroundurl)
+    const imageUrl = post.backgroundurl; // Ensure this property exists
+    if (imageUrl && parentElement) {
+      this.getColors(imageUrl, 5).then((colors) => {
+        if (colors.length > 0) {
+          console.log(colors)
+          parentElement.style.backgroundColor = colors[2]; // Set dominant color
+        }
+      }).catch((error) => {
+        console.error('Failed to fetch colors:', error);
+      });
+    }
   }
+  
 
-
+  async getColors(image: string, colorCounts: number) {
+    try {
+      return await this.colorService.getColors(image, colorCounts);
+    } catch (error) {
+      console.error("Error updating colors:", error);
+      return []
+    }
+  }
 }
