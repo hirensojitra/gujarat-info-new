@@ -104,6 +104,22 @@ const routes: Routes = [
     ],
   },
   {
+    path: 'privacy-policy',
+    component: LayoutComponent,
+    data: { layout: 'empty-layout' },
+    children: [
+      { path: '', loadChildren: () => import('./module/privacy-policy/privacy-policy.module').then(m => m.PrivacyPolicyModule) }
+    ],
+  },
+  {
+    path: 'data-deletion-instructions',
+    component: LayoutComponent,
+    data: { layout: 'empty-layout' },
+    children: [
+      { path: '', loadChildren: () => import('./module/data-deletion-instructions/data-deletion-instructions.module').then(m => m.DataDeletionInstructionsModule) }
+    ],
+  },
+  {
     path: 'latest',
     component: LayoutComponent,
     data: { layout: 'empty-layout' },
