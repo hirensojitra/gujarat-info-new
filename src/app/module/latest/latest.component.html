@@ -8,19 +8,19 @@
                             <div class="row g-md-3 g-2" #masonryGrid data-masonry="{'percentPosition': true}">
                                 <div class="col-lg-3 col-md-6 col-4 masonry-box"
                                     *ngFor="let post of posts; let i= index">
-                                    <h3 class="h5 fw-bold m-0 p-3 bg-black text-white">{{post.title}}</h3>
+                                    <h3 class="h5 fw-bold m-0 p-3 bg-black text-white d-none d-md-block">{{post.title}}</h3>
                                     <a class="position-relative shadow-sm p-1 text-decoration-none d-block"
                                         [routerLink]="'/poster/' + post.id" target="_blank">
                                         <svg class="svg-content max-w-100-p max-h-100-p img-fluid d-block m-1"
                                             preserveAspectRatio="xMidYMid meet" svgDraw [postDataSet]="post"
                                             [loadOnly]="true" (backgroundLoaded)="onSvgLoad(post, $event)"></svg>
                                         <span
-                                            class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-danger d-none d-md-block">
+                                            class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-danger d-md-block">
                                             Download: {{post.download_counter}}
                                             <span class="visually-hidden">unread messages</span>
                                         </span>
                                     </a>
-                                    <p class="h6 m-0 p-3 bg-light text-dark">{{post.info}}</p>
+                                    <p class="h6 m-0 p-3 bg-light text-dark d-none d-md-block">{{post.info}}</p>
                                 </div>
                             </div>
                         </div>
