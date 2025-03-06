@@ -149,7 +149,7 @@ export class UserProfileComponent implements OnInit, AfterViewInit {
         formData.append('image', file);
       }
       formData.append('username', this.profilePictureForm.get('username')?.value);
-      this.US.updateUserData(this.user.id, formData).subscribe(
+      this.US.updateUser(this.user.id, formData).subscribe(
         (response: any) => {
           this.US.setUser(response.user);
           this.cropperModal.hide();

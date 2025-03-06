@@ -139,7 +139,7 @@ export class EditProfileComponent implements OnInit, OnDestroy {
           this.toastService.show('Invalid userid.', { class: 'bg-danger' });
           return;
         }
-        this.userService.updateUserData(userid, formValue).subscribe(
+        this.userService.updateUser(userid, formValue).subscribe(
           (response: any) => {
             this.userService.setUser(response.user);
             this.toastService.show(response.message, { class: 'bg-success' });

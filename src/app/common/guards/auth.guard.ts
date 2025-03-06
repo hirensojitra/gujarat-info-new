@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
 import { CanActivate, Router, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
+import { Observable, of } from 'rxjs';
+import { catchError, map } from 'rxjs/operators';
 import { AuthService } from '../services/auth.service';
-import { PlatformService } from '../services/platform.service'; // Ensure you have this service
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { PlatformService } from '../services/platform.service';
 
 @Injectable({
   providedIn: 'root',
@@ -19,23 +19,33 @@ export class AuthGuard implements CanActivate {
   canActivate(
     route: ActivatedRouteSnapshot,
     state: RouterStateSnapshot
-  ): Observable<boolean> | Promise<boolean> | boolean {
-    // Check if the code is running in the browser
+  ): Observable<boolean> {
     if (this.platformService.isBrowser()) {
-      // Call the isAuthenticated method which returns an Observable
-      return this.authService.isAuthenticated().pipe(
-        map(isAuth => {
-          if (isAuth) {
-            return true; // Access allowed
-          } else {
-            this.router.navigate(['/auth/login'], { queryParams: { returnUrl: state.url } });
-            return false; // Prevent access and redirect to login
-          }
-        })
-      );
+      return this.checkAuth(state.url);
     }
+    return of(false);
+  }
 
-    // If it's not the browser, you may define your logic here, for now, return false
-    return false;
+  private checkAuth(returnUrl: string): Observable<boolean> {
+    return this.authService.isAuthenticated().pipe(
+      map(isAuthenticated => {
+        if (isAuthenticated) {
+          return true;
+        }
+        
+        this.router.navigate(['/auth/login'], {
+          queryParams: { returnUrl },
+          queryParamsHandling: 'merge'
+        });
+        return false;
+      }),
+      catchError(() => {
+        this.router.navigate(['/auth/login'], { 
+          queryParams: { returnUrl },
+          queryParamsHandling: 'merge'
+        });
+        return of(false);
+      })
+    );
   }
 }

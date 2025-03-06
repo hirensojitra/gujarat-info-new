@@ -198,7 +198,7 @@ export class SvgResponseDirective implements OnChanges, AfterViewInit {
   async updateBackGround(backgroundurl: string) {
     if (backgroundurl) {
       const svg = this.el.nativeElement;
-      const background = await this.getImageDataUrl(backgroundurl);
+      const background = this.loadOnly ? await this.getImageDataUrl(backgroundurl+'?quality=10'):await this.getImageDataUrl(backgroundurl);
       const b = this.renderer.createElement('image', 'http://www.w3.org/2000/svg');
       this.renderer.setAttribute(b, 'x', '0');
       this.renderer.setAttribute(b, 'data-type', 'background-img');

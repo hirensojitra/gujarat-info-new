@@ -26,7 +26,7 @@ const routes: Routes = [
   {
     path: 'img',
     component: LayoutComponent,
-    data: { layout: 'dashboard-layout', role: ['admin'] },
+    data: { layout: 'dashboard-layout', roles: ['admin'] },
     canActivate: [AuthGuard, RoleGuard],
     children: [
       {
@@ -40,7 +40,7 @@ const routes: Routes = [
     component: LayoutComponent,
     data: { layout: 'dashboard-layout' },
     canActivate: [AuthGuard],
-    children: [{ path: '', loadChildren: () => import('./module/view/view.module').then(m => m.ViewModule), canActivate: [RoleGuard], data: { role: ['master'] } },],
+    children: [{ path: '', loadChildren: () => import('./module/view/view.module').then(m => m.ViewModule), canActivate: [RoleGuard], data: { roles: ['master'] } },],
   },
   {
     path: 'user-img',
@@ -125,6 +125,13 @@ const routes: Routes = [
     data: { layout: 'empty-layout' },
     children: [
       { path: '', loadChildren: () => import('./module/latest/latest.module').then(m => m.LatestModule) }
+    ],
+  },{
+    path: 'img-upload',
+    component: LayoutComponent,
+    data: { layout: 'empty-layout' },
+    children: [
+      { path: '', loadChildren: () => import('./module/img-upload/img-upload.module').then(m => m.ImgUploadModule) }
     ],
   },
   {

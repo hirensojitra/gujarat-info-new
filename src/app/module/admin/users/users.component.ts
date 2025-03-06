@@ -43,7 +43,7 @@ export class UsersComponent implements OnInit {
   }
   updateUserRole(userId: string, newRole: string): void {
     if (confirm(`Are you sure you want to assign the role "${newRole}" to this user? ${userId}`)) {
-      this.userService.updateUserData(userId, { roles: newRole }).subscribe(
+      this.userService.updateUser(userId, { roles: newRole }).subscribe(
         (response) => {
           this.toastService.show('User role updated successfully!', { class: 'bg-success', title: 'Success:' });
           this.loadUsers(); // Refresh the user list

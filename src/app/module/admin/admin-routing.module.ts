@@ -16,7 +16,7 @@ const routes: Routes = [
     },
     children: [
       { path: '', pathMatch: 'full', redirectTo: 'users' },
-      { path: 'users', loadChildren: () => import('./users/users.module').then(m => m.UsersModule), data: { role: ['admin'] }, canActivate: [AuthGuard, RoleGuard] }
+      { path: 'users', loadChildren: () => import('./users/users.module').then(m => m.UsersModule), data: { roles: ['admin'] }, canActivate: [AuthGuard, RoleGuard] }
     ]
   },
 ];

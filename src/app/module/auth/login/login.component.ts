@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { UserService } from '../../../common/services/user.service';
@@ -10,8 +10,10 @@ import { ToastService } from '../../../common/services/toast.service';
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss'],
 })
-export class LoginComponent implements OnInit {
+export class LoginComponent {
   loginForm: FormGroup;
+  isLoading = false;
+
   constructor(
     private fb: FormBuilder,
     private userService: UserService,
@@ -19,44 +21,32 @@ export class LoginComponent implements OnInit {
     private router: Router,
     private toast: ToastService
   ) {
-    // Initialize the login form with validators
     this.loginForm = this.fb.group({
       username: ['', [Validators.required]],
       password: ['', [Validators.required, Validators.minLength(6)]],
     });
-
-  }
-  async ngOnInit(): Promise<void> {
-
   }
 
-  // Handle form submission for login
   onSubmit() {
-    if (this.loginForm.valid) {
-      const loginData = this.loginForm.value;
+    if (this.loginForm.invalid) return;
 
-      this.authService.loginUser(loginData.username, loginData.password).subscribe(
-        response => {
-          if (response.token) {
-            this.userService.setUser(response);  // Passing the entire response since it includes user data
-            this.authService.setToken(response.token);
-            this.userService.getUser().subscribe(data => {
-              console.log(data)
-            })
-            this.router.navigate(['/dashboard']);
-          } else if (response.error) {
-            // Handle error and show toast notification for error message
-            this.toast.show(response.error, { class: 'bg-danger' });
-          }
-        },
-        error => {
-          // Handle network or server errors
-          console.error('Login error:', error);
-          this.toast.show('An error occurred during login', { class: 'bg-danger' });
+    this.isLoading = true;
+    const { username, password } = this.loginForm.value;
+    this.authService.loginUser(username, password).subscribe({
+      next: (response) => {
+        if (response.token) {
+          this.userService.setUser(response);
+          this.authService.setToken(response.token);
+          this.router.navigate(['/dashboard']);
         }
-      );
-    }
+      },
+      error: (error) => {
+        this.isLoading = false;
+        this.toast.show(error.message || 'Login failed', { class: 'bg-danger' });
+      },
+      complete: () => {
+        this.isLoading = false;
+      }
+    });
   }
-
-
 }

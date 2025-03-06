@@ -143,6 +143,7 @@ export class ImageListComponent implements OnInit, AfterViewInit {
   }
 
   isAdmin(): boolean {
+    console.log('Tests');
     return this.authService.hasRole(['admin', 'master']);
   }
 

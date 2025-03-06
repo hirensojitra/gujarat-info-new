@@ -88,6 +88,11 @@ export class HeaderComponent {
       label: 'Dashboard',
       icon: 'fa-tachometer',
       link: '/dashboard',
+    },
+    {
+      label: 'SVG',
+      icon: 'fa-users',
+      link: '/img-upload',
     }, {
       label: 'Admin',
       icon: 'fa-users',
@@ -172,8 +177,8 @@ export class HeaderComponent {
       return 'USER';
     }
   }
-  ngOnInit(): void {
-    this.userSubscription = this.US.getUser().subscribe((user: User | null) => {
+  async ngOnInit(): Promise<void> {
+    this.userSubscription = await this.US.getUser().subscribe((user: User | null) => {
       if (user) {
         this.user = user;
         this.validateImage(this.user.username);

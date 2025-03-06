@@ -871,7 +871,8 @@ export class SvgProcessorDirective implements OnInit, AfterViewInit {
       this.updateViewBox(Math.min(Math.max(w, 1024), 1920), Math.min(Math.max(h, 1024), 1920));
     }
     if (data && this.postData) {
-      if (data != this.postData.data || this.firstLoad) {
+      if (JSON.stringify(data) !== JSON.stringify(this.postData.data) ||
+      this.firstLoad) {
         if (data.length !== this.postData.data.length) {
 
           let added = data.filter(item => !this.postData.data.includes(item));
