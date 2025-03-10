@@ -10,6 +10,7 @@ import { PostDetails } from 'src/app/common/interfaces/image-element';
 import { AuthService } from 'src/app/common/services/auth.service';
 import { PostDetailService } from 'src/app/common/services/post-detail.service';
 import { PlatformService } from 'src/app/common/services/platform.service';
+import { environment } from 'src/environments/environment';
 
 declare const Masonry: any;
 
@@ -28,6 +29,7 @@ export class ImageListComponent implements OnInit, AfterViewInit {
   pagination: any = { totalPosts: 0, currentPage: 1, totalPages: 0 };
   isBrowser: boolean;
   private masonryInstance: any;
+  imgUrl = environment.MasterApi + '/thumb-images/';
 
   @ViewChild('masonryGrid', { static: false }) masonryGridRef!: ElementRef;
 
