@@ -1,0 +1,90 @@
+@font-face {
+  font-family: 'font-icons';
+  src:  url('fonts/font-icons.eot?icvr6x');
+  src:  url('fonts/font-icons.eot?icvr6x#iefix') format('embedded-opentype'),
+    url('fonts/font-icons.ttf?icvr6x') format('truetype'),
+    url('fonts/font-icons.woff?icvr6x') format('woff'),
+    url('fonts/font-icons.svg?icvr6x#font-icons') format('svg');
+  font-weight: normal;
+  font-style: normal;
+  font-display: block;
+}
+
+[class^="fa-x-"], [class*=" fa-x-"] {
+  /* use !important to prevent issues with browser extensions that change fonts */
+  font-family: 'font-icons' !important;
+  speak: never;
+  font-style: normal;
+  font-weight: normal;
+  font-variant: normal;
+  text-transform: none;
+  line-height: 1;
+
+  /* Better Font Rendering =========== */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.fa-x-layer:before {
+  content: "\e90b";
+}
+.fa-x-back:before {
+  content: "\e90c";
+}
+.fa-x-layer-backward:before {
+  content: "\e90d";
+}
+.fa-x-layer-forward:before {
+  content: "\e90e";
+}
+.fa-x-front:before {
+  content: "\e90f";
+}
+.fa-x-text-background:before {
+  content: "\e90a";
+}
+.fa-x-font-size:before {
+  content: "\e909";
+}
+.fa-x-edit:before {
+  content: "\e908";
+}
+.fa-x-opacity:before {
+  content: "\e904";
+}
+.fa-x-rotation:before {
+  content: "\e905";
+}
+.fa-x-origin:before {
+  content: "\e906";
+}
+.fa-x-lock:before {
+  content: "\e907";
+}
+.fa-x-dimension:before {
+  content: "\e903";
+}
+.fa-x-position:before {
+  content: "\e901";
+}
+.fa-x-control:before {
+  content: "\e902";
+}
+.fa-x-fill:before {
+  content: "\e900";
+}
+.fa-x-border:before {
+  content: "\e910";
+}
+.fa-x-first:before {
+  content: "\e911";
+}
+.fa-x-last:before {
+  content: "\e912";
+}
+.fa-x-previous:before {
+  content: "\e913";
+}
+.fa-x-next:before {
+  content: "\e914";
+}
