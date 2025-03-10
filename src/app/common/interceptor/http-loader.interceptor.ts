@@ -4,16 +4,14 @@ import {
   HttpRequest,
   HttpHandler,
   HttpEvent,
-  HttpResponse,
 } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { finalize, tap } from 'rxjs/operators';
+import { finalize } from 'rxjs/operators';
 import { LoaderService } from '../services/loader';
 import { environment } from 'src/environments/environment';
 
 @Injectable()
 export class HttpLoaderInterceptor implements HttpInterceptor {
-  private activeRequests: number = 0;
   private pendingRequests: number = 0;
 
   constructor(private loaderService: LoaderService) { }
@@ -23,50 +21,29 @@ export class HttpLoaderInterceptor implements HttpInterceptor {
     next: HttpHandler
   ): Observable<HttpEvent<any>> {
     if (this.isExcludedUrl(request.url)) {
-
       return next.handle(request);
     }
-    if (this.pendingRequests === 0) {
-      this.loaderService.show(1);
-    } else {
-      this.loaderService.hide();
-    }
+
     this.pendingRequests++;
+    if (this.pendingRequests === 1) {
+      this.loaderService.show(1);
+    }
+
     return next.handle(request).pipe(
-      tap(
-        (event) => {
-          if (event instanceof HttpResponse) {
-            this.activeRequests++;
-            this.checkHideLoader();
-          }
-        },
-        () => {
-          this.activeRequests++;
-          this.checkHideLoader();
-        }
-      ),
       finalize(() => {
         this.pendingRequests--;
-        this.checkHideLoader();
+        if (this.pendingRequests === 0) {
+          this.loaderService.hide();
+        }
       })
     );
   }
-  private checkHideLoader() {
-    if (!this.pendingRequests) {
-      this.loaderService.hide();
-    }
-  }
+
   private isExcludedUrl(url: string): boolean {
-    // Define URLs that should be excluded from showing the loader
     const excludedUrls = [
-      // '/api/auth',
-      // '/api/excluded-url-2',
-      // '/api/Notification/GetCitizenUserNotificationviewmore',
-      // '/api/Notification/UpdateCitizenUserReadNotification'
-      // Add more excluded URLs as needed
-      environment.MasterApi + '/images'
+      `${environment.MasterApi}/images`,
+      // Add other excluded URLs as needed
     ];
-    // Check if the request URL matches any of the excluded URLs
-    return excludedUrls.some(excludedUrl => url.includes(excludedUrl));
+    return excludedUrls.some(excludedUrl => url.startsWith(excludedUrl));
   }
 }

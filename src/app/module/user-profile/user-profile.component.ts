@@ -18,9 +18,7 @@ declare const bootstrap: any;
 })
 
 export class UserProfileComponent implements OnInit, AfterViewInit {
-
   user!: User | any;
-
   @ViewChild('imageInput') imageInput!: ElementRef;
   @ViewChild('imageInputBtn') imageInputBtn!: ElementRef;
   cropper!: Cropper;

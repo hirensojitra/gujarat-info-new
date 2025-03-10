@@ -16,6 +16,7 @@ import { FontService } from '../../common/services/fonts.service';
 import { BaseUrlService } from '../../common/services/baseuri.service';
 import { SEOService } from 'src/app/common/services/seo.service';
 import { isPlatformBrowser, isPlatformServer } from '@angular/common';
+import { environment } from 'src/environments/environment';
 
 interface MatchObject {
   components: string;
@@ -77,7 +78,7 @@ export class PosterComponent implements OnInit {
   baseUrl: string;
   finalImage: any;
   pageLink: string = '';
-
+  imgUrl = environment.MasterApi + '/thumb-images/';
   @ViewChild('imageDraw') imageDraw!: ElementRef<SVGElement | HTMLElement>;
   @ViewChild('textInput') textInput!: ElementRef;
   @ViewChild('imageInput') imageInput!: ElementRef;
@@ -169,7 +170,7 @@ export class PosterComponent implements OnInit {
     const author = 'Hiren Sojitra';
     const siteName = 'PostNew';
     const twitterUsername = '@Sojitra_Hiren';
-    const imageUrl = `${backgroundurl}?quality=30`;
+    const imageUrl = `${this.imgUrl}${id}`;
     const postUrl = `https://www.postnew.in/poster/${id}`;
     const locale = 'en_US';
 

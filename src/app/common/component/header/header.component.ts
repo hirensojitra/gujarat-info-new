@@ -93,6 +93,7 @@ export class HeaderComponent {
       label: 'SVG',
       icon: 'fa-users',
       link: '/img-upload',
+      role: ['master'],
     }, {
       label: 'Admin',
       icon: 'fa-users',
@@ -114,7 +115,8 @@ export class HeaderComponent {
     }, {
       label: 'User Images',
       icon: 'fa-image',
-      link: '/user-img'
+      link: '/user-img',
+      role: ['master'],
     },
     {
       label: 'Canvas Generator',

@@ -1,16 +1,29 @@
 import { isPlatformBrowser } from '@angular/common';
-import { ChangeDetectorRef, Component, ElementRef, Inject, PLATFORM_ID, ViewChild } from '@angular/core';
-import { ActivatedRoute, NavigationExtras, Router, UrlTree } from '@angular/router';
+import {
+  ChangeDetectorRef,
+  Component,
+  ElementRef,
+  Inject,
+  PLATFORM_ID,
+  ViewChild,
+} from '@angular/core';
+import {
+  ActivatedRoute,
+  NavigationExtras,
+  Router,
+  UrlTree,
+} from '@angular/router';
 import { PostDetails } from 'src/app/common/interfaces/image-element';
 import { AuthService } from 'src/app/common/services/auth.service';
 import { ColorService } from 'src/app/common/services/color.service';
 import { PlatformService } from 'src/app/common/services/platform.service';
 import { PostDetailService } from 'src/app/common/services/post-detail.service';
+import { environment } from 'src/environments/environment';
 declare const Masonry: any;
 @Component({
   selector: 'app-latest',
   templateUrl: './latest.component.html',
-  styleUrl: './latest.component.scss'
+  styleUrl: './latest.component.scss',
 })
 export class LatestComponent {
   posts: PostDetails[] = [];
@@ -37,7 +50,7 @@ export class LatestComponent {
   ) {
     this.isBrowser = isPlatformBrowser(this.platformId);
   }
-
+  imgUrl = environment.MasterApi + '/thumb-images/';
   async ngOnInit(): Promise<void> {
     this.route.queryParams.subscribe(async (params) => {
       this.currentPage = +params['page'] || 1;
@@ -126,9 +139,9 @@ export class LatestComponent {
         limit: this.limit,
         search: this.search,
         sortBy: this.sortBy,
-        order: this.order
+        order: this.order,
       },
-      queryParamsHandling: 'merge'
+      queryParamsHandling: 'merge',
     });
   }
 
@@ -139,30 +152,30 @@ export class LatestComponent {
     if (this.masonryInstance && this.isBrowser) {
       window.dispatchEvent(new Event('resize'));
     }
-  
+
     // Parent element of the SVG
     const parentElement = (event?.target as SVGElement)?.parentElement;
-  console.log(post.backgroundurl)
-    const imageUrl = post.backgroundurl; // Ensure this property exists
+    const imageUrl = this.imgUrl + post.id; // Ensure this property exists
     if (imageUrl && parentElement) {
-      this.getColors(imageUrl, 5).then((colors) => {
-        if (colors.length > 0) {
-          console.log(colors)
-          parentElement.style.backgroundColor = colors[2]; // Set dominant color
-        }
-      }).catch((error) => {
-        console.error('Failed to fetch colors:', error);
-      });
+      this.getColors(imageUrl, 5)
+        .then((colors) => {
+          if (colors.length > 0) {
+            console.log(colors);
+            parentElement.style.backgroundColor = colors[2]; // Set dominant color
+          }
+        })
+        .catch((error) => {
+          console.error('Failed to fetch colors:', error);
+        });
     }
   }
-  
 
   async getColors(image: string, colorCounts: number) {
     try {
       return await this.colorService.getColors(image, colorCounts);
     } catch (error) {
-      console.error("Error updating colors:", error);
-      return []
+      console.error('Error updating colors:', error);
+      return [];
     }
   }
 }

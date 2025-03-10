@@ -18,7 +18,7 @@
                 <div class="col-md-6 col-lg-7 py-3 position-relative min-h-180-px">
                     <div class="position-absolute w-100 overflow-hidden start-0 top-0 bg-light p-3 svg-container" (touchmove)="onTouch($event)">
                         <!-- <svg version="2" xmlns="https://www.w3.org/2000/svg" svgProcessor class="svg-content max-w-100-p max-h-100-p img-fluid mx-auto d-block" preserveAspectRatio="xMidYMid meet" [style.transform]="'scale(' + scaleFactor + ')'" (dataChanges)="updateValue($event)" (getSelected)="getSelected($event);centerActiveButton()" [postDataSet]="postDetailsForm.value"></svg> -->
-                        <svg version="2" xmlns="https://www.w3.org/2000/svg" class="svg-content max-w-100-p max-h-100-p img-fluid mx-auto d-block" preserveAspectRatio="xMidYMid meet" [style.transform]="'scale(' + scaleFactor + ')'" (dataChanges)="updateValue($event)" (getSelected)="getSelected($event);" svgDraw [postDataSet]="postDetailsForm.value"></svg>
+                        <svg version="2" xmlns="https://www.w3.org/2000/svg" class="svg-content max-w-100-p max-h-100-p img-fluid mx-auto d-block" preserveAspectRatio="xMidYMid meet" [style.transform]="'scale(' + scaleFactor + ')'" (dataChanges)="updateValue($event)" (getSelected)="getSelected($event);" svgDraw [postDataSet]="postDetailsForm.value" #svgElement></svg>
                         <!-- <svg version="2" xmlns="https://www.w3.org/2000/svg" class="svg-content max-w-100-p max-h-100-p img-fluid mx-auto d-block" preserveAspectRatio="xMidYMid meet" [style.transform]="'scale(' + scaleFactor + ')'" [svgDraw]="postDetailsForm.value" (dataChanges)="updateValue($event)" (getSelected)="getSelected($event);centerActiveButton()"></svg> -->
                     </div>
                 </div>

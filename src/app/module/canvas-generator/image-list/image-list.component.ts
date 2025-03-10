@@ -1,16 +1,11 @@
-import {
-  AfterViewInit,
-  Component,
-  OnInit,
-  Inject,
-  PLATFORM_ID,
-  ElementRef,
-  ViewChild,
-  Renderer2,
-  ChangeDetectorRef,
-} from '@angular/core';
+import {AfterViewInit,Component,OnInit,Inject,PLATFORM_ID,ElementRef,ViewChild,Renderer2,ChangeDetectorRef} from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
-import { ActivatedRoute, NavigationExtras, Router, UrlTree } from '@angular/router';
+import {
+  ActivatedRoute,
+  NavigationExtras,
+  Router,
+  UrlTree,
+} from '@angular/router';
 import { PostDetails } from 'src/app/common/interfaces/image-element';
 import { AuthService } from 'src/app/common/services/auth.service';
 import { PostDetailService } from 'src/app/common/services/post-detail.service';
@@ -79,13 +74,6 @@ export class ImageListComponent implements OnInit, AfterViewInit {
       });
     }
   }
-  deviceId: any;
-  private async loadDeviceId(): Promise<void> {
-    if (this.isBrowser) {
-      this.deviceId = await this.platformService.getDeviceId();
-      console.log('Device ID:', this.deviceId);
-    }
-  }
 
   private async getAllPosts(): Promise<void> {
     this.PS.getAllPosts({
@@ -100,14 +88,12 @@ export class ImageListComponent implements OnInit, AfterViewInit {
 
       // Trigger DOM updates and Masonry initialization
       this.cdr.detectChanges();
-      setTimeout(() => {
-        if (this.masonryInstance) {
-          this.masonryInstance.reloadItems();
-          this.masonryInstance.layout();
-        } else {
-          this.initializeMasonry();
-        }
-      }, 100);
+      if (this.masonryInstance) {
+        this.masonryInstance.reloadItems();
+        this.masonryInstance.layout();
+      } else {
+        this.initializeMasonry();
+      }
     });
   }
 
@@ -136,9 +122,9 @@ export class ImageListComponent implements OnInit, AfterViewInit {
         limit: this.limit,
         search: this.search,
         sortBy: this.sortBy,
-        order: this.order
+        order: this.order,
       },
-      queryParamsHandling: 'merge'
+      queryParamsHandling: 'merge',
     });
   }
 
@@ -147,15 +133,6 @@ export class ImageListComponent implements OnInit, AfterViewInit {
     return this.authService.hasRole(['admin', 'master']);
   }
 
-  getRandomImage(min: number, max: number): string {
-    return (
-      'https://dummyimage.com/' +
-      (Math.floor(Math.random() * (max - min + 1)) + min) +
-      'x' +
-      (Math.floor(Math.random() * (max - min + 1)) + min) +
-      '/F5F5F5/000'
-    );
-  }
   onSvgLoad(): void {
     if (this.masonryInstance && this.isBrowser) {
       window.dispatchEvent(new Event('resize'));
@@ -164,9 +141,12 @@ export class ImageListComponent implements OnInit, AfterViewInit {
 
   navigateToEdit(postId: string): void {
     const navigationExtras: NavigationExtras = {
-      queryParams: { img: postId }
+      queryParams: { img: postId },
     };
-    const urlTree: UrlTree = this.router.createUrlTree(['/images/generate'], navigationExtras);
+    const urlTree: UrlTree = this.router.createUrlTree(
+      ['/images/generate'],
+      navigationExtras
+    );
     const url: string = this.router.serializeUrl(urlTree);
     window.open(url, '_blank');
   }

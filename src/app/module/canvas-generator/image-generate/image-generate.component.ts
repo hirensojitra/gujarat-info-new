@@ -9,6 +9,8 @@ import { FontService } from 'src/app/common/services/fonts.service';
 import { HttpClient } from '@angular/common/http';
 import { ToastService } from 'src/app/common/services/toast.service';
 import { animate, style, transition, trigger } from '@angular/animations';
+import { ThumbImagesService } from 'src/app/common/services/thumb-images.service';
+import { environment } from 'src/environments/environment';
 declare const bootstrap: any;
 
 interface Data {
@@ -214,7 +216,8 @@ export class ImageGenerateComponent implements OnInit, AfterViewInit {
     private fontService: FontService,
     private router: Router,
     private http: HttpClient,
-    private toastService: ToastService
+    private toastService: ToastService,
+    private TS: ThumbImagesService,
   ) {
     this.route.queryParams.subscribe(params => {
       this.imgParam = params['img'];
@@ -428,9 +431,9 @@ export class ImageGenerateComponent implements OnInit, AfterViewInit {
       x: 30,
       y: 30,
       width: 100,
-      height: 50,
+      height: 100,
       fill: "#FFFFFF",
-      opacity: 0.8,
+      opacity: 1,
       originX: 5,
       originY: 5,
       rotate: 0,
@@ -1044,23 +1047,55 @@ export class ImageGenerateComponent implements OnInit, AfterViewInit {
     });
   }
 
-  onSubmit(clone?: boolean) {
+  onSubmit(isCopy?: boolean) {
     if (this.postDetailsForm?.valid) {
-      const formData = this.postDetailsForm?.value;
-      console.log(formData);
-      if (clone) {
-        formData.id = null;
-        formData.download_counter = 0;
-      };
-      if (formData.id === null) {
-        const { id, ...formDataWithoutId } = formData;
-        this.addPost(formDataWithoutId);
-      } else {
-        this.updatePost(formData);
-      }
+      const postData = this.postDetailsForm.value;
+      
+      const operation$ = isCopy 
+        ? this.PS.addPost({ ...postData, id: null })
+        : this.PS.updatePost(postData);
+  
+      operation$.subscribe({
+        next: (res) => {
+          console.log(res)
+          const postId = this.postDetails.id;
+
+          this.toastService.show(`Post ${isCopy ? 'copied' : 'saved'} successfully`, {
+            class: 'bg-success text-light',
+            delay: 3000
+          });
+  
+          // Generate and upload thumbnail
+          this.generateThumbnail()
+            .then(blob => {
+              this.uploadThumbnail(postId, blob);
+              this.router.navigate([], { 
+                queryParams: { img: postId }, 
+                queryParamsHandling: 'merge' 
+              });
+            })
+            .catch(error => {
+              console.error('Thumbnail generation failed:', error);
+              this.toastService.show('Error generating thumbnail', {
+                class: 'bg-warning text-dark',
+                delay: 5000
+              });
+            });
+        },
+        error: (err) => {
+          console.error('Post operation failed:', err);
+          this.toastService.show(`Failed to ${isCopy ? 'copy' : 'save'} post`, {
+            class: 'bg-danger text-light',
+            delay: 5000
+          });
+        }
+      });
     } else {
-      // If the form is invalid, mark all fields as touched to display validation errors
       this.postDetailsForm?.markAllAsTouched();
+      this.toastService.show('Please fill all required fields', {
+        class: 'bg-warning text-dark',
+        delay: 5000
+      });
     }
   }
   addPost(newPostData: PostDetails): void {
@@ -1078,7 +1113,152 @@ export class ImageGenerateComponent implements OnInit, AfterViewInit {
         }
       );
   }
+  @ViewChild('svgElement') svgElement: ElementRef;
+  private generateThumbnail(): Promise<Blob> {
+    return new Promise(async (resolve, reject) => {
+        try {
+            if (!this.svgElement?.nativeElement) {
+                throw new Error("SVG element not found");
+            }
 
+            const svgEl = this.svgElement.nativeElement;
+
+            // 1️⃣ Convert all <image> elements to data URIs
+            await this.embedImagesAsDataURI(svgEl);
+
+            // 2️⃣ Serialize the SVG to a string
+            let svgString = new XMLSerializer().serializeToString(svgEl);
+            svgString = svgString.replace(/xmlns="[^"]*"/g, "");
+            svgString = svgString.replace(/<svg/, '<svg xmlns="http://www.w3.org/2000/svg"');
+
+            // 3️⃣ Create a data URL from the SVG string
+            const svgUrl = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svgString)}`;
+            console.log("Generated SVG URL:", svgUrl);
+
+            // 4️⃣ Create a canvas and get its context
+            const canvas = document.createElement("canvas");
+            const ctx = canvas.getContext("2d");
+            if (!ctx) {
+                throw new Error("Failed to get canvas context");
+            }
+
+            // 5️⃣ Set canvas dimensions
+            const originalWidth = this.postDetails?.w || 1024;
+            const originalHeight = this.postDetails?.h || 1024;
+            const targetWidth = 500;
+            const targetHeight = Math.round((originalHeight / originalWidth) * targetWidth);
+            canvas.width = targetWidth;
+            canvas.height = targetHeight;
+
+            // 6️⃣ Create an Image from the SVG
+            const img = new Image();
+            img.crossOrigin = "anonymous";
+            img.onload = () => {
+                try {
+                    console.log("SVG Image loaded successfully, drawing to canvas...");
+                    ctx.drawImage(img, 0, 0, targetWidth, targetHeight);
+
+                    // 7️⃣ Convert to JPEG with compression
+                    canvas.toBlob((blob) => {
+                        if (!blob) {
+                            return reject(new Error("Canvas conversion failed"));
+                        }
+
+                        console.log("Initial Blob size:", blob.size);
+                        if (blob.size > 100000) {
+                            console.log("Compressing image...");
+                            canvas.toBlob(
+                                (compressedBlob) => resolve(compressedBlob || blob),
+                                "image/jpeg",
+                                0.7
+                            );
+                        } else {
+                            resolve(blob);
+                        }
+                    }, "image/jpeg", 0.9);
+                } catch (error) {
+                    console.error("Error during canvas operations:", error);
+                    reject(error);
+                }
+            };
+
+            img.onerror = (error) => {
+                console.error("Image loading failed:", error);
+                reject(new Error(`Image loading failed: ${error}`));
+            };
+
+            img.src = svgUrl;
+        } catch (error) {
+            console.error("Error in generateThumbnail:", error);
+            reject(error);
+        }
+    });
+}
+
+/**
+ * 🔹 **Convert all <image> elements inside an SVG to embedded data URIs**
+ * This ensures images are loaded before being rendered to canvas.
+ */
+private async embedImagesAsDataURI(svgEl: SVGElement): Promise<void> {
+    const imageElements = Array.from(svgEl.querySelectorAll("image"));
+    const loadImageAsBase64 = (img: SVGImageElement) => {
+        return new Promise<void>((resolve) => {
+            const href = img.getAttribute("href") || img.getAttribute("xlink:href");
+            if (!href || href.startsWith("data:image")) {
+                return resolve(); // Skip if it's already a data URI
+            }
+
+            const tempImg = new Image();
+            tempImg.crossOrigin = "anonymous";
+            tempImg.src = href;
+
+            tempImg.onload = () => {
+                // Convert image to Base64 and set it inside the SVG
+                const canvas = document.createElement("canvas");
+                canvas.width = tempImg.width;
+                canvas.height = tempImg.height;
+                const ctx = canvas.getContext("2d");
+                ctx?.drawImage(tempImg, 0, 0);
+                img.setAttribute("href", canvas.toDataURL("image/png"));
+                resolve();
+            };
+
+            tempImg.onerror = () => {
+                console.warn(`Image failed to load: ${href}`);
+                resolve(); // Continue even if one image fails
+            };
+        });
+    };
+
+    // Process all <image> elements
+    await Promise.all(imageElements.map(loadImageAsBase64));
+}
+
+
+getThumbnailUrl(postId: string): string {
+  return `${environment.MasterApi}/thumb-images/${postId}`;
+}
+  private uploadThumbnail(postId: string, blob: Blob): void {
+    console.log(blob)
+    const formData = new FormData();
+    formData.append('thumbnail', blob, `${postId}.jpg`);
+    formData.append('postId', postId);
+    this.TS.uploadThumbnail(postId, formData).subscribe({
+      next: () => {
+        this.toastService.show('Thumbnail saved successfully', { 
+          class: 'bg-success text-light',
+          delay: 3000
+        });
+      },
+      error: (err) => {
+        console.error('Thumbnail upload failed:', err);
+        this.toastService.show('Failed to save thumbnail', { 
+          class: 'bg-danger text-light',
+          delay: 5000
+        });
+      }
+    });
+  }
   updatePost(newData: PostDetails): void {
     this.PS.updatePost(newData)
       .subscribe(response => {

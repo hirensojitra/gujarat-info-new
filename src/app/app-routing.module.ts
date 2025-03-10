@@ -129,7 +129,8 @@ const routes: Routes = [
   },{
     path: 'img-upload',
     component: LayoutComponent,
-    data: { layout: 'empty-layout' },
+    data: { layout: 'empty-layout', roles:['master'] },
+    canActivate: [AuthGuard,RoleGuard],
     children: [
       { path: '', loadChildren: () => import('./module/img-upload/img-upload.module').then(m => m.ImgUploadModule) }
     ],

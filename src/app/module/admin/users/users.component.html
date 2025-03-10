@@ -2,26 +2,50 @@
     <div class="flex-grow-1 overflow-y-auto position-relative">
         <div class="position-absolute h-100 w-100 p-3">
             <div class="row g-3 align-items-stretch">
-                <div class="col-md-4 col-sm-6 col-lg-4 col-xl-3 col-xxl-2 col-6" *ngFor="let user of users; let i = index">
+                <div class="col-md-4 col-sm-6 col-lg-4 col-xl-3 col-xxl-2 col-6"
+                    *ngFor="let user of users; let i = index">
                     <div class="profile-widget p-3 h-100 bg-white d-flex flex-column rounded-3 border">
                         <div class="flex-grow-1 d-flex align-items-center flex-column">
-                            <img [src]="validateImage(user.username)" [alt]="user.firstname?user.firstname+' '+user.lastname:'User'" class="rounded-2 border-2 shadow border border-white mx-auto mb-3" remSize [wPX]="60" [hPX]="60">
+                            <img [src]="validateImage(user.username)"
+                                [alt]="user.firstname?user.firstname+' '+user.lastname:'User'"
+                                class="rounded-2 border-2 shadow border border-white mx-auto mb-3" remSize [wPX]="60"
+                                [hPX]="60">
                             <div class="text-center">
-                                <h5 class="text-truncate fw-bold mb-0 text-dark" [title]="user.fullname">{{user.fullname}}</h5>
-                                <small class="text-truncate m-0" [title]="user.username"><i>&#64;{{user.username}}</i></small>
+                                <h5 class="text-truncate fw-bold mb-0 text-dark" [title]="user.fullname">
+                                    {{user.fullname}}</h5>
+                                <small class="text-truncate m-0"
+                                    [title]="user.username"><i>&#64;{{user.username}}</i></small>
                                 <!-- <div class="text-secondary" *ngIf="user.roles">( {{user.roles}} )</div> -->
                             </div>
                             <hr class="border-dark w-75">
                             <div class="d-flex align-items-center">
-                                <a href="#" *ngIf="user.email" class="btn btn-outline-secondary rounded-0 btn-sm m-1 p-0 d-flex align-items-center justify-content-center" remSize [hPX]="30" [wPX]="30" type="button" (click)="sendMail(user.email)"><small><i class="fa fa-envelope text-center"></i></small></a>
-                                <a href="#" *ngIf="user.mobile" class="btn btn-outline-secondary rounded-0 btn-sm m-1 p-0 d-flex align-items-center justify-content-center" remSize [hPX]="30" [wPX]="30" type="button" (click)="makeCall(user.mobile)"><small><i class="fa fa-phone text-center"></i></small></a>
+                                <a href="#" *ngIf="user.email"
+                                    class="btn btn-outline-secondary rounded-0 btn-sm m-1 p-0 d-flex align-items-center justify-content-center"
+                                    remSize [hPX]="30" [wPX]="30" type="button" (click)="sendMail(user.email)"><small><i
+                                            class="fa fa-envelope text-center"></i></small></a>
+                                <a href="#" *ngIf="user.mobile"
+                                    class="btn btn-outline-secondary rounded-0 btn-sm m-1 p-0 d-flex align-items-center justify-content-center"
+                                    remSize [hPX]="30" [wPX]="30" type="button"
+                                    (click)="makeCall(user.mobile)"><small><i
+                                            class="fa fa-phone text-center"></i></small></a>
                             </div>
                         </div>
                         <div class="dropdown profile-action h-100 d-flex align-items-start">
-                            <a href="#" class="action-icon dropdown-toggle btn btn-lighter border-0 outline-0" data-bs-toggle="dropdown" aria-expanded="false"><i class="fa fa-ellipsis-h"></i></a>
+                            <!-- <a href="#" class="action-icon dropdown-toggle" data-bs-toggle="dropdown">
+                                <i class="fa fa-ellipsis-h"></i>
+                            </a> -->
+                            <a class="action-icon" (click)="openRolesModal(user);$event.preventDefault();" href="#">
+                                <i class="fa fa-shield me-2"></i>
+                            </a>
                             <div class="dropdown-menu dropdown-menu-right">
-                                <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#edit_employee"><i class="fa fa-pencil me-2"></i> Edit</a>
-                                <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#delete_employee"><i class="fa fa-trash me-2"></i> Delete</a>
+                                <a class="dropdown-item" (click)="openRolesModal(user);$event.preventDefault();" href="#">
+                                    <i class="fa fa-shield me-2"></i>
+                                </a>
+                                <div class="dropdown-divider"></div>
+                                <a class="dropdown-item" href="#" data-bs-toggle="modal"
+                                    data-bs-target="#delete_employee">
+                                    <i class="fa fa-trash me-2"></i> Delete
+                                </a>
                             </div>
                         </div>
                     </div>
@@ -29,6 +53,31 @@
             </div>
         </div>
     </div>
-    <div pagination [currentPage]="currentPage" [totalItems]="pagination.totalUsers" [pageSize]="limit" [pageSizes]="[30, 50, 100]" (currentPageChange)="changePage($event)" (pageSizeChange)="changePageSize($event)" class="mt-0 mb-0 px-3">
+    <!-- <div pagination [currentPage]="currentPage" [totalItems]="pagination.totalUsers" [pageSize]="limit"
+        [pageSizes]="[30, 50, 100]" (currentPageChange)="changePage($event)" (pageSizeChange)="changePageSize($event)"
+        class="mt-0 mb-0 px-3">
+    </div> -->
+</div>
+<div class="modal fade" #rolesModal tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit Roles for {{ selectedUser?.fullname }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="form-check" *ngFor="let role of availableRoles">
+                    <input class="form-check-input" type="checkbox" [id]="'role-'+selectedUser?._id+'-'+role"
+                        [(ngModel)]="selectedRoles[role]">
+                    <label class="form-check-label" [for]="'role-'+selectedUser?._id+'-'+role">
+                        {{ role }}
+                    </label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" (click)="updateRoles()">Save Changes</button>
+            </div>
+        </div>
     </div>
 </div>
