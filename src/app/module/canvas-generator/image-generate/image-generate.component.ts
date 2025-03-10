@@ -1145,7 +1145,7 @@ export class ImageGenerateComponent implements OnInit, AfterViewInit {
             // 5️⃣ Set canvas dimensions
             const originalWidth = this.postDetails?.w || 1024;
             const originalHeight = this.postDetails?.h || 1024;
-            const targetWidth = 500;
+            const targetWidth = 612;
             const targetHeight = Math.round((originalHeight / originalWidth) * targetWidth);
             canvas.width = targetWidth;
             canvas.height = targetHeight;
@@ -1156,6 +1156,7 @@ export class ImageGenerateComponent implements OnInit, AfterViewInit {
             img.onload = () => {
                 try {
                     console.log("SVG Image loaded successfully, drawing to canvas...");
+                    ctx.imageSmoothingQuality = "high";
                     ctx.drawImage(img, 0, 0, targetWidth, targetHeight);
 
                     // 7️⃣ Convert to JPEG with compression
