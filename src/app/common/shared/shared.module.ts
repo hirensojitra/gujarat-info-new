@@ -19,6 +19,7 @@ import { ScrollCenterDirective } from '../directives/scroll-center.directive';
 import { DecimalDirective } from '../directives/decimal.directive';
 import { ConfirmationModalComponent } from '../component/confirmation-modal/confirmation-modal.component';
 import { RemSizeDirective } from '../directives/rem-size.directive';
+import { FileSizePipe } from '../pipes/filesize.pipe';
 
 @NgModule({
   imports: [
@@ -43,7 +44,8 @@ import { RemSizeDirective } from '../directives/rem-size.directive';
     SvgResponseDirective,
     ScrollCenterDirective,
     ConfirmationModalComponent,
-    RemSizeDirective
+    RemSizeDirective,
+    FileSizePipe
   ],
   exports: [
     CaptchaDirective,
@@ -62,7 +64,8 @@ import { RemSizeDirective } from '../directives/rem-size.directive';
     SvgResponseDirective,
     ScrollCenterDirective,
     ConfirmationModalComponent,
-    RemSizeDirective
+    RemSizeDirective,
+    FileSizePipe
   ],
   providers: [KeysPipe, ColorService, ColorPickerComponent, DependencyListPipe, RemSizeDirective]
 })

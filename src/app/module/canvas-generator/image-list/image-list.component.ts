@@ -9,7 +9,6 @@ import {
 import { PostDetails } from 'src/app/common/interfaces/image-element';
 import { AuthService } from 'src/app/common/services/auth.service';
 import { PostDetailService } from 'src/app/common/services/post-detail.service';
-import { PlatformService } from 'src/app/common/services/platform.service';
 import { environment } from 'src/environments/environment';
 
 declare const Masonry: any;
@@ -30,6 +29,7 @@ export class ImageListComponent implements OnInit, AfterViewInit {
   isBrowser: boolean;
   private masonryInstance: any;
   imgUrl = environment.MasterApi + '/thumb-images/';
+  isUserAdmin: boolean = false;
 
   @ViewChild('masonryGrid', { static: false }) masonryGridRef!: ElementRef;
 
@@ -40,12 +40,13 @@ export class ImageListComponent implements OnInit, AfterViewInit {
     private authService: AuthService,
     @Inject(PLATFORM_ID) private platformId: Object,
     private cdr: ChangeDetectorRef,
-    private platformService: PlatformService
+    private renderer: Renderer2
   ) {
     this.isBrowser = isPlatformBrowser(this.platformId);
   }
 
   async ngOnInit(): Promise<void> {
+    this.isUserAdmin = this.authService.hasRole(['admin', 'master']); 
     this.route.queryParams.subscribe(async (params) => {
       this.currentPage = +params['page'] || 1;
       this.limit = +params['limit'] || this.limit;
@@ -130,12 +131,14 @@ export class ImageListComponent implements OnInit, AfterViewInit {
     });
   }
 
-  isAdmin(): boolean {
-    console.log('Tests');
-    return this.authService.hasRole(['admin', 'master']);
-  }
+  onSvgLoad(event: Event): void {
+    const imageElement = event.target as HTMLImageElement;
+    const parentDiv = imageElement.parentElement; // Get the div with opacity-0
 
-  onSvgLoad(): void {
+    if (parentDiv) {
+      this.renderer.removeClass(parentDiv, 'opacity-0'); // Remove class
+    }
+
     if (this.masonryInstance && this.isBrowser) {
       window.dispatchEvent(new Event('resize'));
     }
