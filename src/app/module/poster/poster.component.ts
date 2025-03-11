@@ -1349,7 +1349,7 @@ export class PosterComponent implements OnInit {
           console.error('User cancelled login or did not fully authorize.');
         }
       },
-      { scope: 'public_profile,email,publish_to_groups' }
+      { scope: 'public_profile,email' }
     ); // Adjust scopes as needed
   }
   private dataURLtoBlob(dataURL: string): Blob {
