@@ -56,8 +56,6 @@ export class RegisterComponent implements OnInit {
             this.authService.setToken(response.token);
             this.router.navigate(['/dashboard']);
           }
-          localStorage.setItem('token', result.token); // Store the JWT
-          this.router.navigate(['/dashboard']); // Navigate to dashboard
         } else {
           this.errorMessage = 'Unable to process Google registration.';
         }
