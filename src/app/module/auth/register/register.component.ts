@@ -46,6 +46,7 @@ export class RegisterComponent implements OnInit {
       .subscribe((result: any) => {
         this.isLoading = false;
         if (result && result.token) {
+          console.log("After Login: "+ result)
           localStorage.setItem('token', result.token); // Store the JWT
           this.router.navigate(['/dashboard']); // Navigate to dashboard
         } else {
