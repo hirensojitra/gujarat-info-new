@@ -1,72 +1,122 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { UserService } from '../../../common/services/user.service';
-import { ToastService } from '../../../common/services/toast.service';
-
+import { catchError } from 'rxjs/operators';
+import { of } from 'rxjs';
+import { environment } from 'src/environments/environment';
+declare const google: any;
 @Component({
   selector: 'app-register',
   templateUrl: './register.component.html',
-  styleUrls: ['./register.component.scss'],
+  styleUrls: ['./register.component.scss']
 })
-export class RegisterComponent {
+export class RegisterComponent implements OnInit {
   registrationForm: FormGroup;
-  isSubmitting = false;
+  isLoading: boolean = false;
+  errorMessage: string = '';
 
   constructor(
     private fb: FormBuilder,
-    private userService: UserService,
-    private router: Router,
-    private toast: ToastService
-  ) {
+    private http: HttpClient,
+    private router: Router
+  ) {}
+
+  ngOnInit(): void {
     this.registrationForm = this.fb.group({
-      username: ['', [
-        Validators.required,
-        Validators.minLength(5),
-        Validators.maxLength(20),
-        Validators.pattern('^[a-zA-Z][a-zA-Z0-9_]*$')
-      ]],
+      username: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required, Validators.minLength(6)]],
-      roles: ['user'],
-      emailVerified: [false]
+      password: ['', Validators.required],
+      roles: ['user'] // default role; adjust if needed
     });
   }
-
+  handleGoogleCredential(response: any): void {
+    const idToken = response.credential; // The idToken received from Google
+    console.log('Google idToken:', idToken); // Debugging
+  
+    // Send the idToken to the backend
+    this.http.post(this.api + '/auth/google', { idToken }, { responseType: 'json' })
+      .pipe(
+        catchError(error => {
+          this.errorMessage = error.error?.message || 'Google authentication failed.';
+          this.isLoading = false;
+          return of(null);
+        })
+      )
+      .subscribe((result: any) => {
+        this.isLoading = false;
+        if (result && result.token) {
+          localStorage.setItem('token', result.token); // Store the JWT
+          this.router.navigate(['/dashboard']); // Navigate to dashboard
+        } else {
+          this.errorMessage = 'Unable to process Google registration.';
+        }
+      });
+  }
+  
   register(): void {
-    if (this.registrationForm.invalid || this.isSubmitting) {
-      this.markFormGroupTouched(this.registrationForm);
+    if (this.registrationForm.invalid) {
       return;
     }
+    this.isLoading = true;
+    this.errorMessage = '';
 
-    this.isSubmitting = true;
-    const formData = this.registrationForm.value;
-
-    this.userService.registerUser({
-      username: formData.username,
-      password: formData.password,
-      email: formData.email,
-      roles: [formData.roles], // Convert to array to match API expectations
-      emailVerified: formData.emailVerified
-    }).subscribe({
-      next: () => {
-        this.router.navigate(['/auth']);
-        this.toast.show('Registration successful!', { class: 'bg-success' });
-      },
-      error: (error) => {
-        this.toast.show(error.message || 'Registration failed', { class: 'bg-danger' });
-        this.isSubmitting = false;
-      },
-      complete: () => this.isSubmitting = false
+    // Call the backend API for standard registration
+    this.http.post('/api/auth/register', this.registrationForm.value)
+      .pipe(
+        catchError(error => {
+          this.errorMessage = error.error?.message || 'Registration failed.';
+          this.isLoading = false;
+          console.log(this.errorMessage)
+          return of(null);
+        })
+      )
+      .subscribe((result: any) => {
+        this.isLoading = false;
+        if (result && result.success) {
+          // Redirect to login page or dashboard after successful registration
+          this.router.navigate(['/auth/login']);
+        } else if (result && result.error) {
+          this.errorMessage = result.error;
+        }
+      });
+  }
+  api:string=environment.MasterApi;
+  registerWithGoogle(): void {
+    this.isLoading = true;
+    this.errorMessage = '';
+  
+    google.accounts.id.initialize({
+      client_id: '650577899089-eq5q93v869b5qvi6vllcq81o8v06ubsm.apps.googleusercontent.com',
+      callback: (response: any) => this.handleGoogleCredential(response),
     });
+  
+    // Render the Google button inside a div (optional)
+    google.accounts.id.prompt();
   }
 
-  private markFormGroupTouched(formGroup: FormGroup): void {
-    Object.values(formGroup.controls).forEach(control => {
-      control.markAsTouched();
-      if (control instanceof FormGroup) {
-        this.markFormGroupTouched(control);
-      }
-    });
+  registerWithFacebook(): void {
+    this.isLoading = true;
+    this.errorMessage = '';
+
+    // Call your backend endpoint for Facebook registration
+    // The backend should return a redirect URL for Facebook OAuth flow
+    this.http.get(this.api+'/auth/facebook', { responseType: 'json' })
+      .pipe(
+        catchError(error => {
+          this.errorMessage = error.error?.message || 'Facebook registration failed.';
+          this.isLoading = false;
+          return of(null);
+        })
+      )
+      .subscribe((result: any) => {
+        this.isLoading = false;
+        if (result && result.redirectUrl) {
+          // Redirect the user to the provided URL for Facebook OAuth
+          window.location.href = result.redirectUrl;
+        } else {
+          this.errorMessage = 'Unable to process Facebook registration.';
+        }
+      });
   }
 }
