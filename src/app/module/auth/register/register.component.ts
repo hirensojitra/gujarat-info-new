@@ -7,6 +7,7 @@ import { of } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { UserService } from 'src/app/common/services/user.service';
 import { AuthService } from 'src/app/common/services/auth.service';
+import { ToastService } from 'src/app/common/services/toast.service';
 declare const google: any;
 @Component({
   selector: 'app-register',
@@ -23,7 +24,8 @@ export class RegisterComponent implements OnInit {
     private http: HttpClient,
     private router: Router,
     private userService: UserService,
-    private authService: AuthService
+    private authService: AuthService,
+    private toast: ToastService
   ) {}
 
   ngOnInit(): void {
@@ -40,26 +42,33 @@ export class RegisterComponent implements OnInit {
   
     // Send the idToken to the backend
     this.http.post(this.api + '/auth/google', { idToken }, { responseType: 'json' })
-      .pipe(
-        catchError(error => {
-          this.errorMessage = error.error?.message || 'Google authentication failed.';
-          this.isLoading = false;
-          return of(null);
-        })
-      )
-      .subscribe((result: any) => {
+    .pipe(
+      catchError(error => {
         this.isLoading = false;
-        if (result && result.token) {
-          console.log( result)
-          if (response.token) {
-            this.userService.setUser(response);
-            this.authService.setToken(response.token);
-            this.router.navigate(['/dashboard']);
-          }
+        this.toast.show(error.error?.message || 'Google authentication failed.', { class: 'bg-danger' });
+        return of(null);
+      })
+    )
+    .subscribe({
+      next: (response: any) => {
+        this.isLoading = false;
+        if (response && response.token) {
+          console.log(response);
+          this.userService.setUser(response);
+          this.authService.setToken(response.token);
+          this.router.navigate(['/dashboard']);
         } else {
-          this.errorMessage = 'Unable to process Google registration.';
+          this.toast.show('Unable to process Google registration.', { class: 'bg-danger' });
         }
-      });
+      },
+      error: (error) => {
+        this.isLoading = false;
+        this.toast.show(error.message || 'Google authentication failed.', { class: 'bg-danger' });
+      },
+      complete: () => {
+        this.isLoading = false;
+      }
+    });
   }
   
   register(): void {
