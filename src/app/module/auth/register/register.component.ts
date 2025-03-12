@@ -5,6 +5,8 @@ import { Router } from '@angular/router';
 import { catchError } from 'rxjs/operators';
 import { of } from 'rxjs';
 import { environment } from 'src/environments/environment';
+import { UserService } from 'src/app/common/services/user.service';
+import { AuthService } from 'src/app/common/services/auth.service';
 declare const google: any;
 @Component({
   selector: 'app-register',
@@ -19,7 +21,9 @@ export class RegisterComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private http: HttpClient,
-    private router: Router
+    private router: Router,
+    private userService: UserService,
+    private authService: AuthService
   ) {}
 
   ngOnInit(): void {
@@ -46,7 +50,12 @@ export class RegisterComponent implements OnInit {
       .subscribe((result: any) => {
         this.isLoading = false;
         if (result && result.token) {
-          console.log("After Login: "+ result)
+          console.log( result)
+          if (response.token) {
+            this.userService.setUser(response);
+            this.authService.setToken(response.token);
+            this.router.navigate(['/dashboard']);
+          }
           localStorage.setItem('token', result.token); // Store the JWT
           this.router.navigate(['/dashboard']); // Navigate to dashboard
         } else {
