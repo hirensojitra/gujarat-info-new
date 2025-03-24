@@ -109,7 +109,7 @@ export interface TextElement {
     lang?: string;
     controlName?: string;
     dependency?: string;
-    type: 'text' | 'select' | 'textarea';
+    type: 'text' | 'select' | 'textarea' | 'date';
     color: string;
     fontStyle: FontStyle;
     rotate: number;

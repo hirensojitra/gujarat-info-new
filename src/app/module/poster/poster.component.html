@@ -20,12 +20,12 @@
                         src="./assets/images/svg/no-post.svg" />
                     <div *ngIf="postStatus=='loading'">Loading</div>
                     <a class="btn btn-success btn-md w-auto m-3"
-                        href="https://whatsapp.com/channel/0029VaePspU1iUxd0HOsMA1d" target="_blank"><i
+                        href="https://whatsapp.com/channel/0029VaePspU1iUxd0HOsMA1d" target="_blank" *ngIf="this.postDetails?.info_show"><i
                             class="fa fa-whatsapp me-2"></i>Join Gujarat Info Channel</a>
                 </div>
             </div>
         </div>
-        <div class="container">
+        <div class="container mt-3">
             <form [formGroup]="formData" (ngSubmit)="onSubmitFormData()" *ngIf="!canDownload && dataset.length"
                 class="row g-2">
                 <div *ngFor="let field of dataset;let i=index"
@@ -34,6 +34,11 @@
                         <label class="form-label" for="{{field.id}}">{{field.title}}</label>
                         <input class="form-control" type="text" id="{{field.id}}" name="{{field.id}}"
                             formControlName="{{field.id}}" [placeholder]="field.title">
+                    </ng-container>
+                    <ng-container *ngIf="field.type === 'date'">
+                        <label class="form-label" for="{{field.id}}">{{field.title}}</label>
+                        <input class="form-control" type="date" id="{{field.id}}" name="{{field.id}}"
+                            formControlName="{{field.id}}">
                     </ng-container>
                     <ng-container *ngIf="field.type === 'image'">
                         <label class="form-label">{{field.title}}</label>
@@ -115,8 +120,8 @@
                 </div>
             </div>
         </div>
-        <span class="w-auto mx-auto" *ngIf="!this.postDetails?.info_show"><a [routerLink]="'/about-us'"
-                class="text-danger fw-bold">More Info</a></span>
+        <span class="w-auto mx-auto d-block text-center" *ngIf="!this.postDetails?.info_show"><a [routerLink]="'/about-us'"
+                class="text-danger fw-bold mx-auto text-decoration-none">More Info</a></span>
     </div>
     <ng-container *ngIf="!postStatus || isDeleted">
         <span class="w-auto mx-auto"><a href="" class="text-danger fw-bold">More Info</a></span>

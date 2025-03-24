@@ -325,6 +325,7 @@
                                                     <select id="type" class="form-select" formControlName="type">
                                                         <option value="select">Select</option>
                                                         <option value="text">Text</option>
+                                                        <option value="date">Date</option>
                                                     </select>
                                                 </div>
                                                 <div class="form-group col-12" [class.d-none]="!getActiveControl(i,'edit')" *ngIf="item.get('text')?.get('api')">
@@ -357,9 +358,13 @@
                                                             <option *ngFor="let option of apiData[item.get('text')?.get('controlName')?.value]" [value]="option.id">{{ item.get('text')?.get('lang')?.value=='en'?option.name:option.gu_name }}</option>
                                                         </select>
                                                     </div>
-                                                    <div *ngSwitchCase="'anotherType'" class="form-group col-12" [class.d-none]="!getActiveControl(i,'edit')">
+                                                    <div *ngSwitchCase="'text'" class="form-group col-12" [class.d-none]="!getActiveControl(i,'edit')">
                                                         <label for="text" class="form-label">Input Text</label>
                                                         <textarea id="text" class="form-control" formControlName="text"></textarea>
+                                                    </div>
+                                                    <div *ngSwitchCase="'date'" class="form-group col-12" [class.d-none]="!getActiveControl(i,'edit')">
+                                                        <label for="text" class="form-label">Date</label>
+                                                        <input type="date" id="text" class="form-control" formControlName="text">
                                                     </div>
                                                     <div *ngSwitchDefault class="form-group col-12" [class.d-none]="!getActiveControl(i,'edit')">
                                                         <label for="text" class="form-label">Input Text</label>

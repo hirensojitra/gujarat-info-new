@@ -906,7 +906,7 @@ export class PosterComponent implements OnInit {
     this.dataset.forEach((field) => {
       const index = parseInt(field.index, 10);
       if (!isNaN(index) && this.postDetails?.data) {
-        if (field.type === 'text') {
+        if (field.type === 'text'||field.type === 'date') {
           const textData = this.postDetails.data.filter(
             (_, i) => i === index
           )[0]?.text;
