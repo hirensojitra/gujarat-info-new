@@ -113,7 +113,7 @@ export class PosterComponent implements OnInit {
   cropper!: Cropper;
   cropperModalTitle: string | undefined = '';
   facebookAccessToken: string | null = null;
-
+  isInAppBrowser: boolean = false;
   constructor(
     private route: ActivatedRoute,
     private titleService: Title,
@@ -147,6 +147,7 @@ export class PosterComponent implements OnInit {
 
   async ngOnInit(): Promise<void> {
     if (isPlatformBrowser(this.platformId)) {
+      this.detectInAppBrowser();
       await this.route.paramMap.subscribe(async (params) => {
         this.imgParam = params.get('img');
         if (this.imgParam) {
@@ -209,6 +210,21 @@ export class PosterComponent implements OnInit {
       });
     }
     await new Promise((resolve) => setTimeout(resolve, 1500));
+  }
+  detectInAppBrowser() {
+    const userAgent = navigator.userAgent || navigator.vendor;
+    if (
+      /FBAN|FBAV|Instagram|Twitter|Snapchat|WhatsApp|Messenger|Line/i.test(
+        userAgent
+      )
+    ) {
+      this.isInAppBrowser = true;
+    }
+  }
+  openInBrowser() {
+    const currentUrl = window.location.href;
+    const intentUrl = `intent://${currentUrl.replace(/^https?:\/\//, '')}#Intent;scheme=https;package=com.android.chrome;end;`;
+    window.location.href = intentUrl;
   }
   async changeMetadataDynamically(): Promise<void> {
     const {
@@ -275,7 +291,6 @@ export class PosterComponent implements OnInit {
       this.postDetails = post;
       const p = JSON.parse(JSON.stringify(post));
       this.isDeleted = post.deleted;
-
       if (!post.deleted) {
         this.postStatus = 'loading';
         try {
@@ -906,7 +921,7 @@ export class PosterComponent implements OnInit {
     this.dataset.forEach((field) => {
       const index = parseInt(field.index, 10);
       if (!isNaN(index) && this.postDetails?.data) {
-        if (field.type === 'text'||field.type === 'date') {
+        if (field.type === 'text' || field.type === 'date') {
           const textData = this.postDetails.data.filter(
             (_, i) => i === index
           )[0]?.text;
@@ -1227,6 +1242,7 @@ export class PosterComponent implements OnInit {
       link.href = dataURL;
       this.finalImage = dataURL;
       link.download = fileName;
+      link.target = '_top';
       const textElements = svgElement.querySelectorAll('text');
       context &&
         textElements.forEach((text) => {
@@ -1235,7 +1251,9 @@ export class PosterComponent implements OnInit {
           context.font = `${fontSize}px ${fontFamily}`;
         });
       this.downloaded = true;
-      !share && link.click();
+      link.target = '_blank'; // Try to open in new tab
+      document.body.appendChild(link); // Required for Firefox
+      link.click();
       await this.PS.updateDownloadCounter(this.imgParam).subscribe(
         (post) => {
           if (post) {
@@ -1244,8 +1262,10 @@ export class PosterComponent implements OnInit {
             this.resetForm();
           } else {
           }
+          document.body.removeChild(link);
         },
         (error) => {
+          document.body.removeChild(link);
           this.postStatus = undefined;
           console.error('Error fetching post:', error);
         }
@@ -1254,9 +1274,9 @@ export class PosterComponent implements OnInit {
     };
   }
   async facebookPhoto() {
-    if(!this.facebookAccessToken){
+    if (!this.facebookAccessToken) {
       this.loginWithFacebook();
-      return
+      return;
     }
     this.loaderService.show(0);
     const svgElement = this.imageDraw.nativeElement;

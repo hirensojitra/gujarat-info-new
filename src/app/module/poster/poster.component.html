@@ -1,5 +1,35 @@
 <div class="h-100-vh d-flex flex-column">
-    <div class="flex-grow-1 overflow-auto">
+    <div class="flex-grow-1 overflow-auto align-items-center" *ngIf="isInAppBrowser">
+        <div *ngIf="isInAppBrowser" class="container mt-4">
+            <div *ngIf="this.postDetails" class="px-3">
+                <h1 class="text-center my-4 fw-b h5" *ngIf="this.postDetails.title">{{this.postDetails.title}}</h1>
+                <h2 class="text-center mb-4 lh-base h6" *ngIf="this.postDetails.info">{{this.postDetails.info}}</h2>
+                <ng-container *ngIf="postStatus!=='loading'&&isDeleted==false">
+                    <h5 class="text-center mb-4"><b>{{postStatus}}</b></h5>
+                </ng-container>
+            </div>
+            <img [src]="imgUrl+postDetails.id" [alt]="this.postDetails.title" *ngIf="this.postDetails"
+                        class="w-100">
+            <button (click)="openInBrowser()" class="btn btn-success btn-lg mt-3 mx-auto d-block">
+                <i class="fa fa-download me-2"></i> DOWNLOAD POSTER
+            </button>
+            <div class="alert alert-secondary text-center p-4 my-4">
+                <h3 class="text-danger"><i class="bi bi-exclamation-triangle"></i> You're using an in-app browser!</h3>
+                <p class="mt-2">For the best experience, please open this page in your default browser.</p>
+
+                <h5 class="mt-3">📌 How to Open in Browser:</h5>
+                <ul class="list-group list-group-flush text-start mx-auto w-75">
+                    <li class="list-group-item"><strong>Facebook:</strong> Tap <b>••• (three dots)</b> in the top-right
+                        & select <b>"Open in Browser"</b>.</li>
+                    <li class="list-group-item"><strong>Instagram:</strong> Tap <b>••• (three dots)</b> in the top-right
+                        & select <b>"Open in Browser"</b>.</li>
+                    <li class="list-group-item"><strong>Twitter:</strong> Tap the <b>share icon</b> & choose <b>"Open in
+                            Browser"</b>.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="flex-grow-1 overflow-auto" *ngIf="!isInAppBrowser">
         <div *ngIf="this.postDetails" class="px-3">
             <h1 class="text-center my-4 fw-b h5" *ngIf="this.postDetails.title">{{this.postDetails.title}}</h1>
             <h2 class="text-center mb-4 lh-base h6" *ngIf="this.postDetails.info">{{this.postDetails.info}}</h2>
@@ -7,6 +37,7 @@
                 <h5 class="text-center mb-4"><b>{{postStatus}}</b></h5>
             </ng-container>
         </div>
+
         <!-- <div class="d-flex align-items-center justify-content-center p-2 mb-3 bg-light" *ngIf="postStatus && !isDeleted">
             <div class="fb-share-button mb-2" [attr.data-href]="pageLink" data-layout="" data-size=""></div>
         </div> -->
@@ -14,14 +45,17 @@
             <div class="row g-0">
                 <div class="col-md-6 col-lg-3 mx-auto text-center">
                     <svg #imageDraw class="max-w-100 max-h-100 border"
-                    [ngClass]="{'d-none':postStatus=='loading'}"></svg>
-                        <img [src]="imgUrl+this.postDetails.id" [alt]="this.postDetails.title" [ngClass]="{'d-none':postStatus!=='loading'}" *ngIf="postStatus=='loading'&&this.postDetails" class="w-100">
+                        [ngClass]="{'d-none':postStatus=='loading'}"></svg>
+                    <img [src]="imgUrl+this.postDetails.id" [alt]="this.postDetails.title"
+                        [ngClass]="{'d-none':postStatus!=='loading'}" *ngIf="postStatus=='loading'&&this.postDetails"
+                        class="w-100">
                     <img class="max-w-100 max-h-100 rounded-4" *ngIf="!postStatus || isDeleted"
                         src="./assets/images/svg/no-post.svg" />
                     <div *ngIf="postStatus=='loading'">Loading</div>
                     <a class="btn btn-success btn-md w-auto m-3"
-                        href="https://whatsapp.com/channel/0029VaePspU1iUxd0HOsMA1d" target="_blank" *ngIf="this.postDetails?.info_show"><i
-                            class="fa fa-whatsapp me-2"></i>Join Gujarat Info Channel</a>
+                        href="https://whatsapp.com/channel/0029VaePspU1iUxd0HOsMA1d" target="_blank"
+                        *ngIf="this.postDetails?.info_show"><i class="fa fa-whatsapp me-2"></i>Join Gujarat Info
+                        Channel</a>
                 </div>
             </div>
         </div>
@@ -120,16 +154,9 @@
                 </div>
             </div>
         </div>
-        <span class="w-auto mx-auto d-block text-center" *ngIf="this.postDetails?.info_show"><a [routerLink]="'/about-us'"
-                class="text-danger fw-bold mx-auto text-decoration-none">More Info</a></span>
+        <span class="w-auto mx-auto d-block text-center" *ngIf="this.postDetails?.info_show"><a
+                [routerLink]="'/about-us'" class="text-danger fw-bold mx-auto text-decoration-none">More Info</a></span>
     </div>
-    <ng-container *ngIf="!postStatus || isDeleted">
-        <span class="w-auto mx-auto"><a href="" class="text-danger fw-bold">More Info</a></span>
-        <div class="my-3 d-flex">
-            <div class="btn btn-md btn-danger mx-auto" (click)="myInfo.show()"><i class="fa fa-user me-2"></i>Contact Us
-            </div>
-        </div>
-    </ng-container>
 </div>
 <div class="modal fade" id="textModal" tabindex="-1" aria-labelledby="textModalLabel" aria-hidden="true">
     <div class="modal-dialog  modal-dialog-centered modal-dialog-scrollable">
