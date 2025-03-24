@@ -156,6 +156,7 @@ export class PosterComponent implements OnInit {
           ).toPromise()) as PostDetails;
           if (this.postDetailsDefault && !this.postDetailsDefault.deleted) {
             this.getPostById();
+            this.pageLink = window.location.href;
             await this.changeMetadataDynamically();
           }
         }
@@ -223,7 +224,10 @@ export class PosterComponent implements OnInit {
   }
   openInBrowser() {
     const currentUrl = window.location.href;
-    const intentUrl = `intent://${currentUrl.replace(/^https?:\/\//, '')}#Intent;scheme=https;package=com.android.chrome;end;`;
+    const intentUrl = `intent://${currentUrl.replace(
+      /^https?:\/\//,
+      ''
+    )}#Intent;scheme=https;package=com.android.chrome;end;`;
     window.location.href = intentUrl;
   }
   async changeMetadataDynamically(): Promise<void> {
@@ -1453,13 +1457,74 @@ export class PosterComponent implements OnInit {
       )
     );
   }
-  shareOnFacebook(): void {
-    // Call FB.ui to trigger the Feed Dialog
-    (window as any).FB.ui({
-      method: 'feed',
-      link: this.pageLink,
-    });
+  async shareOnFacebook(): Promise<void> {
+    this.loaderService.show(0);
+    const svgElement = this.imageDraw.nativeElement;
+    const viewBoxAttr = svgElement.getAttribute('viewBox') || '';
+    const viewBoxValues = viewBoxAttr.split(' ').map(Number);
+    const viewBoxWidth = viewBoxValues[2];
+    const viewBoxHeight = viewBoxValues[3];
+
+    // Create a canvas element matching the SVG viewBox dimensions
+    const canvas = document.createElement('canvas');
+    const context = canvas.getContext('2d');
+    canvas.width = viewBoxWidth;
+    canvas.height = viewBoxHeight;
+    const image = new Image();
+
+    // Serialize the SVG into a string and load it as an image
+    const serializer = new XMLSerializer();
+    const fontFamilies = this.getFontStylesFromSVG(svgElement);
+    await this.loadFonts(fontFamilies);
+    const svgString = serializer.serializeToString(svgElement);
+    image.src =
+      'data:image/svg+xml;base64,' +
+      btoa(unescape(encodeURIComponent(svgString)));
+
+    image.onload = async () => {
+      // Draw the SVG image onto the canvas and get the data URL of the PNG image
+      context?.drawImage(image, 0, 0);
+      const dataURL = canvas.toDataURL('image/png');
+      this.finalImage = dataURL;
+
+      // Optionally update your download counter
+      this.PS.updateDownloadCounter(this.imgParam).subscribe(
+        (post) => {
+          if (post) {
+            this.postStatus = 'Total Download: ' + post.download_counter;
+            this.resetForm();
+          }
+        },
+        (error) => {
+          this.postStatus = undefined;
+          console.error('Error fetching post:', error);
+        }
+      );
+
+      this.loaderService.hide();
+
+      // Call FB.ui and include the image (finalImage) along with other text content
+      (window as any).FB.ui(
+        {
+          method: 'feed',
+          link: this.pageLink, // The URL your shared post will link to
+          picture: this.finalImage, // The generated image from your SVG (ensure it's accessible)
+          name: 'Check out my Poster', // Title for the shared post
+          caption: 'My Poster Creation', // A short caption
+          description:
+            'I created this poster with awesome features. Take a look!',
+        },
+        (response: any) => {
+          if (response && !response.error_message) {
+            console.log('Posted successfully.');
+          } else {
+            console.error('Error while posting:', response.error_message);
+          }
+        }
+      );
+    };
   }
+
   async onTextSubmit() {
     if (this.selectedIndex !== null && this.postDetails?.data) {
       this.postDetails.data = this.postDetails.data.map((item, index) => {
