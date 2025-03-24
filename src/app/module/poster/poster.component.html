@@ -118,8 +118,8 @@
             <h5 class="text-center my-2 text-danger"><b>No any post available for this link.</b></h5>
         </ng-container>
     </div>
-    <div *ngIf="postStatus && isDeleted==false" class="position-sticky bottom-0 bg-light border-top px-3">
-        <span class="w-100 mx-auto py-3 d-flex align-items-center justify-content-center"
+    <div *ngIf="postStatus && isDeleted==false" class="position-sticky bottom-0 bg-light border-top pt-3 px-3">
+        <span class="w-100 mx-auto pb-3 d-flex align-items-center justify-content-center"
             *ngIf="this.postDetails?.info_show">Created by <a href="https://www.facebook.com/SOJITRAHIREN"
                 class="fw-bold btn btn-outline-danger ms-3" target="_blank" (click)="myInfo.show();false">Hiren
                 Sojitra</a></span>
@@ -130,9 +130,9 @@
                         <button class="btn btn-primary btn-md me-1 w-100" (click)="checkDownload('download')"><i
                                 class="fa fa-download me-2"></i>Download
                         </button>
-                        <button class="btn btn-primary btn-md me-1 w-100" (click)="shareOnFacebook()"><i
+                        <!-- <button class="btn btn-primary btn-md me-1 w-100" (click)="shareOnFacebook()"><i
                                 class="fa fa-facebook me-2"></i>Facebook
-                        </button>
+                        </button> -->
                         <button class="btn btn-danger ms-1 btn-md text-nowrap" (click)="resetForm()"><i
                                 class="fa fa-refresh"></i></button>
                     </div>
