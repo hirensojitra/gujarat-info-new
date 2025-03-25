@@ -7,12 +7,7 @@ import {
   PLATFORM_ID,
   ViewChild,
 } from '@angular/core';
-import {
-  ActivatedRoute,
-  NavigationExtras,
-  Router,
-  UrlTree,
-} from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { PostDetails } from 'src/app/common/interfaces/image-element';
 import { AuthService } from 'src/app/common/services/auth.service';
 import { ColorService } from 'src/app/common/services/color.service';
@@ -20,6 +15,7 @@ import { PlatformService } from 'src/app/common/services/platform.service';
 import { PostDetailService } from 'src/app/common/services/post-detail.service';
 import { environment } from 'src/environments/environment';
 declare const Masonry: any;
+
 @Component({
   selector: 'app-latest',
   templateUrl: './latest.component.html',
@@ -35,8 +31,12 @@ export class LatestComponent {
   pagination: any = { totalPosts: 0, currentPage: 1, totalPages: 0 };
   isBrowser: boolean;
   private masonryInstance: any;
+  loading: boolean = false;
+  progress: number = 0;
 
   @ViewChild('masonryGrid', { static: false }) masonryGridRef!: ElementRef;
+
+  imgUrl = environment.MasterApi + '/thumb-images/';
 
   constructor(
     private PS: PostDetailService,
@@ -50,7 +50,7 @@ export class LatestComponent {
   ) {
     this.isBrowser = isPlatformBrowser(this.platformId);
   }
-  imgUrl = environment.MasterApi + '/thumb-images/';
+
   async ngOnInit(): Promise<void> {
     this.route.queryParams.subscribe(async (params) => {
       this.currentPage = +params['page'] || 1;
@@ -82,27 +82,35 @@ export class LatestComponent {
       });
     }
   }
-  deviceId: any;
-  private async loadDeviceId(): Promise<void> {
-    if (this.isBrowser) {
-      this.deviceId = await this.platformService.getDeviceId();
-      console.log('Device ID:', this.deviceId);
-    }
-  }
 
   private async getAllPosts(): Promise<void> {
+    this.loading = true;
+    this.progress = 0;
+
     this.PS.getAllPosts({
       page: this.currentPage,
       limit: this.limit,
       search: this.search,
       sortBy: this.sortBy,
       order: this.order,
-    }).subscribe((response) => {
-      this.posts = response.posts;
+    }).subscribe(async (response) => {
+      const totalPosts = response.posts.length;
+      let processedCount = 0;
+      this.posts = await Promise.all(
+        response.posts.map(async (post) => {
+          const imageUrl = this.imgUrl + post.id;
+          post.image = await this.convertImageToDataURI(imageUrl);
+          processedCount++;
+          this.progress = Math.round((processedCount / totalPosts) * 100);
+          this.cdr.detectChanges();
+          return post;
+        })
+      );
       this.pagination = response.pagination;
-
-      // Trigger DOM updates and Masonry initialization
+      this.loading = false;
+      this.progress = 100;
       this.cdr.detectChanges();
+
       setTimeout(() => {
         if (this.masonryInstance) {
           this.masonryInstance.reloadItems();
@@ -110,24 +118,47 @@ export class LatestComponent {
         } else {
           this.initializeMasonry();
         }
-      }, 100);
+      }, 0);
     });
   }
 
-  changePage(page: number): void {
-    if (this.currentPage != page) {
-      this.currentPage = page;
-      this.updateUrlParams();
-      this.getAllPosts();
+  async convertImageToDataURI(imageUrl: string): Promise<string> {
+    if (!this.isBrowser) {
+      return imageUrl;
+    }
+    try {
+      const response = await fetch(imageUrl, { mode: 'cors' });
+      const blob = await response.blob();
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result as string);
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+      });
+    } catch (error) {
+      console.error('Error converting image to Data URI:', error);
+      return '';
     }
   }
 
-  changePageSize(newLimit: number): void {
-    if (this.limit != newLimit) {
+  async changePage(page: number): Promise<void> {
+    if (this.currentPage !== page) {
+      this.currentPage = page;
+      this.progress = 0;
+      this.loading = true;
+      this.updateUrlParams();
+      await this.getAllPosts();
+    }
+  }
+
+  async changePageSize(newLimit: number): Promise<void> {
+    if (this.limit !== newLimit) {
       this.limit = newLimit;
       this.currentPage = 1;
+      this.progress = 0;
+      this.loading = true;
       this.updateUrlParams();
-      this.getAllPosts();
+      await this.getAllPosts();
     }
   }
 
@@ -148,6 +179,7 @@ export class LatestComponent {
   isAdmin(): boolean {
     return this.authService.hasRole(['admin', 'master']);
   }
+
   onSvgLoad(post: PostDetails, event?: Event): void {
     if (this.masonryInstance && this.isBrowser) {
       window.dispatchEvent(new Event('resize'));
@@ -155,13 +187,12 @@ export class LatestComponent {
 
     // Parent element of the SVG
     const parentElement = (event?.target as SVGElement)?.parentElement;
-    const imageUrl = this.imgUrl + post.id; // Ensure this property exists
+    const imageUrl = post.image; // post.image is already the Data URI now
     if (imageUrl && parentElement) {
       this.getColors(imageUrl, 5)
         .then((colors) => {
           if (colors.length > 0) {
-            console.log(colors);
-            parentElement.style.backgroundColor = colors[2]; // Set dominant color
+            parentElement.style.backgroundColor = colors[2];
           }
         })
         .catch((error) => {
