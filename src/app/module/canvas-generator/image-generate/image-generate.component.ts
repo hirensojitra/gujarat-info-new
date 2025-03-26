@@ -1,6 +1,31 @@
-import { AfterViewInit, Component, ElementRef, HostListener, OnInit, QueryList, ViewChild, ViewChildren } from '@angular/core';
-import { AbstractControl, FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
-import { CircleProperties, EllipseProperties, ImageElement, LineProperties, PostDetails, RectProperties, SvgProperties, TextElement } from 'src/app/common/interfaces/image-element';
+import {
+  AfterViewInit,
+  Component,
+  ElementRef,
+  HostListener,
+  OnInit,
+  QueryList,
+  ViewChild,
+  ViewChildren,
+} from '@angular/core';
+import {
+  AbstractControl,
+  FormArray,
+  FormBuilder,
+  FormControl,
+  FormGroup,
+  Validators,
+} from '@angular/forms';
+import {
+  CircleProperties,
+  EllipseProperties,
+  ImageElement,
+  LineProperties,
+  PostDetails,
+  RectProperties,
+  SvgProperties,
+  TextElement,
+} from 'src/app/common/interfaces/image-element';
 import { ColorService } from 'src/app/common/services/color.service';
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -25,7 +50,7 @@ interface Data {
   image?: ImageElement;
 }
 interface ShapeControl {
-  id: string,
+  id: string;
   title: string;
   active: boolean;
   icon: string;
@@ -47,13 +72,13 @@ interface ShapeControls {
     trigger('itemAnim', [
       transition('void => *', [
         style({ opacity: 0, transform: 'scale(0.95)' }),
-        animate('200ms', style({ opacity: 1, transform: 'scale(1)' }))
+        animate('200ms', style({ opacity: 1, transform: 'scale(1)' })),
       ]),
       transition('* => void', [
-        animate('200ms', style({ opacity: 0, transform: 'scale(0.95)' }))
-      ])
-    ])
-  ]
+        animate('200ms', style({ opacity: 0, transform: 'scale(0.95)' })),
+      ]),
+    ]),
+  ],
 })
 export class ImageGenerateComponent implements OnInit, AfterViewInit {
   isExpanded: boolean = false;
@@ -65,148 +90,248 @@ export class ImageGenerateComponent implements OnInit, AfterViewInit {
     rect: [
       { id: 'border', title: 'Border', icon: 'fa-x-border', active: false },
       { id: 'fill', title: 'Fill', icon: 'fa-x-fill', active: false },
-      { id: 'dimension', title: 'Dimension', icon: 'fa-x-dimension', active: false },
+      {
+        id: 'dimension',
+        title: 'Dimension',
+        icon: 'fa-x-dimension',
+        active: false,
+      },
       { id: 'opacity', title: 'Opacity', icon: 'fa-x-opacity', active: false },
       { id: 'rotate', title: 'Rotation', icon: 'fa-x-rotation', active: false },
       { id: 'origin', title: 'Origin', icon: 'fa-x-origin', active: false },
-      { id: 'position', title: 'Position', icon: 'fa-x-position', active: false },
-      { id: 'control', title: 'Control', icon: 'fa-x-control', active: false }
+      {
+        id: 'position',
+        title: 'Position',
+        icon: 'fa-x-position',
+        active: false,
+      },
+      { id: 'control', title: 'Control', icon: 'fa-x-control', active: false },
     ],
     circle: [
       { id: 'border', title: 'Border', icon: 'fa-x-border', active: false },
       { id: 'fill', title: 'Fill', icon: 'fa-x-fill', active: false },
-      { id: 'dimension', title: 'Dimension', icon: 'fa-x-dimension', active: false },
+      {
+        id: 'dimension',
+        title: 'Dimension',
+        icon: 'fa-x-dimension',
+        active: false,
+      },
       { id: 'opacity', title: 'Opacity', icon: 'fa-x-opacity', active: false },
       { id: 'origin', title: 'Origin', icon: 'fa-x-origin', active: false },
-      { id: 'position', title: 'Position', icon: 'fa-x-position', active: false },
-      { id: 'control', title: 'Control', icon: 'fa-x-control', active: false }],
+      {
+        id: 'position',
+        title: 'Position',
+        icon: 'fa-x-position',
+        active: false,
+      },
+      { id: 'control', title: 'Control', icon: 'fa-x-control', active: false },
+    ],
     ellipse: [
-      { id: 'position', title: 'Position', icon: 'fa-x-position', active: false },
-      { id: 'dimension', title: 'Dimension', icon: 'fa-x-dimension', active: false },
+      {
+        id: 'position',
+        title: 'Position',
+        icon: 'fa-x-position',
+        active: false,
+      },
+      {
+        id: 'dimension',
+        title: 'Dimension',
+        icon: 'fa-x-dimension',
+        active: false,
+      },
       { id: 'fill', title: 'Fill', icon: 'fa-x-fill', active: false },
       { id: 'opacity', title: 'opacity', icon: 'fa-x-opacity', active: false },
       { id: 'originX', title: 'originX', icon: 'fa-', active: false },
       { id: 'originY', title: 'originY', icon: 'fa-', active: false },
       { id: 'rotate', title: 'rotate', icon: 'fa-', active: false },
-      { id: 'control', title: 'Control', icon: 'fa-x-control', active: false }],
+      { id: 'control', title: 'Control', icon: 'fa-x-control', active: false },
+    ],
     line: [
-      { id: 'position', title: 'Position', icon: 'fa-x-position', active: false },
-      { id: 'dimension', title: 'Dimension', icon: 'fa-x-dimension', active: false },
+      {
+        id: 'position',
+        title: 'Position',
+        icon: 'fa-x-position',
+        active: false,
+      },
+      {
+        id: 'dimension',
+        title: 'Dimension',
+        icon: 'fa-x-dimension',
+        active: false,
+      },
       { id: 'fill', title: 'Fill', icon: 'fa-x-fill', active: false },
       { id: 'opacity', title: 'opacity', icon: 'fa-x-opacity', active: false },
       { id: 'originX', title: 'originX', icon: 'fa-', active: false },
       { id: 'originY', title: 'originY', icon: 'fa-', active: false },
       { id: 'rotate', title: 'rotate', icon: 'fa-', active: false },
-      { id: 'control', title: 'Control', icon: 'fa-x-control', active: false }
+      { id: 'control', title: 'Control', icon: 'fa-x-control', active: false },
     ],
     text: [
       { id: 'edit', title: 'Edit', icon: 'fa-x-edit', active: false },
       { id: 'fill', title: 'Fill', icon: 'fa-x-fill', active: false },
       { id: 'fontSize', title: 'Size', icon: 'fa-x-font-size', active: false },
       { id: 'fontStyle', title: 'Style', icon: 'fa-italic', active: false },
-      { id: 'textAlign', title: 'Alignment', icon: 'fa-align-left', active: false },
+      {
+        id: 'textAlign',
+        title: 'Alignment',
+        icon: 'fa-align-left',
+        active: false,
+      },
       { id: 'fontFamily', title: 'Font', icon: 'fa-font', active: false },
       { id: 'fontWeight', title: 'Weight', icon: 'fa-bold', active: false },
-      { id: 'textShadow', title: 'Shadow', icon: 'fa-eye-slash', active: false },
-      { id: 'textBackground', title: 'Background', icon: 'fa-x-text-background', active: false },
+      {
+        id: 'textShadow',
+        title: 'Shadow',
+        icon: 'fa-eye-slash',
+        active: false,
+      },
+      {
+        id: 'textBackground',
+        title: 'Background',
+        icon: 'fa-x-text-background',
+        active: false,
+      },
       { id: 'textEffects', title: 'Effects', icon: 'fa-magic', active: false },
-      { id: 'letterSpacing', title: 'Spacing', icon: 'fa-arrows-h', active: false },
-      { id: 'lineHeight', title: 'Line Height', icon: 'fa-arrows-v', active: false },
-      { id: 'textTransformation', title: 'Transformation', icon: 'fa-text-width', active: false },
+      {
+        id: 'letterSpacing',
+        title: 'Spacing',
+        icon: 'fa-arrows-h',
+        active: false,
+      },
+      {
+        id: 'lineHeight',
+        title: 'Line Height',
+        icon: 'fa-arrows-v',
+        active: false,
+      },
+      {
+        id: 'textTransformation',
+        title: 'Transformation',
+        icon: 'fa-text-width',
+        active: false,
+      },
       { id: 'opacity', title: 'Opacity', icon: 'fa-x-opacity', active: false },
-      { id: 'position', title: 'Position', icon: 'fa-x-position', active: false },
-      { id: 'dimension', title: 'Dimension', icon: 'fa-x-dimension', active: false },
+      {
+        id: 'position',
+        title: 'Position',
+        icon: 'fa-x-position',
+        active: false,
+      },
+      {
+        id: 'dimension',
+        title: 'Dimension',
+        icon: 'fa-x-dimension',
+        active: false,
+      },
       { id: 'control', title: 'Control', icon: 'fa-x-control', active: false },
-      { id: 'rotate', title: 'Rotation', icon: 'fa-x-rotation', active: false }
+      { id: 'rotate', title: 'Rotation', icon: 'fa-x-rotation', active: false },
     ],
     image: [
-      { id: 'position', title: 'Position', icon: 'fa-x-position', active: false },
+      {
+        id: 'position',
+        title: 'Position',
+        icon: 'fa-x-position',
+        active: false,
+      },
       { id: 'edit', title: 'Edit', icon: 'fa-x-edit', active: false },
-      { id: 'dimension', title: 'Dimension', icon: 'fa-x-dimension', active: false },
+      {
+        id: 'dimension',
+        title: 'Dimension',
+        icon: 'fa-x-dimension',
+        active: false,
+      },
       { id: 'fill', title: 'Fill', icon: 'fa-x-fill', active: false },
       { id: 'opacity', title: 'opacity', icon: 'fa-x-opacity', active: false },
       { id: 'origin', title: 'Origin', icon: 'fa-x-origin', active: false },
       { id: 'rotate', title: 'rotate', icon: 'fa-x-rotation', active: false },
       { id: 'url', title: 'URL', icon: 'fa-link', active: false },
       { id: 'control', title: 'Control', icon: 'fa-x-control', active: false },
-    ]
+    ],
+  };
 
-  }
-
-  fontFamilies: { family: string; variables: string[]; names: string[]; }[] = []
+  fontFamilies: { family: string; variables: string[]; names: string[] }[] = [];
   postDetailsForm: FormGroup | undefined = undefined;
   imgParam: any;
   postDetails: PostDetails = {
-    "id": null,
-    "deleted": false,
-    "download_counter": 0,
-    "h": 1024,
-    "w": 1024,
-    "title": "image",
-    "info": "",
-    "info_show": true,
-    "backgroundurl": "https://images.unsplash.com/photo-1536663094815-aa7e99627504?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    "data": [
+    id: null,
+    deleted: false,
+    download_counter: 0,
+    h: 1024,
+    w: 1024,
+    title: 'image',
+    info: '',
+    info_show: true,
+    backgroundurl:
+      'https://images.unsplash.com/photo-1536663094815-aa7e99627504?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+    data: [
       {
-        "title": "Text 1",
-        "editable": true,
-        "boxed": true,
-        "text": {
-          "x": 706,
-          "y": 955,
-          "fs": 40,
-          "fw": "normal",
-          "text": "Sample Text",
-          "type": "text",
-          "color": "#FFFFFF",
-          "fontStyle": {
-            "italic": false,
-            "underline": false
+        title: 'Text 1',
+        editable: true,
+        boxed: true,
+        text: {
+          x: 706,
+          y: 955,
+          fs: 40,
+          fw: 'normal',
+          text: 'Sample Text',
+          type: 'text',
+          color: '#FFFFFF',
+          fontStyle: {
+            italic: false,
+            underline: false,
           },
-          "rotate": 0,
-          "fontFamily": "Noto Sans Gujarati",
-          "textShadow": {
-            "enable": false,
-            "color": "#FFFFFF",
-            "blur": 0,
-            "offsetX": 0,
-            "offsetY": 0
+          rotate: 0,
+          fontFamily: 'Noto Sans Gujarati',
+          textShadow: {
+            enable: false,
+            color: '#FFFFFF',
+            blur: 0,
+            offsetX: 0,
+            offsetY: 0,
           },
-          "backgroundColor": "#FFFFFF",
-          "textEffects": {
-            "enable": false,
-            "gradient": {
-              "enable": false,
-              "startColor": "#ffffff",
-              "endColor": "#000000",
-              "direction": "horizontal"
+          backgroundColor: '#FFFFFF',
+          textEffects: {
+            enable: false,
+            gradient: {
+              enable: false,
+              startColor: '#ffffff',
+              endColor: '#000000',
+              direction: 'horizontal',
             },
-            "outline": {
-              "enable": false,
-              "color": "#FFFFFF",
-              "width": 2
+            outline: {
+              enable: false,
+              color: '#FFFFFF',
+              width: 2,
             },
-            "glow": {
-              "enable": false,
-              "color": "#ffffff",
-              "blur": 0
-            }
+            glow: {
+              enable: false,
+              color: '#ffffff',
+              blur: 0,
+            },
           },
-          "textAnchor": "start",
-          "alignmentBaseline": "start",
-          "letterSpacing": 0,
-          "lineHeight": 1.5,
-          "textTransformation": "none",
-          "opacity": 100,
-          "originX": 0,
-          "originY": 0
-        }
-      }
-    ]
-  }
+          textAnchor: 'start',
+          alignmentBaseline: 'start',
+          letterSpacing: 0,
+          lineHeight: 1.5,
+          textTransformation: 'none',
+          opacity: 100,
+          originX: 0,
+          originY: 0,
+        },
+      },
+    ],
+  };
   confirmDelete: any;
   apiData: { [key: string]: any[] } = {};
-  selectData: { [key: string]: { title: string, control: FormControl, api: string, dependency: string, lang: string } } = {};
+  selectData: {
+    [key: string]: {
+      title: string;
+      control: FormControl;
+      api: string;
+      dependency: string;
+      lang: string;
+    };
+  } = {};
   positionShuffle: boolean = false;
   constructor(
     private fb: FormBuilder,
@@ -217,18 +342,18 @@ export class ImageGenerateComponent implements OnInit, AfterViewInit {
     private router: Router,
     private http: HttpClient,
     private toastService: ToastService,
-    private TS: ThumbImagesService,
+    private TS: ThumbImagesService
   ) {
-    this.route.queryParams.subscribe(params => {
+    this.route.queryParams.subscribe((params) => {
       this.imgParam = params['img'];
     });
-    this.fontFamilies = this.fontService.fontFamilies
+    this.fontFamilies = this.fontService.fontFamilies;
   }
   async getColors(image: string, colorCounts: number) {
     try {
       this.colorSet = await this.colorService.getColors(image, colorCounts);
     } catch (error) {
-      console.error("Error updating colors:", error);
+      console.error('Error updating colors:', error);
     }
   }
   getColorClass(isActive: boolean): string {
@@ -242,7 +367,7 @@ export class ImageGenerateComponent implements OnInit, AfterViewInit {
     const value = (event.target as HTMLInputElement).value;
     control?.setValue(value);
   }
-  updateValue(d: { data: Data, index: number }) {
+  updateValue(d: { data: Data; index: number }) {
     const value = this.postDetailsForm?.get('data') as FormArray | null;
     if (value) {
       const t = value.at(d.index) as FormControl | null;
@@ -250,42 +375,62 @@ export class ImageGenerateComponent implements OnInit, AfterViewInit {
         const newData = d.data;
         if (newData.text) {
           if (newData.text.x) {
-            t.get('text')?.get('x')?.patchValue(newData.text.x, { emitEvent: false });
+            t.get('text')
+              ?.get('x')
+              ?.patchValue(newData.text.x, { emitEvent: false });
           }
           if (newData.text.y) {
-            t.get('text')?.get('y')?.patchValue(newData.text.y, { emitEvent: false });
+            t.get('text')
+              ?.get('y')
+              ?.patchValue(newData.text.y, { emitEvent: false });
           }
         }
         if (newData.image) {
           if (newData.image.x) {
-            t.get('image')?.get('x')?.patchValue(newData.image.x, { emitEvent: false });
+            t.get('image')
+              ?.get('x')
+              ?.patchValue(newData.image.x, { emitEvent: false });
           }
           if (newData.image.y) {
-            t.get('image')?.get('y')?.patchValue(newData.image.y, { emitEvent: false });
+            t.get('image')
+              ?.get('y')
+              ?.patchValue(newData.image.y, { emitEvent: false });
           }
         }
         if (newData.rect) {
           if (newData.rect.x) {
-            t.get('rect')?.get('x')?.patchValue(newData.rect.x, { emitEvent: false });
+            t.get('rect')
+              ?.get('x')
+              ?.patchValue(newData.rect.x, { emitEvent: false });
           }
           if (newData.rect.y) {
-            t.get('rect')?.get('y')?.patchValue(newData.rect.y, { emitEvent: false });
+            t.get('rect')
+              ?.get('y')
+              ?.patchValue(newData.rect.y, { emitEvent: false });
           }
         }
         if (newData.circle) {
           if (newData.circle.cx) {
-            t.get('circle')?.get('cx')?.patchValue(newData.circle.cx, { emitEvent: false });
+            t.get('circle')
+              ?.get('cx')
+              ?.patchValue(newData.circle.cx, { emitEvent: false });
           }
           if (newData.circle.cy) {
-            t.get('circle')?.get('cy')?.patchValue(newData.circle.cy, { emitEvent: false });
+            t.get('circle')
+              ?.get('cy')
+              ?.patchValue(newData.circle.cy, { emitEvent: false });
           }
         }
         if (newData.ellipse) {
           if (newData.ellipse.cx) {
-            t.get('ellipse')?.get('cx')?.patchValue(newData.ellipse.cx, { emitEvent: false });
+            t.get('ellipse')
+              ?.get('cx')
+              ?.patchValue(newData.ellipse.cx, { emitEvent: false });
           }
           if (newData.ellipse.cy) {
-            t.get('ellipse')?.get('cy')?.patchValue(newData.ellipse.cy, { emitEvent: false });
+            t.get('ellipse')
+              ?.get('cy')
+              ?.patchValue(newData.ellipse.cy, { emitEvent: false });
           }
         }
       } else {
@@ -301,19 +446,18 @@ export class ImageGenerateComponent implements OnInit, AfterViewInit {
   }
 
   getPostById(postId: any): void {
-    this.PS.getPostById(postId)
-      .subscribe(
-        post => {
-          if (post) {
-            this.postDetails = post;
-            this.initForm();
-          } else {
-          }
-        },
-        error => {
-          console.error('Error fetching post:', error);
+    this.PS.getPostById(postId).subscribe(
+      (post) => {
+        if (post) {
+          this.postDetails = post;
+          this.initForm();
+        } else {
         }
-      );
+      },
+      (error) => {
+        console.error('Error fetching post:', error);
+      }
+    );
   }
 
   initForm() {
@@ -324,16 +468,21 @@ export class ImageGenerateComponent implements OnInit, AfterViewInit {
       w: [this.postDetails.w, Validators.required],
       title: [this.postDetails.title, Validators.required],
       backgroundurl: [this.postDetails.backgroundurl, Validators.required],
-      download_counter: [this.postDetails.download_counter, Validators.required],
+      download_counter: [
+        this.postDetails.download_counter,
+        Validators.required,
+      ],
       info: [this.postDetails.info || '', Validators.required],
       info_show: [this.postDetails.info_show || false, Validators.required],
       data: this.fb.array([]),
-      apiData: this.apiData
+      apiData: this.apiData,
     });
-    this.postDetailsForm?.get('backgroundurl')?.valueChanges.subscribe(async (v) => {
-      this.postDetails.backgroundurl = v;
-      await this.getColors(v, 20);
-    });
+    this.postDetailsForm
+      ?.get('backgroundurl')
+      ?.valueChanges.subscribe(async (v) => {
+        this.postDetails.backgroundurl = v;
+        await this.getColors(v, 20);
+      });
     this.postDetailsForm.valueChanges.subscribe(async (v) => {
       this.postDetails = v;
     });
@@ -345,14 +494,14 @@ export class ImageGenerateComponent implements OnInit, AfterViewInit {
       d.line && this.addData('line', d);
       d.text && this.addData('text', d);
       d.image && this.addData('image', d);
-    })
-    this.rebuild(this.postDetails.data)
+    });
+    this.rebuild(this.postDetails.data);
   }
   get dataArray() {
     return this.postDetailsForm?.get('data') as FormArray;
   }
   addData(t: string, value?: Data) {
-    let d: FormGroup = this.fb.group({})
+    let d: FormGroup = this.fb.group({});
     switch (t) {
       case 'rect':
         d = this.createRectFormGroup(value || this.rectData);
@@ -400,20 +549,32 @@ export class ImageGenerateComponent implements OnInit, AfterViewInit {
       this.positionShuffle = true;
       this.rebuild(this.postDetails.data);
       this.positionShuffle = false;
-      this.toastService.show(d.get('title')?.value + " is deleted successfully.", { class: 'bg-success' });
+      this.toastService.show(
+        d.get('title')?.value + ' is deleted successfully.',
+        { class: 'bg-success' }
+      );
     } else {
-      this.toastService.show(canDelete.join(', ') + (canDelete.length > 1 ? " are" : ' is') + " depend on " + d.get('title')?.value + ".", { title: d.get('title')?.value + " can't be deleted.", class: 'bg-danger' });
+      this.toastService.show(
+        canDelete.join(', ') +
+          (canDelete.length > 1 ? ' are' : ' is') +
+          ' depend on ' +
+          d.get('title')?.value +
+          '.',
+        {
+          title: d.get('title')?.value + " can't be deleted.",
+          class: 'bg-danger',
+        }
+      );
     }
   }
   private checkDependency(controlName: string, index: number): string[] {
-
     const hasDependency: string[] = [];
     this.dataArray.controls.some((control, i) => {
       if (i !== index) {
         const cn = control.get('text')?.get('dependency')?.value;
 
         if (cn === controlName) {
-          hasDependency.push(control.get('title')?.value)
+          hasDependency.push(control.get('title')?.value);
         }
         return cn === controlName;
       }
@@ -424,7 +585,7 @@ export class ImageGenerateComponent implements OnInit, AfterViewInit {
   }
 
   rectData = {
-    title: "Rect",
+    title: 'Rect',
     editable: false,
     boxed: true,
     rect: {
@@ -432,12 +593,12 @@ export class ImageGenerateComponent implements OnInit, AfterViewInit {
       y: 30,
       width: 100,
       height: 100,
-      fill: "#FFFFFF",
+      fill: '#FFFFFF',
       opacity: 1,
       originX: 5,
       originY: 5,
       rotate: 0,
-    }
+    },
   };
   createRectFormGroup(r: Data): FormGroup {
     return this.fb.group({
@@ -458,26 +619,29 @@ export class ImageGenerateComponent implements OnInit, AfterViewInit {
         rotate: [r.rect?.rotate || 0, Validators.required],
         stroke: [r.rect?.stroke || '#000000', Validators.required],
         strokeWidth: [r.rect?.strokeWidth || 1, Validators.required],
-        strokeAlignment: [r.rect?.strokeAlignment || 'center', Validators.required],
+        strokeAlignment: [
+          r.rect?.strokeAlignment || 'center',
+          Validators.required,
+        ],
         fillOpacity: [r.rect?.fillOpacity || 1, Validators.required],
         strokeOpacity: [r.rect?.strokeOpacity || 1, Validators.required],
-      })
+      }),
     });
   }
 
   circleData = {
-    title: "Circle 1",
+    title: 'Circle 1',
     editable: false,
     boxed: true,
     circle: {
       cx: 50,
       cy: 50,
       r: 30,
-      fill: "#FFFFFF",
+      fill: '#FFFFFF',
       opacity: 1,
       originX: 0,
-      originY: 0
-    }
+      originY: 0,
+    },
   };
 
   createCircleFormGroup(c: Data): FormGroup {
@@ -497,12 +661,15 @@ export class ImageGenerateComponent implements OnInit, AfterViewInit {
         stroke: [c.circle?.stroke || '#FFF', Validators.required],
         strokeWidth: [c.circle?.strokeWidth || 0, Validators.required],
         strokeOpacity: [c.circle?.strokeOpacity || 1, Validators.required],
-        strokeAlignment: [c.circle?.strokeAlignment || 'center', Validators.required],
-      })
-    })
+        strokeAlignment: [
+          c.circle?.strokeAlignment || 'center',
+          Validators.required,
+        ],
+      }),
+    });
   }
   ellipseData = {
-    title: "Ellipse 1",
+    title: 'Ellipse 1',
     editable: false,
     boxed: true,
     ellipse: {
@@ -510,12 +677,12 @@ export class ImageGenerateComponent implements OnInit, AfterViewInit {
       cy: 100,
       rx: 50,
       ry: 30,
-      fill: "green",
+      fill: 'green',
       opacity: 0.8,
       originX: 0,
       originY: 0,
-      rotate: 0
-    }
+      rotate: 0,
+    },
   };
   createEllipseFormGroup(e: Data): FormGroup {
     return this.fb.group({
@@ -536,13 +703,16 @@ export class ImageGenerateComponent implements OnInit, AfterViewInit {
         stroke: [e.ellipse?.stroke || '#000000', Validators.required], // Added stroke with default '#000000'
         strokeWidth: [e.ellipse?.strokeWidth || 1, Validators.required], // Added strokeWidth with default 1
         strokeOpacity: [e.ellipse?.strokeOpacity || 1, Validators.required], // Added strokeOpacity with default 1
-        strokeAlignment: [e.ellipse?.strokeAlignment || 'center', Validators.required] // Added strokeAlignment with default 'center'
-      })
+        strokeAlignment: [
+          e.ellipse?.strokeAlignment || 'center',
+          Validators.required,
+        ], // Added strokeAlignment with default 'center'
+      }),
     });
   }
 
   lineData = {
-    title: "Line 1",
+    title: 'Line 1',
     editable: false,
     boxed: true,
     line: {
@@ -550,13 +720,13 @@ export class ImageGenerateComponent implements OnInit, AfterViewInit {
       y1: 50,
       x2: 150,
       y2: 150,
-      stroke: "black",
+      stroke: 'black',
       strokeWidth: 2,
       opacity: 1,
       originX: 0,
       originY: 0,
-      rotate: 0
-    }
+      rotate: 0,
+    },
   };
 
   createLineFormGroup(l: Data): FormGroup {
@@ -574,64 +744,69 @@ export class ImageGenerateComponent implements OnInit, AfterViewInit {
         opacity: [l.line?.opacity, Validators.required],
         originX: [l.line?.originX, Validators.required],
         originY: [l.line?.originY, Validators.required],
-        rotate: [l.line?.rotate, Validators.required]
-      })
+        rotate: [l.line?.rotate, Validators.required],
+      }),
     });
   }
-  textData: { title: string, editable: boolean, boxed: boolean, text: TextElement } = {
-    title: "Text 1",
+  textData: {
+    title: string;
+    editable: boolean;
+    boxed: boolean;
+    text: TextElement;
+  } = {
+    title: 'Text 1',
     editable: true,
     boxed: true,
     text: {
       x: 100,
       y: 100,
       fs: 40,
-      fw: "normal",
-      text: "Sample Text",
+      fw: 'normal',
+      text: 'Sample Text',
       type: 'text',
-      color: "#FFFFFF",
+      color: '#FFFFFF',
       fontStyle: {
         italic: false,
-        underline: false
+        underline: false,
       },
       rotate: 0,
-      fontFamily: "Noto Sans Gujarati",
+      fontFamily: 'Noto Sans Gujarati',
       textShadow: {
         enable: false,
-        color: "#FFFFFF",
+        color: '#FFFFFF',
         blur: 0,
         offsetX: 0,
-        offsetY: 0
+        offsetY: 0,
       },
-      backgroundColor: "#FFFFFF",
+      backgroundColor: '#FFFFFF',
       textEffects: {
         enable: false,
         gradient: {
           enable: false,
-          startColor: "#ffffff",
-          endColor: "#000000",
-          direction: "horizontal"
+          startColor: '#ffffff',
+          endColor: '#000000',
+          direction: 'horizontal',
         },
         outline: {
           enable: false,
-          color: "#FFFFFF",
-          width: 2
+          color: '#FFFFFF',
+          width: 2,
         },
         glow: {
           enable: false,
-          color: "#ffffff",
-          blur: 0
-        }
+          color: '#ffffff',
+          blur: 0,
+        },
       },
-      textAnchor: "start",
+      textAnchor: 'start',
       alignmentBaseline: 'middle',
       letterSpacing: 0,
       lineHeight: 1.5,
-      textTransformation: "none",
+      textTransformation: 'none',
       opacity: 100,
       originX: 0,
-      originY: 0
-    }
+      originY: 0,
+    },
   };
   createTextFormGroup(t: Data): FormGroup {
     const textForm = this.fb.group({
@@ -648,7 +823,7 @@ export class ImageGenerateComponent implements OnInit, AfterViewInit {
         color: [t.text?.color, Validators.required],
         fontStyle: this.fb.group({
           italic: [t.text?.fontStyle.italic, Validators.required],
-          underline: [t.text?.fontStyle.underline, Validators.required]
+          underline: [t.text?.fontStyle.underline, Validators.required],
         }),
         rotate: [t.text?.rotate, Validators.required],
         fontFamily: [t.text?.fontFamily, Validators.required],
@@ -657,27 +832,36 @@ export class ImageGenerateComponent implements OnInit, AfterViewInit {
           color: [t.text?.textShadow.color],
           blur: [t.text?.textShadow.blur],
           offsetX: [t.text?.textShadow.offsetX],
-          offsetY: [t.text?.textShadow.offsetY]
+          offsetY: [t.text?.textShadow.offsetY],
         }),
         backgroundColor: [t.text?.backgroundColor, Validators.required],
         textEffects: this.fb.group({
           enable: [false],
           gradient: this.fb.group({
             enable: [false],
-            startColor: [t.text?.textEffects.gradient.startColor, Validators.required],
-            endColor: [t.text?.textEffects.gradient.endColor, Validators.required],
-            direction: [t.text?.textEffects.gradient.direction, Validators.required]
+            startColor: [
+              t.text?.textEffects.gradient.startColor,
+              Validators.required,
+            ],
+            endColor: [
+              t.text?.textEffects.gradient.endColor,
+              Validators.required,
+            ],
+            direction: [
+              t.text?.textEffects.gradient.direction,
+              Validators.required,
+            ],
           }),
           outline: this.fb.group({
             enable: [false],
             color: [t.text?.textEffects.outline.color, Validators.required],
-            width: [t.text?.textEffects.outline.width, Validators.required]
+            width: [t.text?.textEffects.outline.width, Validators.required],
           }),
           glow: this.fb.group({
             enable: [false],
             color: [t.text?.textEffects.glow.color, Validators.required],
-            blur: [t.text?.textEffects.glow.blur, Validators.required]
-          })
+            blur: [t.text?.textEffects.glow.blur, Validators.required],
+          }),
         }),
         textAnchor: [t.text?.textAnchor],
         alignmentBaseline: [t.text?.textAnchor],
@@ -686,8 +870,8 @@ export class ImageGenerateComponent implements OnInit, AfterViewInit {
         textTransformation: [t.text?.textTransformation, Validators.required],
         opacity: [t.text?.opacity, Validators.required],
         originX: [t.text?.originX],
-        originY: [t.text?.originY]
-      })
+        originY: [t.text?.originY],
+      }),
     });
     const cn = t.text?.controlName ?? Math.random().toString(36).substring(7);
     const textFormGroup = textForm.get('text') as FormGroup;
@@ -708,13 +892,11 @@ export class ImageGenerateComponent implements OnInit, AfterViewInit {
   }
   async fetchDataFromAPI(apiUrl: string, controlName: string): Promise<void> {
     await this.http.get<any[]>(apiUrl).subscribe({
-      next: data => {
+      next: (data) => {
         this.apiData[controlName] = data['data'] || data;
-        console.log(this.apiData[controlName])
+        console.log(this.apiData[controlName]);
       },
-      error: () => {
-
-      }
+      error: () => {},
     });
   }
   async syncData(control: AbstractControl | null) {
@@ -739,39 +921,55 @@ export class ImageGenerateComponent implements OnInit, AfterViewInit {
     }
   }
 
-
   getControlByKey(key: string) {
     return this.selectData[key];
   }
-  dependencyList(key: string): { title: string, value: string }[] {
-    const result: { title: string, value: string }[] = [];
+  dependencyList(key: string): { title: string; value: string }[] {
+    const result: { title: string; value: string }[] = [];
     for (const k in this.selectData) {
       if (k !== key) {
         result.push({ title: this.selectData[k].title, value: k });
       }
     }
-    console.log(result)
+    console.log(result);
     return result;
   }
-  private addSelectControls(textForm: FormGroup, textFormGroup: FormGroup, t: Data, cn: string) {
+  private addSelectControls(
+    textForm: FormGroup,
+    textFormGroup: FormGroup,
+    t: Data,
+    cn: string
+  ) {
     this.selectData[cn] = {
       title: textForm.get('title')?.value || '',
       control: textFormGroup.get('text') as FormControl,
       api: t.text?.api as string,
       dependency: t.text?.dependency || 'none',
-      lang: t.text?.lang || 'en'
+      lang: t.text?.lang || 'en',
     };
     if (!textFormGroup.contains('lang')) {
-      textFormGroup.addControl('lang', new FormControl(t.text?.lang, Validators.required));
+      textFormGroup.addControl(
+        'lang',
+        new FormControl(t.text?.lang, Validators.required)
+      );
     }
     if (!textFormGroup.contains('controlName')) {
-      textFormGroup.addControl('controlName', new FormControl(t.text?.controlName || cn, Validators.required));
+      textFormGroup.addControl(
+        'controlName',
+        new FormControl(t.text?.controlName || cn, Validators.required)
+      );
     }
     if (!textFormGroup.contains('dependency')) {
-      textFormGroup.addControl('dependency', new FormControl(t.text?.dependency || 'none', Validators.required));
+      textFormGroup.addControl(
+        'dependency',
+        new FormControl(t.text?.dependency || 'none', Validators.required)
+      );
     }
     if (!textFormGroup.contains('api')) {
-      textFormGroup.addControl('api', new FormControl(t.text?.api, Validators.required));
+      textFormGroup.addControl(
+        'api',
+        new FormControl(t.text?.api, Validators.required)
+      );
     }
   }
   private removeSelectControls(textFormGroup: FormGroup) {
@@ -791,12 +989,16 @@ export class ImageGenerateComponent implements OnInit, AfterViewInit {
   updateFontWeights(c: AbstractControl<any, any>) {
     let selectedFontFamily = c.value;
     const parentFormGroup = c.parent;
-    const f = this.fontFamilies.find(family => family.family === selectedFontFamily);
+    const f = this.fontFamilies.find(
+      (family) => family.family === selectedFontFamily
+    );
     if (!f) {
-      selectedFontFamily = ('Noto Sans Gujarati')
+      selectedFontFamily = 'Noto Sans Gujarati';
     }
     if (selectedFontFamily && parentFormGroup) {
-      const font = this.fontFamilies.find(f => f.family === selectedFontFamily);
+      const font = this.fontFamilies.find(
+        (f) => f.family === selectedFontFamily
+      );
       const fontWeights = font ? font.variables : [];
       const currentValue = parentFormGroup.get('fw')?.value;
       if (!fontWeights.includes(currentValue)) {
@@ -806,41 +1008,43 @@ export class ImageGenerateComponent implements OnInit, AfterViewInit {
   }
   getWeight(c: AbstractControl<any, any>) {
     const selectedFontFamily = c.value;
-    const f = this.fontFamilies.find(family => family.family === selectedFontFamily);
+    const f = this.fontFamilies.find(
+      (family) => family.family === selectedFontFamily
+    );
     if (f) {
       return f.variables;
     } else {
-      return []
+      return [];
     }
   }
   createSvgPropertiesFormGroup(svg: SvgProperties): FormGroup {
     return this.fb.group({
       fill: [svg.fill, Validators.required],
       stroke: [svg.stroke, Validators.required],
-      strokeWidth: [svg.strokeWidth, Validators.required]
+      strokeWidth: [svg.strokeWidth, Validators.required],
     });
   }
   imageData = {
-    title: "Image 1",
+    title: 'Image 1',
     editable: true,
     boxed: true,
     image: {
       r: 50,
       x: 100,
       y: 100,
-      imageUrl: "assets/images/svg/upload-img.svg",
-      borderColor: "#000000",
+      imageUrl: 'assets/images/svg/upload-img.svg',
+      borderColor: '#000000',
       borderWidth: 2,
-      shape: "circle",
-      origin: "center",
-      placeholder: "Placeholder Text",
+      shape: 'circle',
+      origin: 'center',
+      placeholder: 'Placeholder Text',
       svgProperties: {
-        fill: "#ffffff",
-        stroke: "#000000",
-        strokeWidth: 2
+        fill: '#ffffff',
+        stroke: '#000000',
+        strokeWidth: 2,
       },
-      rotate: 0
-    }
+      rotate: 0,
+    },
   };
   createImageFormGroup(i: Data): FormGroup {
     return this.fb.group({
@@ -857,13 +1061,19 @@ export class ImageGenerateComponent implements OnInit, AfterViewInit {
         shape: [i.image?.shape, Validators.required],
         origin: [i.image?.origin, Validators.required],
         placeholder: [i.image?.placeholder, Validators.required],
-        svgProperties: this.createSvgPropertiesFormGroup(i.image?.svgProperties!),
-        rotate: [i.image?.rotate]
-      })
+        svgProperties: this.createSvgPropertiesFormGroup(
+          i.image?.svgProperties!
+        ),
+        rotate: [i.image?.rotate],
+      }),
     });
   }
   async drop(event: CdkDragDrop<any[]>) {
-    moveItemInArray(this.postDetails.data, event.previousIndex, event.currentIndex);
+    moveItemInArray(
+      this.postDetails.data,
+      event.previousIndex,
+      event.currentIndex
+    );
     this.positionShuffle = true;
     await this.rebuild(this.postDetails.data);
     this.positionShuffle = false;
@@ -882,7 +1092,9 @@ export class ImageGenerateComponent implements OnInit, AfterViewInit {
   }
   getActiveControl(rectIndex: number, controlId: string): boolean {
     const controls = this.controlSet[rectIndex];
-    const activeControl = controls.find(control => control.id === controlId && control.active);
+    const activeControl = controls.find(
+      (control) => control.id === controlId && control.active
+    );
     return activeControl ? true : false;
   }
   toggleExpand(event: Event) {
@@ -989,18 +1201,18 @@ export class ImageGenerateComponent implements OnInit, AfterViewInit {
     this.controlSet = [];
     for (let i = 0; i < dataArray.length; i++) {
       const item = dataArray[i];
-      (item.rect) && this.dataArray.push(this.createRectFormGroup(item));
-      (item.rect) && this.controlSet.push(this.controlValues.rect);
-      (item.circle) && this.dataArray.push(this.createCircleFormGroup(item));
-      (item.circle) && this.controlSet.push(this.controlValues.circle);
-      (item.ellipse) && this.dataArray.push(this.createEllipseFormGroup(item));
-      (item.ellipse) && this.controlSet.push(this.controlValues.ellipse);
-      (item.line) && this.dataArray.push(this.createLineFormGroup(item));
-      (item.line) && this.controlSet.push(this.controlValues.line);
-      (item.text) && this.dataArray.push(this.createTextFormGroup(item));
-      (item.text) && this.controlSet.push(this.controlValues.text);
-      (item.image) && this.dataArray.push(this.createImageFormGroup(item));
-      (item.image) && this.controlSet.push(this.controlValues.image);
+      item.rect && this.dataArray.push(this.createRectFormGroup(item));
+      item.rect && this.controlSet.push(this.controlValues.rect);
+      item.circle && this.dataArray.push(this.createCircleFormGroup(item));
+      item.circle && this.controlSet.push(this.controlValues.circle);
+      item.ellipse && this.dataArray.push(this.createEllipseFormGroup(item));
+      item.ellipse && this.controlSet.push(this.controlValues.ellipse);
+      item.line && this.dataArray.push(this.createLineFormGroup(item));
+      item.line && this.controlSet.push(this.controlValues.line);
+      item.text && this.dataArray.push(this.createTextFormGroup(item));
+      item.text && this.controlSet.push(this.controlValues.text);
+      item.image && this.dataArray.push(this.createImageFormGroup(item));
+      item.image && this.controlSet.push(this.controlValues.image);
     }
     this.postDetailsForm?.get('data')?.setValue(dataArray);
     if (this.positionShuffle == false) {
@@ -1031,7 +1243,15 @@ export class ImageGenerateComponent implements OnInit, AfterViewInit {
       this.fetchDataFromAPI(api, key);
     }
   }
-  private setupDependency(key: string, data: { title: string, control: FormControl, api: string, dependency: string }) {
+  private setupDependency(
+    key: string,
+    data: {
+      title: string;
+      control: FormControl;
+      api: string;
+      dependency: string;
+    }
+  ) {
     if (!data.api.endsWith('/')) {
       data.api += '/';
     }
@@ -1043,42 +1263,46 @@ export class ImageGenerateComponent implements OnInit, AfterViewInit {
     dependencyControl.valueChanges.subscribe(async (value) => {
       const dependentApi = `${data.api}${value}`;
       await this.fetchDataFromAPI(dependentApi, key);
-      data.control.setValue(data.title, { emitEvent: true })
+      data.control.setValue(data.title, { emitEvent: true });
     });
   }
 
   onSubmit(isCopy?: boolean) {
     if (this.postDetailsForm?.valid) {
       const postData = this.postDetailsForm.value;
-      
-      const operation$ = isCopy 
-        ? this.PS.addPost({ ...postData, id: null })
-        : this.PS.updatePost(postData);
-  
+      console.log(postData);
+      const operation$ =
+        isCopy == true || this.postDetails.id == null
+          ? this.PS.addPost({ ...postData, id: null })
+          : this.PS.updatePost(postData);
+
       operation$.subscribe({
         next: (res) => {
-          console.log(res)
-          const postId = this.postDetails.id;
-
-          this.toastService.show(`Post ${isCopy ? 'copied' : 'saved'} successfully`, {
-            class: 'bg-success text-light',
-            delay: 3000
-          });
-  
-          // Generate and upload thumbnail
+          if (res.id) {
+            const postId = res.id;
+            this.postDetailsForm?.get('id')?.setValue(postId);
+            this.postDetails.id = postId;
+            this.router.navigate([], {
+              queryParams: { img: postId },
+              queryParamsHandling: 'merge',
+            });
+          }
+          this.toastService.show(
+            `Post ${isCopy ? 'copied' : 'saved'} successfully`,
+            {
+              class: 'bg-success text-light',
+              delay: 3000,
+            }
+          );
           this.generateThumbnail()
-            .then(blob => {
-              this.uploadThumbnail(postId, blob);
-              this.router.navigate([], { 
-                queryParams: { img: postId }, 
-                queryParamsHandling: 'merge' 
-              });
+            .then((blob) => {
+              this.uploadThumbnail(this.postDetails.id, blob);
             })
-            .catch(error => {
+            .catch((error) => {
               console.error('Thumbnail generation failed:', error);
               this.toastService.show('Error generating thumbnail', {
                 class: 'bg-warning text-dark',
-                delay: 5000
+                delay: 5000,
               });
             });
         },
@@ -1086,198 +1310,210 @@ export class ImageGenerateComponent implements OnInit, AfterViewInit {
           console.error('Post operation failed:', err);
           this.toastService.show(`Failed to ${isCopy ? 'copy' : 'save'} post`, {
             class: 'bg-danger text-light',
-            delay: 5000
+            delay: 5000,
           });
-        }
+        },
       });
     } else {
       this.postDetailsForm?.markAllAsTouched();
       this.toastService.show('Please fill all required fields', {
         class: 'bg-warning text-dark',
-        delay: 5000
+        delay: 5000,
       });
     }
   }
   addPost(newPostData: PostDetails): void {
-    this.PS.addPost(newPostData)
-      .subscribe(
-        (response: PostDetails) => {
-          const addedDataId = response.id;
-          console.log('Added data ID:', addedDataId);
-          this.postDetailsForm?.get('id')?.setValue(addedDataId);
-          this.postDetails.id = addedDataId;
-          this.router.navigate([], { queryParams: { img: addedDataId }, queryParamsHandling: 'merge' });
-        },
-        error => {
-          console.error(error); // Handle error appropriately
-        }
-      );
+    this.PS.addPost(newPostData).subscribe(
+      (response: PostDetails) => {
+        const addedDataId = response.id;
+        console.log('Added data ID:', addedDataId);
+        this.postDetailsForm?.get('id')?.setValue(addedDataId);
+        this.postDetails.id = addedDataId;
+        this.router.navigate([], {
+          queryParams: { img: addedDataId },
+          queryParamsHandling: 'merge',
+        });
+      },
+      (error) => {
+        console.error(error); // Handle error appropriately
+      }
+    );
   }
   @ViewChild('svgElement') svgElement: ElementRef;
   private generateThumbnail(): Promise<Blob> {
     return new Promise(async (resolve, reject) => {
-        try {
-            if (!this.svgElement?.nativeElement) {
-                throw new Error("SVG element not found");
-            }
-
-            const svgEl = this.svgElement.nativeElement;
-
-            // 1️⃣ Convert all <image> elements to data URIs
-            await this.embedImagesAsDataURI(svgEl);
-
-            // 2️⃣ Serialize the SVG to a string
-            let svgString = new XMLSerializer().serializeToString(svgEl);
-            svgString = svgString.replace(/xmlns="[^"]*"/g, "");
-            svgString = svgString.replace(/<svg/, '<svg xmlns="http://www.w3.org/2000/svg"');
-
-            // 3️⃣ Create a data URL from the SVG string
-            const svgUrl = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svgString)}`;
-            console.log("Generated SVG URL:", svgUrl);
-
-            // 4️⃣ Create a canvas and get its context
-            const canvas = document.createElement("canvas");
-            const ctx = canvas.getContext("2d");
-            if (!ctx) {
-                throw new Error("Failed to get canvas context");
-            }
-
-            // 5️⃣ Set canvas dimensions
-            const originalWidth = this.postDetails?.w || 1024;
-            const originalHeight = this.postDetails?.h || 1024;
-            const targetWidth = 612;
-            const targetHeight = Math.round((originalHeight / originalWidth) * targetWidth);
-            canvas.width = targetWidth;
-            canvas.height = targetHeight;
-
-            // 6️⃣ Create an Image from the SVG
-            const img = new Image();
-            img.crossOrigin = "anonymous";
-            img.onload = () => {
-                try {
-                    console.log("SVG Image loaded successfully, drawing to canvas...");
-                    ctx.imageSmoothingQuality = "high";
-                    ctx.drawImage(img, 0, 0, targetWidth, targetHeight);
-
-                    // 7️⃣ Convert to JPEG with compression
-                    canvas.toBlob((blob) => {
-                        if (!blob) {
-                            return reject(new Error("Canvas conversion failed"));
-                        }
-
-                        console.log("Initial Blob size:", blob.size);
-                        if (blob.size > 100000) {
-                            console.log("Compressing image...");
-                            canvas.toBlob(
-                                (compressedBlob) => resolve(compressedBlob || blob),
-                                "image/jpeg",
-                                0.7
-                            );
-                        } else {
-                            resolve(blob);
-                        }
-                    }, "image/jpeg", 0.9);
-                } catch (error) {
-                    console.error("Error during canvas operations:", error);
-                    reject(error);
-                }
-            };
-
-            img.onerror = (error) => {
-                console.error("Image loading failed:", error);
-                reject(new Error(`Image loading failed: ${error}`));
-            };
-
-            img.src = svgUrl;
-        } catch (error) {
-            console.error("Error in generateThumbnail:", error);
-            reject(error);
+      try {
+        if (!this.svgElement?.nativeElement) {
+          throw new Error('SVG element not found');
         }
+
+        const svgEl = this.svgElement.nativeElement;
+
+        // 1️⃣ Convert all <image> elements to data URIs
+        await this.embedImagesAsDataURI(svgEl);
+
+        // 2️⃣ Serialize the SVG to a string
+        let svgString = new XMLSerializer().serializeToString(svgEl);
+        svgString = svgString.replace(/xmlns="[^"]*"/g, '');
+        svgString = svgString.replace(
+          /<svg/,
+          '<svg xmlns="http://www.w3.org/2000/svg"'
+        );
+
+        // 3️⃣ Create a data URL from the SVG string
+        const svgUrl = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(
+          svgString
+        )}`;
+        console.log('Generated SVG URL:', svgUrl);
+
+        // 4️⃣ Create a canvas and get its context
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+          throw new Error('Failed to get canvas context');
+        }
+
+        // 5️⃣ Set canvas dimensions
+        const originalWidth = this.postDetails?.w || 1024;
+        const originalHeight = this.postDetails?.h || 1024;
+        const targetWidth = 612;
+        const targetHeight = Math.round(
+          (originalHeight / originalWidth) * targetWidth
+        );
+        canvas.width = targetWidth;
+        canvas.height = targetHeight;
+
+        // 6️⃣ Create an Image from the SVG
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.onload = () => {
+          try {
+            console.log('SVG Image loaded successfully, drawing to canvas...');
+            ctx.imageSmoothingQuality = 'high';
+            ctx.drawImage(img, 0, 0, targetWidth, targetHeight);
+
+            // 7️⃣ Convert to JPEG with compression
+            canvas.toBlob(
+              (blob) => {
+                if (!blob) {
+                  return reject(new Error('Canvas conversion failed'));
+                }
+
+                console.log('Initial Blob size:', blob.size);
+                if (blob.size > 100000) {
+                  console.log('Compressing image...');
+                  canvas.toBlob(
+                    (compressedBlob) => resolve(compressedBlob || blob),
+                    'image/jpeg',
+                    0.7
+                  );
+                } else {
+                  resolve(blob);
+                }
+              },
+              'image/jpeg',
+              0.9
+            );
+          } catch (error) {
+            console.error('Error during canvas operations:', error);
+            reject(error);
+          }
+        };
+
+        img.onerror = (error) => {
+          console.error('Image loading failed:', error);
+          reject(new Error(`Image loading failed: ${error}`));
+        };
+
+        img.src = svgUrl;
+      } catch (error) {
+        console.error('Error in generateThumbnail:', error);
+        reject(error);
+      }
     });
-}
+  }
 
-/**
- * 🔹 **Convert all <image> elements inside an SVG to embedded data URIs**
- * This ensures images are loaded before being rendered to canvas.
- */
-private async embedImagesAsDataURI(svgEl: SVGElement): Promise<void> {
-    const imageElements = Array.from(svgEl.querySelectorAll("image"));
+  /**
+   * 🔹 **Convert all <image> elements inside an SVG to embedded data URIs**
+   * This ensures images are loaded before being rendered to canvas.
+   */
+  private async embedImagesAsDataURI(svgEl: SVGElement): Promise<void> {
+    const imageElements = Array.from(svgEl.querySelectorAll('image'));
     const loadImageAsBase64 = (img: SVGImageElement) => {
-        return new Promise<void>((resolve) => {
-            const href = img.getAttribute("href") || img.getAttribute("xlink:href");
-            if (!href || href.startsWith("data:image")) {
-                return resolve(); // Skip if it's already a data URI
-            }
+      return new Promise<void>((resolve) => {
+        const href = img.getAttribute('href') || img.getAttribute('xlink:href');
+        if (!href || href.startsWith('data:image')) {
+          return resolve(); // Skip if it's already a data URI
+        }
 
-            const tempImg = new Image();
-            tempImg.crossOrigin = "anonymous";
-            tempImg.src = href;
+        const tempImg = new Image();
+        tempImg.crossOrigin = 'anonymous';
+        tempImg.src = href;
 
-            tempImg.onload = () => {
-                // Convert image to Base64 and set it inside the SVG
-                const canvas = document.createElement("canvas");
-                canvas.width = tempImg.width;
-                canvas.height = tempImg.height;
-                const ctx = canvas.getContext("2d");
-                ctx?.drawImage(tempImg, 0, 0);
-                img.setAttribute("href", canvas.toDataURL("image/png"));
-                resolve();
-            };
+        tempImg.onload = () => {
+          // Convert image to Base64 and set it inside the SVG
+          const canvas = document.createElement('canvas');
+          canvas.width = tempImg.width;
+          canvas.height = tempImg.height;
+          const ctx = canvas.getContext('2d');
+          ctx?.drawImage(tempImg, 0, 0);
+          img.setAttribute('href', canvas.toDataURL('image/png'));
+          resolve();
+        };
 
-            tempImg.onerror = () => {
-                console.warn(`Image failed to load: ${href}`);
-                resolve(); // Continue even if one image fails
-            };
-        });
+        tempImg.onerror = () => {
+          console.warn(`Image failed to load: ${href}`);
+          resolve(); // Continue even if one image fails
+        };
+      });
     };
 
     // Process all <image> elements
     await Promise.all(imageElements.map(loadImageAsBase64));
-}
+  }
 
-
-getThumbnailUrl(postId: string): string {
-  return `${environment.MasterApi}/thumb-images/${postId}`;
-}
+  getThumbnailUrl(postId: string): string {
+    return `${environment.MasterApi}/thumb-images/${postId}`;
+  }
   private uploadThumbnail(postId: string, blob: Blob): void {
-    console.log(blob)
+    console.log(blob);
     const formData = new FormData();
     formData.append('thumbnail', blob, `${postId}.jpg`);
     formData.append('postId', postId);
     this.TS.uploadThumbnail(postId, formData).subscribe({
       next: () => {
-        this.toastService.show('Thumbnail saved successfully', { 
+        this.toastService.show('Thumbnail saved successfully', {
           class: 'bg-success text-light',
-          delay: 3000
+          delay: 3000,
         });
       },
       error: (err) => {
         console.error('Thumbnail upload failed:', err);
-        this.toastService.show('Failed to save thumbnail', { 
+        this.toastService.show('Failed to save thumbnail', {
           class: 'bg-danger text-light',
-          delay: 5000
+          delay: 5000,
         });
-      }
+      },
     });
   }
   updatePost(newData: PostDetails): void {
-    this.PS.updatePost(newData)
-      .subscribe(response => {
-
-      }, error => {
+    this.PS.updatePost(newData).subscribe(
+      (response) => {},
+      (error) => {
         console.error(error); // Handle error appropriately
-      });
+      }
+    );
   }
   softDelete(): void {
     const id = this.postDetailsForm?.get('id')?.value;
-    id && this.PS.softDeletePost(id)
-      .subscribe(
-        response => {
+    id &&
+      this.PS.softDeletePost(id).subscribe(
+        (response) => {
           console.log('Soft deletion successful:', response);
           this.confirmDelete.hide();
           window.close();
         },
-        error => {
+        (error) => {
           console.error('Error during soft deletion:', error);
         }
       );
@@ -1285,12 +1521,12 @@ getThumbnailUrl(postId: string): string {
 
   hardDelete(): void {
     const id = this.postDetailsForm?.get('id')?.value;
-    id && this.PS.hardDeletePost(id)
-      .subscribe(
-        response => {
+    id &&
+      this.PS.hardDeletePost(id).subscribe(
+        (response) => {
           console.log('Hard deletion successful:', response);
         },
-        error => {
+        (error) => {
           console.error('Error during hard deletion:', error);
         }
       );
@@ -1300,17 +1536,15 @@ getThumbnailUrl(postId: string): string {
     // Synchronize the horizontal scroll position with the vertical scroll position
     element.scrollLeft = element.scrollLeft;
   }
-  ngAfterViewInit(): void {
-
-  }
+  ngAfterViewInit(): void {}
   ngOnInit(): void {
-    this.confirmDelete = new bootstrap.Modal(document.getElementById('confirmDelete')!, { focus: false, keyboard: false, static: false });
-    this.confirmDelete._element.addEventListener('hide.bs.modal', () => {
-    });
-    this.confirmDelete._element.addEventListener('show.bs.modal', () => {
-    });
-    this.confirmDelete._element.addEventListener('shown.bs.modal', () => {
-    });
+    this.confirmDelete = new bootstrap.Modal(
+      document.getElementById('confirmDelete')!,
+      { focus: false, keyboard: false, static: false }
+    );
+    this.confirmDelete._element.addEventListener('hide.bs.modal', () => {});
+    this.confirmDelete._element.addEventListener('show.bs.modal', () => {});
+    this.confirmDelete._element.addEventListener('shown.bs.modal', () => {});
     this.imgParam && this.getPostById(this.imgParam);
     !this.imgParam && this.initForm();
   }

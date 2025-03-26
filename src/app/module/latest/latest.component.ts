@@ -75,7 +75,6 @@ export class LatestComponent {
 
   private initializeMasonry(): void {
     if (this.masonryGridRef && this.isBrowser) {
-      console.log('Initializing Masonry:', this.masonryGridRef.nativeElement);
       this.masonryInstance = new Masonry(this.masonryGridRef.nativeElement, {
         itemSelector: '.masonry-box',
         percentPosition: true,
@@ -94,15 +93,18 @@ export class LatestComponent {
       sortBy: this.sortBy,
       order: this.order,
     }).subscribe(async (response) => {
-      const totalPosts = response.posts.length;
+      const totalPosts = response.posts.filter(
+        (post) => post?.info_show
+      ).length;
       let processedCount = 0;
       this.posts = await Promise.all(
         response.posts.map(async (post) => {
-          const imageUrl = this.imgUrl + post.id;
-          post.image = await this.convertImageToDataURI(imageUrl);
-          processedCount++;
-          this.progress = Math.round((processedCount / totalPosts) * 100);
-          this.cdr.detectChanges();
+          if (post?.info_show) {
+            const imageUrl = this.imgUrl + post.id;
+            post.image = await this.convertImageToDataURI(imageUrl);
+            processedCount++;
+            this.progress = Math.round((processedCount / totalPosts) * 100);
+          }
           return post;
         })
       );
@@ -110,15 +112,7 @@ export class LatestComponent {
       this.loading = false;
       this.progress = 100;
       this.cdr.detectChanges();
-
-      setTimeout(() => {
-        if (this.masonryInstance) {
-          this.masonryInstance.reloadItems();
-          this.masonryInstance.layout();
-        } else {
-          this.initializeMasonry();
-        }
-      }, 0);
+      this.initializeMasonry();
     });
   }
 
@@ -146,8 +140,7 @@ export class LatestComponent {
       this.currentPage = page;
       this.progress = 0;
       this.loading = true;
-      this.updateUrlParams();
-      await this.getAllPosts();
+      await this.updateUrlParams();
     }
   }
 
@@ -157,8 +150,7 @@ export class LatestComponent {
       this.currentPage = 1;
       this.progress = 0;
       this.loading = true;
-      this.updateUrlParams();
-      await this.getAllPosts();
+      await this.updateUrlParams();
     }
   }
 
