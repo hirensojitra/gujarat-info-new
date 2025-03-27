@@ -37,7 +37,9 @@ import { animate, style, transition, trigger } from '@angular/animations';
 import { ThumbImagesService } from 'src/app/common/services/thumb-images.service';
 import { environment } from 'src/environments/environment';
 declare const bootstrap: any;
-
+interface FontStyles {
+  [fontFamily: string]: Set<string>;
+}
 interface Data {
   title: string;
   editable: boolean;
@@ -333,6 +335,7 @@ export class ImageGenerateComponent implements OnInit, AfterViewInit {
     };
   } = {};
   positionShuffle: boolean = false;
+  
   constructor(
     private fb: FormBuilder,
     private colorService: ColorService,
@@ -1270,7 +1273,6 @@ export class ImageGenerateComponent implements OnInit, AfterViewInit {
   onSubmit(isCopy?: boolean) {
     if (this.postDetailsForm?.valid) {
       const postData = this.postDetailsForm.value;
-      console.log(postData);
       const operation$ =
         isCopy == true || this.postDetails.id == null
           ? this.PS.addPost({ ...postData, id: null })
@@ -1348,7 +1350,8 @@ export class ImageGenerateComponent implements OnInit, AfterViewInit {
         }
 
         const svgEl = this.svgElement.nativeElement;
-
+        const fontFamilies = this.getFontStylesFromSVG(svgEl);
+        await this.loadFonts(fontFamilies);
         // 1️⃣ Convert all <image> elements to data URIs
         await this.embedImagesAsDataURI(svgEl);
 
@@ -1364,7 +1367,6 @@ export class ImageGenerateComponent implements OnInit, AfterViewInit {
         const svgUrl = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(
           svgString
         )}`;
-        console.log('Generated SVG URL:', svgUrl);
 
         // 4️⃣ Create a canvas and get its context
         const canvas = document.createElement('canvas');
@@ -1388,7 +1390,6 @@ export class ImageGenerateComponent implements OnInit, AfterViewInit {
         img.crossOrigin = 'anonymous';
         img.onload = () => {
           try {
-            console.log('SVG Image loaded successfully, drawing to canvas...');
             ctx.imageSmoothingQuality = 'high';
             ctx.drawImage(img, 0, 0, targetWidth, targetHeight);
 
@@ -1398,8 +1399,6 @@ export class ImageGenerateComponent implements OnInit, AfterViewInit {
                 if (!blob) {
                   return reject(new Error('Canvas conversion failed'));
                 }
-
-                console.log('Initial Blob size:', blob.size);
                 if (blob.size > 100000) {
                   console.log('Compressing image...');
                   canvas.toBlob(
@@ -1432,7 +1431,77 @@ export class ImageGenerateComponent implements OnInit, AfterViewInit {
       }
     });
   }
+  getFontStylesFromSVG(svgElement: SVGElement | HTMLElement): FontStyles {
+    const textElements = svgElement.querySelectorAll('text');
+    const fontStyles: FontStyles = {}; // Initialize as an empty object
+    textElements.forEach((text) => {
+      const fontFamily = text.getAttribute('font-family');
+      const fontWeight = text.getAttribute('font-weight') || 'normal'; // Default to 'normal' if font-weight is not specified
+      if (fontFamily) {
+        // Extract font family name from the attribute value
+        const fontFamilyName = fontFamily
+          .split(',')[0]
+          .replace(/['"]/g, '')
+          .trim(); // Remove single or double quotes and extra spaces
+        if (!fontStyles[fontFamilyName]) {
+          fontStyles[fontFamilyName] = new Set<string>();
+        }
+        fontStyles[fontFamilyName].add(fontWeight);
+      }
+    });
+    return fontStyles;
+  }
+  async loadFonts(fontStyles: FontStyles) {
+    const svg = this.svgElement.nativeElement;
+    let svgDefs =
+      (svg.querySelector('defs') as SVGDefsElement) ||
+      svg.appendChild(
+        document.createElementNS('http://www.w3.org/2000/svg', 'defs')
+      );
 
+    let styleElement = svgDefs.querySelector('style') as any | null;
+    if (!styleElement) {
+      styleElement = document.createElementNS(
+        'http://www.w3.org/2000/svg',
+        'style'
+      );
+      svgDefs.appendChild(styleElement);
+    }
+
+    const addedRules = new Set<string>();
+
+    for (const [fontFamily, fontWeights] of Object.entries(fontStyles)) {
+      for (const fontWeight of fontWeights) {
+        const fontPath = this.fontService.getFontPath(fontFamily, fontWeight);
+        const fontData = await this.loadFontAsBase64(
+          `assets/fonts/${fontPath}.ttf`
+        );
+        const fontFaceRule = `@font-face {
+          font-family: '${fontFamily}';
+          font-style: normal;
+          font-weight: ${fontWeight};
+          font-stretch: 100%;
+          font-display: swap;
+          src: url(data:font/truetype;base64,${fontData}) format('truetype');
+        }`;
+
+        if (!addedRules.has(fontFaceRule)) {
+          styleElement.textContent += fontFaceRule;
+          addedRules.add(fontFaceRule);
+        }
+      }
+    }
+  }
+  async loadFontAsBase64(fontUrl: string): Promise<string> {
+    const response = await fetch(fontUrl);
+    const fontData = await response.arrayBuffer();
+    return btoa(
+      new Uint8Array(fontData).reduce(
+        (data, byte) => data + String.fromCharCode(byte),
+        ''
+      )
+    );
+  }
   /**
    * 🔹 **Convert all <image> elements inside an SVG to embedded data URIs**
    * This ensures images are loaded before being rendered to canvas.
@@ -1476,7 +1545,6 @@ export class ImageGenerateComponent implements OnInit, AfterViewInit {
     return `${environment.MasterApi}/thumb-images/${postId}`;
   }
   private uploadThumbnail(postId: string, blob: Blob): void {
-    console.log(blob);
     const formData = new FormData();
     formData.append('thumbnail', blob, `${postId}.jpg`);
     formData.append('postId', postId);

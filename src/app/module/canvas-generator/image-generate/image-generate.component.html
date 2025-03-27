@@ -46,6 +46,10 @@
                                     <label for="backgroundurl" class="form-label">Background URL</label>
                                     <input type="text" id="backgroundurl" class="form-control" formControlName="backgroundurl">
                                 </div>
+                                <div class="form-group col-12" [class.d-none]="selectedElement!==-1">
+                                    <label for="download_counter" class="form-label">Download Counter</label>
+                                    <input type="text" id="download_counter" class="form-control" formControlName="download_counter">
+                                </div>
                                 <div formArrayName="data" class="col-12">
                                     <!-- Use ngFor to iterate over each element in the data form array -->
                                     <div *ngFor="let item of dataArray.controls; let i = index" class="row g-3" [class.d-none]="selectedElement!==i">
