@@ -92,19 +92,17 @@ export class LatestComponent {
       search: this.search,
       sortBy: this.sortBy,
       order: this.order,
+      published: true,
+      info_show: true
     }).subscribe(async (response) => {
-      const totalPosts = response.posts.filter(
-        (post) => post?.info_show
-      ).length;
+      const totalPosts = response.posts.length;
       let processedCount = 0;
       this.posts = await Promise.all(
         response.posts.map(async (post) => {
-          if (post?.info_show) {
-            const imageUrl = this.imgUrl + post.id;
-            post.image = await this.convertImageToDataURI(imageUrl);
-            processedCount++;
-            this.progress = Math.round((processedCount / totalPosts) * 100);
-          }
+          const imageUrl = this.imgUrl + post.id;
+          post.image = await this.convertImageToDataURI(imageUrl);
+          processedCount++;
+          this.progress = Math.round((processedCount / totalPosts) * 100);
           return post;
         })
       );

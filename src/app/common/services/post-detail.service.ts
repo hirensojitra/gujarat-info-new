@@ -16,21 +16,32 @@ export class PostDetailService {
     search?: string;
     sortBy?: string;
     order?: string;
+    published?: boolean;
+    info_show?: boolean;
   }): Observable<{ posts: PostDetails[]; pagination: any }> {
-    // Build the query string from parameters
-    const queryParams = new HttpParams()
+    // Initialize query parameters
+    let queryParams = new HttpParams()
       .set('page', params.page.toString())
       .set('limit', (params.limit || 12).toString())
       .set('search', params.search || '')
       .set('sortBy', params.sortBy || 'created_at')
       .set('order', params.order || 'desc');
-
-    // Make the HTTP GET request with the constructed query string
+  
+    // Conditionally add optional parameters
+    if (params.published !== undefined) {
+      queryParams = queryParams.set('published', params.published.toString());
+    }
+  
+    if (params.info_show !== undefined) {
+      queryParams = queryParams.set('info_show', params.info_show.toString());
+    }
+  
     return this.http.get<{ posts: PostDetails[]; pagination: any }>(
       this.baseUrl,
       { params: queryParams }
     );
   }
+  
 
   addPost(newPostData: PostDetails): Observable<PostDetails> {
     return this.http.post<PostDetails>(`${this.baseUrl}`, newPostData).pipe(

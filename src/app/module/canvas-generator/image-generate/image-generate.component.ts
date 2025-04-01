@@ -263,6 +263,7 @@ export class ImageGenerateComponent implements OnInit, AfterViewInit {
     title: 'image',
     info: '',
     info_show: true,
+    published: false,
     backgroundurl:
       'https://images.unsplash.com/photo-1536663094815-aa7e99627504?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
     data: [
@@ -335,7 +336,7 @@ export class ImageGenerateComponent implements OnInit, AfterViewInit {
     };
   } = {};
   positionShuffle: boolean = false;
-  
+
   constructor(
     private fb: FormBuilder,
     private colorService: ColorService,
@@ -476,7 +477,8 @@ export class ImageGenerateComponent implements OnInit, AfterViewInit {
         Validators.required,
       ],
       info: [this.postDetails.info || '', Validators.required],
-      info_show: [this.postDetails.info_show || false, Validators.required],
+      info_show: [this.postDetails.info_show || false],
+      published: [this.postDetails.published || false],
       data: this.fb.array([]),
       apiData: this.apiData,
     });

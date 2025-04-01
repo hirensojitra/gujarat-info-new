@@ -3,13 +3,14 @@ import {
   Component,
   ElementRef,
   Inject,
+  makeStateKey,
   OnInit,
   PLATFORM_ID,
   Renderer2,
   ViewChild,
 } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { Title, Meta } from '@angular/platform-browser';
+import { Title, Meta, TransferState } from '@angular/platform-browser';
 import {
   ImageElement,
   PostDetails,
@@ -114,6 +115,7 @@ export class PosterComponent implements OnInit {
   cropperModalTitle: string | undefined = '';
   facebookAccessToken: string | null = null;
   isInAppBrowser: boolean = false;
+  POST_DETAILS_KEY = makeStateKey<PostDetails>('postDetails');
   constructor(
     private route: ActivatedRoute,
     private titleService: Title,
@@ -133,7 +135,8 @@ export class PosterComponent implements OnInit {
     private elementRef: ElementRef,
     private baseUrlService: BaseUrlService,
     private seoService: SEOService,
-    @Inject(PLATFORM_ID) private platformId: Object
+    @Inject(PLATFORM_ID) private platformId: Object,
+    private transferState: TransferState
   ) {
     this.inputTextForm = this.fb.group({
       text: ['', Validators.required],
@@ -148,16 +151,44 @@ export class PosterComponent implements OnInit {
   async ngOnInit(): Promise<void> {
     if (isPlatformBrowser(this.platformId)) {
       this.detectInAppBrowser();
+      if (this.transferState.hasKey(this.POST_DETAILS_KEY)) {
+        this.postDetailsDefault = this.transferState.get(
+          this.POST_DETAILS_KEY,
+          null as any
+        );
+        this.transferState.remove(this.POST_DETAILS_KEY); // Remove to avoid reusing stale data
+      }
       await this.route.paramMap.subscribe(async (params) => {
         this.imgParam = params.get('img');
         if (this.imgParam) {
-          this.postDetailsDefault = (await this.PS.getPostById(
-            this.imgParam.toString()
-          ).toPromise()) as PostDetails;
-          if (this.postDetailsDefault && !this.postDetailsDefault.deleted) {
-            this.getPostById();
-            this.pageLink = window.location.href;
+          try {
+            // Show loading state
+            this.postStatus = 'loading';
+            this.postDetails = undefined;
+
+
+            // Check if post is valid
+            if (
+              this.postDetailsDefault &&
+              !this.postDetailsDefault.deleted &&
+              this.postDetailsDefault.published
+            ) {
+              await this.getPostById(); // Process full details
+              this.pageLink = window.location.href;
+            } else {
+              // Show thumbnail for invalid posts
+              this.postDetails = this.postDetailsDefault;
+              this.isDeleted = this.postDetailsDefault?.deleted;
+              this.postStatus = this.postDetailsDefault?.deleted
+                ? 'This image has been deleted'
+                : 'This image is not published';
+            }
             await this.changeMetadataDynamically();
+          } catch (error) {
+            // Handle API errors
+            console.error('Error fetching post:', error);
+            this.postStatus = 'Error loading image';
+            this.postDetails = undefined;
           }
         }
       });
@@ -204,9 +235,13 @@ export class PosterComponent implements OnInit {
           this.postDetailsDefault = (await this.PS.getPostById(
             this.imgParam.toString()
           ).toPromise()) as PostDetails;
-          if (this.postDetailsDefault && !this.postDetailsDefault.deleted) {
+          if (this.postDetailsDefault) {
             await this.changeMetadataDynamically();
           }
+          this.transferState.set(
+            this.POST_DETAILS_KEY,
+            this.postDetailsDefault
+          );
         }
       });
     }
@@ -290,6 +325,7 @@ export class PosterComponent implements OnInit {
 
   async getPostById(): Promise<void> {
     const post: PostDetails = this.postDetailsDefault;
+    console.log(this.postDetailsDefault);
     if (!post) return;
     try {
       this.postDetails = post;

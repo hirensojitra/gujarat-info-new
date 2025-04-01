@@ -85,6 +85,8 @@ export class ImageListComponent implements OnInit, AfterViewInit {
       search: this.search,
       sortBy: this.sortBy,
       order: this.order,
+      published: undefined,
+      info_show: undefined
     }).subscribe((response) => {
       this.posts = response.posts;
       this.pagination = response.pagination;
