@@ -69,6 +69,7 @@ export class PosterComponent implements OnInit {
   postDetails: PostDetails | undefined;
   imgParam: string;
   isDeleted: boolean | undefined;
+  dataProccessed: boolean | undefined;
   postStatus: string | undefined = 'loading';
   dataset: data[] = [];
   apiData: { [key: string]: any[] } = {};
@@ -151,12 +152,15 @@ export class PosterComponent implements OnInit {
   async ngOnInit(): Promise<void> {
     if (isPlatformBrowser(this.platformId)) {
       this.detectInAppBrowser();
+      await this.seoService.initSEO();
       if (this.transferState.hasKey(this.POST_DETAILS_KEY)) {
         this.postDetailsDefault = this.transferState.get(
           this.POST_DETAILS_KEY,
           null as any
         );
-        this.transferState.remove(this.POST_DETAILS_KEY); // Remove to avoid reusing stale data
+        this.transferState.remove(this.POST_DETAILS_KEY); 
+        this.dataProccessed = true;
+        await this.changeMetadataDynamically();// Remove to avoid reusing stale data
       }
       await this.route.paramMap.subscribe(async (params) => {
         this.imgParam = params.get('img');
@@ -165,9 +169,6 @@ export class PosterComponent implements OnInit {
             // Show loading state
             this.postStatus = 'loading';
             this.postDetails = undefined;
-
-
-            // Check if post is valid
             if (
               this.postDetailsDefault &&
               !this.postDetailsDefault.deleted &&
@@ -183,12 +184,12 @@ export class PosterComponent implements OnInit {
                 ? 'This image has been deleted'
                 : 'This image is not published';
             }
-            await this.changeMetadataDynamically();
           } catch (error) {
             // Handle API errors
             console.error('Error fetching post:', error);
             this.postStatus = 'Error loading image';
             this.postDetails = undefined;
+            this.dataProccessed = true
           }
         }
       });
@@ -232,18 +233,23 @@ export class PosterComponent implements OnInit {
       await this.route.paramMap.subscribe(async (params) => {
         this.imgParam = params.get('img');
         if (this.imgParam) {
-          this.postDetailsDefault = (await this.PS.getPostById(
-            this.imgParam.toString()
-          ).toPromise()) as PostDetails;
-          if (this.postDetailsDefault) {
-            await this.changeMetadataDynamically();
+          try {
+            // Attempt to fetch the post details
+            this.postDetailsDefault = (await this.PS.getPostById(this.imgParam.toString()).toPromise()) as PostDetails;
+            
+            // Check if the post details were fetched successfully
+            if (this.postDetailsDefault) {
+              await this.changeMetadataDynamically();
+              
+              // Set the post details in TransferState
+              this.transferState.set(this.POST_DETAILS_KEY, this.postDetailsDefault);
+            }
+          } catch (error) {
+            this.dataProccessed = true
           }
-          this.transferState.set(
-            this.POST_DETAILS_KEY,
-            this.postDetailsDefault
-          );
         }
       });
+      
     }
     await new Promise((resolve) => setTimeout(resolve, 1500));
   }
@@ -325,7 +331,6 @@ export class PosterComponent implements OnInit {
 
   async getPostById(): Promise<void> {
     const post: PostDetails = this.postDetailsDefault;
-    console.log(this.postDetailsDefault);
     if (!post) return;
     try {
       this.postDetails = post;
@@ -366,6 +371,7 @@ export class PosterComponent implements OnInit {
       } else if (post.deleted && post.msg) {
         this.postStatus = post.msg;
       }
+      this.dataProccessed = true;
     } catch (error) {
       console.error('Error in getPostById:', error);
       this.postStatus = 'Error loading post';

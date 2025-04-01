@@ -3,6 +3,7 @@ import { isPlatformBrowser } from '@angular/common';
 import { PostDetails } from 'src/app/common/interfaces/image-element';
 import { PostDetailService } from 'src/app/common/services/post-detail.service';
 import { ActivatedRoute, Router } from '@angular/router';
+import { environment } from 'src/environments/environment';
 
 declare const bootstrap: any;
 declare const Masonry: any;
@@ -29,7 +30,7 @@ export class ImageDeletedComponent implements OnInit, AfterViewInit {
 
   @ViewChild('masonryGrid', { static: false }) masonryGridRef!: ElementRef;
   private masonryInstance: any;
-
+  imgUrl = environment.MasterApi + '/thumb-images/';
   constructor(
     private PS: PostDetailService,
     private route: ActivatedRoute,

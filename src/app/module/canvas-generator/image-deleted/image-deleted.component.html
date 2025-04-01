@@ -5,7 +5,8 @@
                 <div class="row g-md-3 g-2" *ngIf="posts.length; else noPosts" #masonryGrid data-masonry="{'percentPosition': true}">
                     <div class="col-lg-2 col-md-3 col-sm-4 col-6 masonry-box" *ngFor="let post of posts">
                         <div class="position-relative border p-2">
-                            <svg class="svg-content max-w-100-p max-h-100-p img-fluid mx-auto d-block" preserveAspectRatio="xMidYMid meet" svgDraw [postDataSet]="post" [loadOnly]="true" (backgroundLoaded)="onSvgLoad()"></svg>
+                            <img [src]="imgUrl + post.id" [attr.alt]="post.title"
+                                                class="w-100 img-fluid d-block" (load)="onSvgLoad()">
                             <div class="d-flex flex-column position-absolute start-0 top-0 h-100 w-100 p-3">
                                 <div class="d-flex mb-auto">
                                     <a class="btn btn-success btn-sm me-auto" href="#" (click)="selectRecoverId(post.id);false"><i class="fa fa-refresh"></i></a>

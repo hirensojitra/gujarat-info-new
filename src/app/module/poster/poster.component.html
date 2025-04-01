@@ -1,5 +1,9 @@
 <div class="h-100-vh d-flex flex-column">
-    <div class="flex-grow-1 overflow-auto align-items-center" *ngIf="isInAppBrowser">
+    <div class="flex-grow-1 overflow-auto align-items-center d-flex flex-column justify-content-center" *ngIf="!this.postDetailsDefault">
+        <img class="max-w-100 max-h-100 rounded-4" src="./assets/images/svg/no-post.svg" />
+        <button class="btn btn-danger m-3" [routerLink]="'/latest'"><i class="fa fa-home me-3"></i>Home</button>
+    </div>
+    <div class="flex-grow-1 overflow-auto align-items-center" *ngIf="isInAppBrowser && this.postDetails">
         <div *ngIf="isInAppBrowser" class="container mt-4">
             <div *ngIf="this.postDetails" class="px-3">
                 <h1 class="text-center my-4 fw-b h5" *ngIf="this.postDetails.title">{{this.postDetails.title}}</h1>
@@ -28,11 +32,11 @@
             </div>
         </div>
     </div>
-    <div class="flex-grow-1 overflow-auto" *ngIf="!isInAppBrowser">
+    <div class="flex-grow-1 overflow-auto" *ngIf="!isInAppBrowser&&postDetails">
         <div *ngIf="this.postDetails" class="px-3">
             <h1 class="text-center my-4 fw-b h5" *ngIf="this.postDetails.title">{{this.postDetails.title}}</h1>
             <h2 class="text-center mb-4 lh-base h6" *ngIf="this.postDetails.info">{{this.postDetails.info}}</h2>
-            <ng-container *ngIf="postStatus!=='loading'&&isDeleted==false">
+            <ng-container *ngIf="postStatus!=='loading'">
                 <h5 class="text-center mb-4"><b>{{postStatus}}</b></h5>
             </ng-container>
         </div>
@@ -43,18 +47,28 @@
         <div class="container p-0">
             <div class="row g-0">
                 <div class="col-md-6 col-lg-3 mx-auto text-center">
+                    <img [src]="imgUrl+this.postDetailsDefault.id+'?quality=100'" [alt]="this.postDetailsDefault.title"
+                        *ngIf="postStatus=='This image is not published' || postStatus=='This image has been deleted' && this.postDetailsDefault"
+                        class="w-100">
                     <svg #imageDraw class="max-w-100 max-h-100 border"
-                        [ngClass]="{'d-none':postStatus=='loading'||isDeleted}"></svg>
+                        [ngClass]="{'d-none':postStatus=='loading'|| isDeleted || !dataProccessed}"></svg>
                     <img [src]="imgUrl+this.postDetails.id" [alt]="this.postDetails.title"
                         [ngClass]="{'d-none':postStatus!=='loading'}" *ngIf="postStatus=='loading'&&this.postDetails"
                         class="w-100">
-                    <img class="max-w-100 max-h-100 rounded-4" *ngIf="!postStatus || isDeleted"
-                        src="./assets/images/svg/no-post.svg" />
+                    <!-- <img class="max-w-100 max-h-100 rounded-4" *ngIf="!postStatus || isDeleted"
+                        src="./assets/images/svg/no-post.svg" /> -->
                     <div *ngIf="postStatus=='loading'">Loading</div>
-                    <a class="btn btn-success btn-md w-auto m-3"
-                        href="https://whatsapp.com/channel/0029VaePspU1iUxd0HOsMA1d" target="_blank"
-                        *ngIf="this.postDetails?.info_show"><i class="fa fa-whatsapp me-2"></i>Join Gujarat Info
-                        Channel</a>
+                    <div class="d-flex justify-content-center mt-3">
+                        <a class="btn btn-success btn-md mx-2"
+                            href="https://whatsapp.com/channel/0029VaePspU1iUxd0HOsMA1d" target="_blank"
+                            *ngIf="this.postDetails?.info_show"><i class="fa fa-whatsapp me-2"></i>Join PostNew
+                            Channel</a>
+                        <a class="btn btn-primary btn-md mx-2"
+                            href="https://www.facebook.com/profile.php?id=61574918183049" target="_blank"
+                            *ngIf="this.postDetails?.info_show"><i class="fa fa-facebook me-2"></i>Join
+                            PostNew
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
@@ -116,12 +130,6 @@
         <ng-container *ngIf="!postStatus">
             <h5 class="text-center my-2 text-danger"><b>No any post available for this link.</b></h5>
         </ng-container>
-    </div>
-    <div *ngIf="postStatus && isDeleted==false" class="position-sticky bottom-0 bg-light border-top pt-3 px-3">
-        <span class="w-100 mx-auto pb-3 d-flex align-items-center justify-content-center"
-            *ngIf="this.postDetails?.info_show">Created by <a href="https://www.facebook.com/SOJITRAHIREN"
-                class="fw-bold btn btn-outline-danger ms-3" target="_blank" (click)="myInfo.show();false">Hiren
-                Sojitra</a></span>
         <div class="container">
             <div class="row g-2" *ngIf="canDownload">
                 <div class="col-lg-4 offset-lg-4 col-sm-8 offset-sm-2 col-12 offset-0">
@@ -151,8 +159,16 @@
                 </div>
             </div>
         </div>
-        <span class="w-auto mx-auto d-block text-center" *ngIf="this.postDetails?.info_show"><a
-                [routerLink]="'/about-us'" class="text-danger fw-bold mx-auto text-decoration-none">More Info</a></span>
+    </div>
+    <div class="bg-dark border-top p-1 text-white">
+        <div class="w-100 mx-auto d-flex align-items-center justify-content-center" *ngIf="this.postDetails?.info_show||!this.postDetails">
+            Created by <a href="https://www.facebook.com/SOJITRAHIREN" class="fw-bold btn btn-danger ms-3"
+                target="_blank" (click)="myInfo.show();false">Hiren
+                Sojitra</a>
+            <a [routerLink]="'/about-us'" class="text-danger fw-bold text-decoration-none mx-3 my-1">More
+                Info</a>
+        </div>
+
     </div>
 </div>
 <div class="modal fade" id="textModal" tabindex="-1" aria-labelledby="textModalLabel" aria-hidden="true">
