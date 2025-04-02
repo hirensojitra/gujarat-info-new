@@ -1,1 +1,0 @@
-import{a}from"./chunk-S2A4RMHU.js";import"./chunk-KDHC65KP.js";import"./chunk-L7PFNTAI.js";import"./chunk-WKH7LKHA.js";import"./chunk-VM5R3MMS.js";import"./chunk-UZIG45QV.js";import"./chunk-JOTX47DF.js";import"./chunk-DET3BHZI.js";import"./chunk-CWTPBX7D.js";export{a as TalukaModule};
