@@ -183,6 +183,8 @@ export class LatestComponent {
         .then((colors) => {
           if (colors.length > 0) {
             parentElement.style.backgroundColor = colors[2];
+            parentElement.style.borderColor = colors[2];
+            parentElement.style.color = colors[3];
           }
         })
         .catch((error) => {

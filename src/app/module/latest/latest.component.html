@@ -1,9 +1,10 @@
 <div class="h-100-vh d-flex flex-column align-items-center" *ngIf="isBrowser && loading">
-    <div class="flex-grow-1 p-3 position-relative overflow-hidden w-100 d-flex flex-column justify-content-center align-items-center">
+    <div
+        class="flex-grow-1 p-3 position-relative overflow-hidden w-100 d-flex flex-column justify-content-center align-items-center">
         <img src="assets/images/svg/logo.svg" alt="Post New" class="w-60-px mb-3">
-        <div class="progress w-100"  style="height: 5px;">
-            <div class="progress-bar" role="progressbar" [style.width.%]="progress" 
-                 [attr.aria-valuenow]="progress" aria-valuemin="0" aria-valuemax="100">
+        <div class="progress w-100" style="height: 5px;">
+            <div class="progress-bar" role="progressbar" [style.width.%]="progress" [attr.aria-valuenow]="progress"
+                aria-valuemin="0" aria-valuemax="100">
             </div>
         </div>
         <b class="p-3">{{ progress }}%</b>
@@ -11,31 +12,35 @@
 </div>
 
 <div class="h-100-vh d-flex flex-column" *ngIf="isBrowser&&!loading">
+    <div class="d-flex align-items-center justify-content-center">
+        <a [routerLink]="'/latest'" class="max-w-50 my-3"><img src="assets/images/svg/logo-large.svg" alt="PostNew.in"
+                class="max-w-300-px w-100"></a>
+    </div>
     <div class="flex-grow-1 position-relative overflow-hidden">
         <div class="position-absolute h-100 w-100 d-flex overflow-auto flex-column">
             <div class="container-fluid h-100 w-100 py-3">
                 <div class="row g-3">
                     <ng-container *ngIf="posts.length">
                         <div class="col-12 px-md-3 px-2">
-                            <div class="row g-md-3 g-2" #masonryGrid data-masonry="{'percentPosition': true}">
+                            <div class="row g-md-4 g-3" #masonryGrid data-masonry="{'percentPosition': true}">
                                 <ng-container *ngFor="let post of posts; let i= index">
-                                    <div class="col-lg-3 col-md-6 col-4 masonry-box"
+                                    <div class="col-lg-3 col-md-6 col-6 masonry-box"
                                         *ngIf="post?.info_show && post?.image">
-                                        <h3 class="h5 fw-bold m-0 p-3 bg-black text-white d-none d-md-block">
-                                            {{post.title}}
-                                        </h3>
-                                        <a class="position-relative shadow-sm p-2 text-decoration-none d-block"
+                                        <a class="position-relative shadow-sm text-decoration-none d-block"
                                             [routerLink]="'/poster/' + post.id" target="_blank">
-                                            <img [src]="post.image" [attr.alt]="post.title"
-                                                class="w-100 img-fluid d-block" (load)="onSvgLoad(post, $event)">
-
-                                            <span
-                                                class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-danger d-md-block">
-                                                Download: {{post.download_counter}}
-                                                <span class="visually-hidden">unread messages</span>
-                                            </span>
+                                            <div class="card p-2">
+                                                <img [src]="post.image" [attr.alt]="post.title"
+                                                    class="w-100 img-fluid d-block card-img-top rounded-3"
+                                                    (load)="onSvgLoad(post, $event)">
+                                                <div class="card-body">
+                                                    <h5 class="card-title">
+                                                        {{post.title}}
+                                                    </h5>
+                                                    <p class="card-text">{{post.info}}</p>
+                                                    <p class="m-0 fw-bold"><i class="fa fa-download me-2"></i>{{post.download_counter}}</p>
+                                                </div>
+                                            </div>
                                         </a>
-                                        <p class="h6 m-0 p-3 bg-light text-dark d-none d-md-block">{{post.info}}</p>
                                     </div>
                                 </ng-container>
                             </div>
