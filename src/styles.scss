@@ -748,3 +748,19 @@ $fab-background-color-2: inherit;
 .progress-bar {
     transition: width 0.3s ease;
 }
+@for $i from 2 through 10 {
+    .text-truncate-#{$i} {
+      display: -webkit-box;
+      -webkit-line-clamp: $i; /* Limits text to $i lines */
+      -webkit-box-orient: vertical;
+      
+      display: box;
+      line-clamp: $i; /* Standard property */
+      box-orient: vertical;
+      
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: normal;
+    }
+  }
+  

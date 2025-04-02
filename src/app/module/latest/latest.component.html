@@ -13,7 +13,7 @@
 
 <div class="h-100-vh d-flex flex-column" *ngIf="isBrowser&&!loading">
     <div class="d-flex align-items-center justify-content-center">
-        <a [routerLink]="'/latest'" class="max-w-50 my-3"><img src="assets/images/svg/logo-large.svg" alt="PostNew.in"
+        <a [routerLink]="'/latest'" class="max-w-50 my-2"><img src="assets/images/svg/logo-large.svg" alt="PostNew.in"
                 class="max-w-300-px w-100"></a>
     </div>
     <div class="flex-grow-1 position-relative overflow-hidden">
@@ -24,19 +24,19 @@
                         <div class="col-12 px-md-3 px-2">
                             <div class="row g-md-4 g-3" #masonryGrid data-masonry="{'percentPosition': true}">
                                 <ng-container *ngFor="let post of posts; let i= index">
-                                    <div class="col-lg-3 col-md-6 col-6 masonry-box"
+                                    <div class="col-lg-3 col-xl-2 col-md-6 col-6 masonry-box"
                                         *ngIf="post?.info_show && post?.image">
-                                        <a class="position-relative shadow-sm text-decoration-none d-block"
+                                        <a class="text-decoration-none d-block"
                                             [routerLink]="'/poster/' + post.id" target="_blank">
-                                            <div class="card p-2">
+                                            <div class="card p-4 pb-0 rounded-4 border-0">
                                                 <img [src]="post.image" [attr.alt]="post.title"
-                                                    class="w-100 img-fluid d-block card-img-top rounded-3"
+                                                    class="w-100 img-fluid d-block card-img-top rounded-3 shadow"
                                                     (load)="onSvgLoad(post, $event)">
-                                                <div class="card-body">
-                                                    <h5 class="card-title">
+                                                <div class="card-body px-0">
+                                                    <h5 class="card-title text-truncate-2">
                                                         {{post.title}}
                                                     </h5>
-                                                    <p class="card-text">{{post.info}}</p>
+                                                    <p class="card-text text-truncate-2">{{post.info}}</p>
                                                     <p class="m-0 fw-bold"><i class="fa fa-download me-2"></i>{{post.download_counter}}</p>
                                                 </div>
                                             </div>

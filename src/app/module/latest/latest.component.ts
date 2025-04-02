@@ -182,9 +182,13 @@ export class LatestComponent {
       this.getColors(imageUrl, 5)
         .then((colors) => {
           if (colors.length > 0) {
-            parentElement.style.backgroundColor = colors[2];
-            parentElement.style.borderColor = colors[2];
-            parentElement.style.color = colors[3];
+            parentElement.style.backgroundColor = colors[4];
+            // parentElement.style.borderColor = colors[2];
+            parentElement.style.color = colors[2];
+            const images = parentElement.querySelectorAll('img');
+          images.forEach((img) => {
+            img.style.boxShadow = `0 0.5rem 1rem ${colors[2]}`;
+          });
           }
         })
         .catch((error) => {
