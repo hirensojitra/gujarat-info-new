@@ -35,6 +35,8 @@ import { BaseUrlService } from '../../common/services/baseuri.service';
 import { SEOService } from 'src/app/common/services/seo.service';
 import { isPlatformBrowser, isPlatformServer } from '@angular/common';
 import { environment } from 'src/environments/environment';
+import { lastValueFrom } from 'rxjs';
+import { trackService } from 'src/app/common/services/track.service';
 declare var FB: any;
 interface MatchObject {
   components: string;
@@ -137,7 +139,8 @@ export class PosterComponent implements OnInit {
     private baseUrlService: BaseUrlService,
     private seoService: SEOService,
     @Inject(PLATFORM_ID) private platformId: Object,
-    private transferState: TransferState
+    private transferState: TransferState,
+    private trackService: trackService
   ) {
     this.inputTextForm = this.fb.group({
       text: ['', Validators.required],
@@ -158,9 +161,9 @@ export class PosterComponent implements OnInit {
           this.POST_DETAILS_KEY,
           null as any
         );
-        this.transferState.remove(this.POST_DETAILS_KEY); 
+        this.transferState.remove(this.POST_DETAILS_KEY);
         this.dataProccessed = true;
-        await this.changeMetadataDynamically();// Remove to avoid reusing stale data
+        await this.changeMetadataDynamically(); // Remove to avoid reusing stale data
       }
       await this.route.paramMap.subscribe(async (params) => {
         this.imgParam = params.get('img');
@@ -189,7 +192,7 @@ export class PosterComponent implements OnInit {
             console.error('Error fetching post:', error);
             this.postStatus = 'Error loading image';
             this.postDetails = undefined;
-            this.dataProccessed = true
+            this.dataProccessed = true;
           }
         }
       });
@@ -235,21 +238,25 @@ export class PosterComponent implements OnInit {
         if (this.imgParam) {
           try {
             // Attempt to fetch the post details
-            this.postDetailsDefault = (await this.PS.getPostById(this.imgParam.toString()).toPromise()) as PostDetails;
-            
+            this.postDetailsDefault = (await this.PS.getPostById(
+              this.imgParam.toString()
+            ).toPromise()) as PostDetails;
+
             // Check if the post details were fetched successfully
             if (this.postDetailsDefault) {
               await this.changeMetadataDynamically();
-              
+
               // Set the post details in TransferState
-              this.transferState.set(this.POST_DETAILS_KEY, this.postDetailsDefault);
+              this.transferState.set(
+                this.POST_DETAILS_KEY,
+                this.postDetailsDefault
+              );
             }
           } catch (error) {
-            this.dataProccessed = true
+            this.dataProccessed = true;
           }
         }
       });
-      
     }
     await new Promise((resolve) => setTimeout(resolve, 1500));
   }
@@ -1046,6 +1053,16 @@ export class PosterComponent implements OnInit {
         );
       }
     }
+    if (this.postDetails && this.postDetails.track) {
+      // Add a mobile control to the form. You can add additional validators if needed.
+      this.formData.addControl(
+        'mobile',
+        new FormControl('', [
+          Validators.required,
+          Validators.pattern(/^\+?[0-9]{10,15}$/),
+        ])
+      );
+    }
   }
   textFormat(text: string): string[] {
     const formattedText = text
@@ -1150,6 +1167,22 @@ export class PosterComponent implements OnInit {
           }
         }
       });
+      const formDataValues = { ...this.formData.value };
+      
+      this.dataset.forEach((field) => {
+        delete formDataValues[field.id];
+        delete formDataValues[field.id + '-file'];
+        
+        if (!(field.type === 'image' || (field.id && field.id.endsWith('-file')))) {
+          formDataValues[field.title] = field.value;
+        }
+      });
+      console.log(formDataValues);
+      // Call trackService.saveData with the filtered data and wait for completion
+      await lastValueFrom(
+        this.trackService.saveData(formDataValues, this.imgParam)
+      );
+
       await this.drawSVG();
       this.canDownload = true;
       this.formData.reset({}, { emitEvent: false });

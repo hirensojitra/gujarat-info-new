@@ -77,9 +77,9 @@
         </div>
         <div class="container mt-3">
             <form [formGroup]="formData" (ngSubmit)="onSubmitFormData()" *ngIf="!canDownload && dataset.length"
-                class="row g-2">
+                class="row g-3">
                 <div *ngFor="let field of dataset;let i=index"
-                    class="form-group col-lg-4 offset-lg-4  col-sm-8 offset-sm-2 col-12 offset-0">
+                    class="form-group col-lg-4 offset-lg-4  col-sm-8 offset-sm-2 col-12 offset-0 position-relative">
                     <ng-container *ngIf="field.type === 'text'">
                         <label class="form-label" for="{{field.id}}">{{field.title}}</label>
                         <input class="form-control" type="text" id="{{field.id}}" name="{{field.id}}"
@@ -107,6 +107,10 @@
                         </select>
                     </ng-container>
                 </div>
+                <div *ngIf="postDetails?.track" class="form-group col-lg-4 offset-lg-4 col-sm-8 offset-sm-2 col-12 position-relative">
+                    <label class="form-label" for="mobile">Mobile Number</label>
+                    <input type="tel" class="form-control" id="mobile" formControlName="mobile" placeholder="Enter your mobile number">
+                  </div>
                 <div class="col-lg-4 offset-lg-4  col-sm-8 offset-sm-2 col-12 offset-0">
                     <hr class="my-2">
                 </div>
