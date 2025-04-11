@@ -26,11 +26,9 @@
                                 <p class="card-text">Email: {{ user.email }}</p>
                                 <p class="card-text">Roles: {{ user.roles }}</p>
                                 <ng-container *ngIf="village">
-                                    <p class="card-text">Village: {{ village.name +' - '+ village.gu_name }}</p>
-                                    <p class="card-text">Taluka: {{ village.taluka_name +' - '+ village.taluka_gu_name
-                                        }}</p>
-                                    <p class="card-text">District: {{ village.district_name +' - '+
-                                        village.district_gu_name }}</p>
+                                    <p class="card-text" *ngIf="village.district_name || village.district_gu_name">District: {{ (village.district_name && village.district_gu_name) ? (village.district_name + ' - ' + village.district_gu_name) : (village.district_name || village.district_gu_name || 'Unavailable') }}</p>
+                                    <p class="card-text" *ngIf="village.taluka_name || village.taluka_gu_name">Taluka: {{ (village.taluka_name && village.taluka_gu_name) ? (village.taluka_name + ' - ' + village.taluka_gu_name) : (village.taluka_name || village.taluka_gu_name || 'Unavailable') }}</p>
+                                    <p class="card-text" *ngIf="village.name || village.gu_name">Village: {{ (village.name && village.gu_name) ? (village.name + ' - ' + village.gu_name) : (village.name || village.gu_name || 'Unavailable') }}</p>
                                 </ng-container>
                                 <input #imageInput type="file" (change)="handleImageInputChange($event)" style="display: none">
                             </div>

@@ -1,4 +1,10 @@
-import { AfterViewInit, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  ElementRef,
+  OnInit,
+  ViewChild,
+} from '@angular/core';
 import Cropper from 'cropperjs';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Subscription } from 'rxjs';
@@ -7,16 +13,16 @@ import { User, Village } from 'src/app/common/interfaces/commonInterfaces';
 import { UserService } from 'src/app/common/services/user.service';
 import { DevelopmentService } from 'src/app/common/services/development.service';
 import { VillageService } from 'src/app/common/services/village.service';
+import { TalukaService } from 'src/app/common/services/taluka.service';
+import { DistrictService } from 'src/app/common/services/district.service';
 
 declare const bootstrap: any;
-
 
 @Component({
   selector: 'app-user-profile',
   templateUrl: './user-profile.component.html',
-  styleUrls: ['./user-profile.component.scss']
+  styleUrls: ['./user-profile.component.scss'],
 })
-
 export class UserProfileComponent implements OnInit, AfterViewInit {
   user!: User | any;
   @ViewChild('imageInput') imageInput!: ElementRef;
@@ -30,16 +36,21 @@ export class UserProfileComponent implements OnInit, AfterViewInit {
     private fb: FormBuilder,
     private US: UserService,
     private DS: DevelopmentService,
-    private villageService: VillageService
+    private villageService: VillageService,
+    private talukaService: TalukaService,
+    private districtService: DistrictService
   ) {
     this.profilePictureForm = this.fb.group({
       username: ['', Validators.required],
-      image: ['']
-    })
+      image: [''],
+    });
   }
 
   ngOnInit(): void {
-    this.cropperModal = new bootstrap.Modal(document.getElementById('cropperModal')!, { focus: false, keyboard: false, static: false });
+    this.cropperModal = new bootstrap.Modal(
+      document.getElementById('cropperModal')!,
+      { focus: false, keyboard: false, static: false }
+    );
     this.cropperModal._element.addEventListener('hide.bs.modal', () => {
       if (this.cropper) {
         this.cropper.destroy();
@@ -47,14 +58,16 @@ export class UserProfileComponent implements OnInit, AfterViewInit {
       // this.profilePictureForm.reset();
     });
     this.cropperModal._element.addEventListener('show.bs.modal', () => {
-      this.profilePictureForm.get('username')?.setValue(this.user.username)
+      this.profilePictureForm.get('username')?.setValue(this.user.username);
       // this.profilePictureForm.get('image')?.setValue(this.user.image)
     });
-    this.imageSelect = new bootstrap.Modal(document.getElementById('imageSelect')!, { focus: false, keyboard: false, static: false });
+    this.imageSelect = new bootstrap.Modal(
+      document.getElementById('imageSelect')!,
+      { focus: false, keyboard: false, static: false }
+    );
     this.imageSelect._element.addEventListener('hidden.bs.modal', () => {
       const inputElement = this.imageInput.nativeElement as HTMLInputElement;
       if (inputElement.files && inputElement.files.length > 0) {
-
       } else {
         // No file selected
         this.imageSelect.show();
@@ -62,23 +75,28 @@ export class UserProfileComponent implements OnInit, AfterViewInit {
       // this.profilePictureForm.reset();
     });
     this.imageSelect._element.addEventListener('show.bs.modal', () => {
-      this.profilePictureForm.get('username')?.setValue(this.user.username)
+      this.profilePictureForm.get('username')?.setValue(this.user.username);
       // this.profilePictureForm.get('image')?.setValue(this.user.image)
     });
     this.userSubscription = this.US.getUser().subscribe((user: User | null) => {
       if (user) {
         this.user = user;
         this.profilePictureForm.get('username')?.setValue(user.username);
-        this.getVillage(user.village_id);
+        if (user.village_id) {
+          this.getVillage(user.village_id);
+        } else {
+          if (user.taluka_id) {
+            this.getTaluka(user.taluka_id);
+          } else {
+            this.getDistrict(user.district_id);
+          }
+        }
         // if (!this.user.image) { this.imageSelect.show(); }
-        this.validateImage(this.user.username)
+        this.validateImage(this.user.username);
       }
     });
-
   }
-  ngAfterViewInit(): void {
-
-  }
+  ngAfterViewInit(): void {}
   openImageCropperDialog(): void {
     const inputElement = this.imageInput.nativeElement;
     if (inputElement) {
@@ -99,14 +117,14 @@ export class UserProfileComponent implements OnInit, AfterViewInit {
 
         this.cropperModal.show();
         // Initialize Cropper
-        const cropperElement = document.getElementById('cropper') as HTMLImageElement;
+        const cropperElement = document.getElementById(
+          'cropper'
+        ) as HTMLImageElement;
         this.cropper = new Cropper(cropperElement, {
           aspectRatio: 1,
           scalable: true,
           viewMode: 1, // Ensure the crop box is always within the container
-          crop: (event) => {
-
-          },
+          crop: (event) => {},
           autoCropArea: 1, // Ensure the initial crop area covers the entire image
           dragMode: 'move', // Allow dragging to move the image within the container
           responsive: true, // Update crop box on resize
@@ -114,7 +132,7 @@ export class UserProfileComponent implements OnInit, AfterViewInit {
           minCropBoxWidth: 320,
           minCropBoxHeight: 320,
           minContainerWidth: 320,
-          minContainerHeight: 320
+          minContainerHeight: 320,
         });
 
         // Set image source for Cropper
@@ -146,7 +164,10 @@ export class UserProfileComponent implements OnInit, AfterViewInit {
         const file = this.base64ToFile(formValue.image, 'profile-picture.png');
         formData.append('image', file);
       }
-      formData.append('username', this.profilePictureForm.get('username')?.value);
+      formData.append(
+        'username',
+        this.profilePictureForm.get('username')?.value
+      );
       this.US.updateUser(this.user.id, formData).subscribe(
         (response: any) => {
           this.US.setUser(response.user);
@@ -192,11 +213,13 @@ export class UserProfileComponent implements OnInit, AfterViewInit {
     }
   }
   deleteImage() {
-    this.profilePictureForm.get('username')?.setValue(this.user.username)
+    this.profilePictureForm.get('username')?.setValue(this.user.username);
     this.profilePictureForm.get('image')?.setValue('delete');
     if (this.user) {
       let formValue = this.profilePictureForm.value;
-      const isUserDataChanged = Object.keys(formValue).some(key => this.user![key] !== formValue[key]);
+      const isUserDataChanged = Object.keys(formValue).some(
+        (key) => this.user![key] !== formValue[key]
+      );
       if (!isUserDataChanged) {
         console.log('User data has not changed. Skipping update.');
         return;
@@ -219,7 +242,7 @@ export class UserProfileComponent implements OnInit, AfterViewInit {
       // );
     }
   }
-  village!: Village;
+  village: any = {};
   getVillage(id: any) {
     this.villageService.getVillageById(id).subscribe(
       (data) => {
@@ -228,9 +251,37 @@ export class UserProfileComponent implements OnInit, AfterViewInit {
           this.village = village;
         }
       },
-      (error) => {
-
-      }
+      (error) => {}
+    );
+  }
+  getTaluka(id: any) {
+    this.talukaService.getTalukaById(id).subscribe(
+      (data) => {
+        const taluka = data.data[0];
+        if (taluka) {
+          this.village = {
+            district_gu_name: taluka.district_gu_name,
+            district_name: taluka.district_name,
+            taluka_gu_name: taluka.gu_name,
+            taluka_name: taluka.name,
+          };
+        }
+      },
+      (error) => {}
+    );
+  }
+  getDistrict(id: any) {
+    this.districtService.getDistrictById(id).subscribe(
+      (data) => {
+        const district = data;
+        if (district) {
+          this.village = {
+            district_gu_name: district.gu_name,
+            district_name: district.name,
+          };
+        }
+      },
+      (error) => {}
     );
   }
 }

@@ -93,6 +93,7 @@ export class UserService {
   }
 
   updateUser(userId: string, updates: Partial<User>): Observable<any> {
+    console.log(updates)
     return this.http.put(`${this.apiUrl}/updateUser/${userId}`, updates, { headers: this.authHeaders })
       .pipe(catchError(this.handleError));
   }

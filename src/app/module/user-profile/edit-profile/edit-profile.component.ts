@@ -42,9 +42,9 @@ export class EditProfileComponent implements OnInit, OnDestroy {
       firstname: ['', Validators.required],
       lastname: ['', Validators.required],
       mobile: ['', Validators.required],
-      district_id: [null, Validators.required],
-      taluka_id: [null, Validators.required],
-      village_id: [null, Validators.required]
+      district_id: [null],
+      taluka_id: [null],
+      village_id: [null]
     });
   }
 
@@ -64,12 +64,13 @@ export class EditProfileComponent implements OnInit, OnDestroy {
           acc[key] = this.userForm.value[key]?.toString() || '';
           return acc;
         }, {});
+        console.log(currentFormValue)
         const isEqual = JSON.stringify(currentFormValue) === JSON.stringify(filteredValue);
         if (!isEqual) {
           this.userForm.patchValue(filteredValue, { emitEvent: false });
-          this.loadDistricts();
         }
       }
+      this.loadDistricts();
     });
     this.userForm.get('district_id')?.valueChanges.pipe(
       takeUntil(this.destroy$)
@@ -108,7 +109,7 @@ export class EditProfileComponent implements OnInit, OnDestroy {
       this.talukas = await this.talukaService.getTalukaByDistrict(districtId).toPromise();
       if (this.talukas.length) {
         const selectedTaluka = this.talukas.find(taluka => taluka.id == this.user.taluka_id);
-        this.userForm.get('taluka_id')?.setValue(selectedTaluka.id || null);
+        this.userForm.get('taluka_id')?.setValue(selectedTaluka?selectedTaluka.id : null);
       }
     }
   }
@@ -129,6 +130,7 @@ export class EditProfileComponent implements OnInit, OnDestroy {
     if (this.userForm.valid) {
       if (this.user) {
         const formValue = this.userForm.value;
+        console.log(formValue)
         const isUserDataChanged = Object.keys(formValue).some(key => this.user![key] !== formValue[key]);
         if (!isUserDataChanged) {
           this.toastService.show('User data has not changed. Skipping update.', { class: 'bg-danger' });

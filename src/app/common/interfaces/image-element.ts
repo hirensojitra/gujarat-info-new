@@ -170,6 +170,7 @@ export interface PostDetails {
   apiData?: { [key: string]: any[] };
   image?: string;
   published: boolean;
+  track: boolean;
 }
 export interface AspectRatio {
   ratio: number;
