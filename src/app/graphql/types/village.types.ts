@@ -1,8 +1,8 @@
 // ./graphql/types/village.types.ts
 
 export interface Village {
-    selected: unknown;
-    id: string;
+    selected?: unknown;
+    id?: string;
     name: string;
     gu_name: string;
   }

@@ -120,10 +120,8 @@ export class DistrictNewComponent implements OnInit, AfterViewInit {
   createDistrictForm(): FormGroup {
     console.log('createDistrictForm', seq++);
     return this.fb.group({
-      id: [''],
       name: ['', Validators.required],
-      gu_name: ['', Validators.required],
-      is_deleted: [false],
+      gu_name: ['', Validators.required]
     });
   }
 

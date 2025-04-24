@@ -65,7 +65,6 @@ export class VillageNewComponent implements OnInit {
 
   private createVillageForm(): FormGroup {
     return this.fb.group({
-      id: [''],
       name: ['', Validators.required],
       gu_name: ['', Validators.required],
       taluka_id: [this.selectedTalukaId, Validators.required]

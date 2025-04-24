@@ -72,6 +72,7 @@ export class GraphVillageService {
   }
 
   createVillages(villages: Village[]): Observable<any> {
+    console.log(villages);
     return this.apollo.mutate({
       mutation: CREATE_VILLAGES,
       variables: { villages },

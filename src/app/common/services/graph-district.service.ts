@@ -84,10 +84,8 @@ export class GraphDistrictService {
     const query = `
       mutation CreateDistricts($districts: [DistrictInput]!) {
         createDistricts(districts: $districts) {
-          id
           name
           gu_name
-          is_deleted
         }
       }
     `;
