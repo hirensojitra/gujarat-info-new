@@ -272,7 +272,7 @@ export class VillageComponent implements OnInit, AfterViewInit {
     const districtId = this.selectedDistrict?.id;
     const talukaId = this.selectedTaluka?.id;
     if (districtId && talukaId) {
-      this.villageService.getDeletedVillageLength(districtId, talukaId).subscribe(
+      this.villageService.getDeletedVillageLength(talukaId).subscribe(
         (data) => {
           this.deletedVillageCount = data.deletedvillagecount;
           (!data.deletedVillagesLength) ? this.villageDeletedModal.hide() : false;

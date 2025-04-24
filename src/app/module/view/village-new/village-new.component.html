@@ -1,0 +1,216 @@
+<div class="h-100 overflow-only-y d-flex flex-column">
+    <ul class="nav nav-pills p-3 pb-0" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="tab-village-active" data-bs-toggle="pill"
+                data-bs-target="#village-active" type="button" role="tab" aria-selected="true">
+                Active Villages <span class="badge bg-light text-dark ms-1">{{ totalActiveVillages }}</span>
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="tab-village-deleted" data-bs-toggle="pill" data-bs-target="#village-deleted"
+                type="button" role="tab" aria-selected="false">
+                Deleted Villages <span class="badge bg-light text-dark ms-1">{{ totalDeletedVillages }}</span>
+            </button>
+        </li>
+    </ul>
+
+    <div class="tab-content flex-grow-1 p-3 bg-white">
+        <!-- Active Villages Tab -->
+        <div class="tab-pane fade show active position-relative h-100" id="village-active" role="tabpanel">
+            <div class="position-absolute h-100 w-100 d-flex flex-column">
+                <div class="row g-2 align-items-center">
+                    <div class="col-md-3">
+                        <select class="form-select" [(ngModel)]="selectedDistrictId" (change)="onDistrictChange()">
+                            <option [ngValue]="null" disabled selected>Select District</option>
+                            <option *ngFor="let d of districts" [ngValue]="d.id">{{ d.name }} ({{ d.gu_name }})</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <select class="form-select" [(ngModel)]="selectedTalukaId" (change)="onTalukaChange()">
+                            <option [ngValue]="null" disabled selected>Select Taluka</option>
+                            <option *ngFor="let t of talukas" [ngValue]="t.id">{{ t.name }} ({{ t.gu_name }})</option>
+                        </select>
+                    </div>
+                    <div class="col ms-auto d-flex">
+                        <button class="btn btn-success text-white flex-grow-1" (click)="openVillageModal()">
+                            <i class="fa fa-plus me-2"></i> Add Village
+                        </button>
+                        <button class="btn btn-secondary ms-2 flex-grow-1" *ngIf="selectedActiveVillages.length > 0"
+                            (click)="editSelectedVillages()">
+                            <i class="fa fa-edit me-2"></i> Edit Selected
+                        </button>
+                        <button class="btn btn-danger ms-2 flex-grow-1" *ngIf="selectedActiveVillages.length > 0"
+                            (click)="deleteSelectedVillages()">
+                            <i class="fa fa-trash me-2"></i> Delete Selected
+                        </button>
+                    </div>
+
+                </div>
+
+                <div class="flex-grow-1 position-relative mt-3">
+                    <div class="position-absolute overflow-y-auto h-100 w-100">
+                        <table class="table table-responsive align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th width="50">Select</th>
+                                    <th width="80">#</th>
+                                    <th width="80">ID</th>
+                                    <th>Name</th>
+                                    <th>Gujarati Name</th>
+                                    <th width="120">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr *ngFor="let v of villages; let i = index"
+                                    [ngClass]="{ 'table-secondary': v.selected }">
+                                    <td><input type="checkbox" [(ngModel)]="v.selected"
+                                            (change)="updateSelectedActiveVillages()" />
+                                    </td>
+                                    <td [width]="80">{{i + activeVillagePagination.limit * (activeVillagePagination.page
+                                        - 1) + 1 }}
+                                    </td>
+                                    <td>{{ v.id }}</td>
+                                    <td>{{ v.name }}</td>
+                                    <td>{{ v.gu_name }}</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-dark me-2" (click)="editVillage(v)">
+                                            <i class="fa fa-edit"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-danger" (click)="deleteVillage(v.id)">
+                                            <i class="fa fa-trash"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div pagination class="mt-0 mb-0 px-3" [currentPage]="activeVillagePagination.page"
+                    [totalItems]="totalActiveVillages" [pageSize]="activeVillagePagination.limit"
+                    [pageSizes]="[10, 20, 50]" (currentPageChange)="changeActiveVillagePage($event)"
+                    (pageSizeChange)="changeActiveVillagePageSize($event)">
+                </div>
+            </div>
+        </div>
+
+        <!-- Deleted Villages Tab -->
+        <div class="tab-pane fade position-relative h-100" id="village-deleted" role="tabpanel">
+            <div class="position-absolute h-100 w-100 d-flex flex-column">
+                <div class="row g-2 align-items-center">
+                    <div class="col ms-auto d-flex">
+                        <button class="btn btn-secondary flex-grow-1" *ngIf="selectedDeletedVillages.length > 0"
+                            (click)="restoreSelectedVillages()">
+                            <i class="fa fa-refresh me-2"></i> Restore Selected
+                        </button>
+                    </div>
+                </div>
+
+                <div class="flex-grow-1 position-relative mt-3">
+                    <div class="position-absolute overflow-y-auto h-100 w-100">
+                        <table class="table table-bordered table-responsive align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th width="50">Select</th>
+                                    <th width="80">#</th>
+                                    <th>Name</th>
+                                    <th>Gujarati Name</th>
+                                    <th width="120">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr *ngFor="let v of deletedVillages; let i = index"
+                                    [ngClass]="{ 'table-secondary': v.selected }">
+                                    <td><input type="checkbox" [(ngModel)]="v.selected"
+                                            (change)="updateSelectedDeletedVillages()" />
+                                    </td>
+                                    <td>{{ i + 1 }}</td>
+                                    <td>{{ v.name }}</td>
+                                    <td>{{ v.gu_name }}</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-success" (click)="restoreVillage(v.id)">
+                                            <i class="fa fa-refresh"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div pagination class="mt-0 mb-0 px-3" [currentPage]="deletedVillagePagination.page"
+                    [totalItems]="totalDeletedVillages" [pageSize]="deletedVillagePagination.limit"
+                    [pageSizes]="[10, 20, 50]" (currentPageChange)="changeDeletedVillagePage($event)"
+                    (pageSizeChange)="changeDeletedVillagePageSize($event)">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Village Modal -->
+<div class="modal fade" id="villageModal" tabindex="-1" aria-labelledby="villageModalLabel">
+    <div class="modal-dialog modal-dialog-scrollable p-0 my-0 modal-dialog-centered position-relative h-100">
+        <div class="modal-content">
+            <div class="modal-header bg-success py-2">
+                <h5 class="modal-title text-white" id="villageModalLabel">
+                    {{ villageModalTitle }}
+                </h5>
+                <button type="button" class="btn ms-auto" data-bs-dismiss="modal" aria-label="Close"
+                    (click)="villageModal.hide()">
+                    <i class="fa fa-close btn-flat text-white"></i>
+                </button>
+            </div>
+
+            <div class="modal-body h-100 overflow-auto py-0 my-3 d-flex flex-column">
+                <form [formGroup]="currentForm" class="mt-3">
+                    <div formArrayName="villages">
+                        <div *ngFor="let village of villagesFormArray.controls; let i = index"
+                            class="d-flex align-items-stretch border border-light rounded px-2 position-relative"
+                            [ngClass]="{ 'mb-3': i < villagesFormArray.length - 1 }">
+
+                            <div [formGroupName]="i" class="py-3 flex-grow-1">
+                                <div class="form-group p-2">
+                                    <label class="form-label mb-2" for="village-name-{{ i }}">Name</label>
+                                    <input class="form-control" type="text" id="village-name-{{ i }}"
+                                        formControlName="name" />
+                                </div>
+
+                                <div class="form-group p-2">
+                                    <label class="form-label mb-2" for="village-gu-name-{{ i }}">Gujarati Name</label>
+                                    <input class="form-control" type="text" id="village-gu-name-{{ i }}"
+                                        formControlName="gu_name" />
+                                </div>
+
+                                <div class="form-group p-2">
+                                    <label class="form-label mb-2" for="village-taluka-{{ i }}">Taluka</label>
+                                    <select class="form-select" id="village-taluka-{{ i }}" formControlName="taluka_id">
+                                        <option [ngValue]="null" disabled>Select Taluka</option>
+                                        <option *ngFor="let t of talukas" [value]="t.id">{{ t.name }} ({{ t.gu_name }})
+                                        </option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <ng-container *ngIf="villagesFormArray.length > 1">
+                                <button type="button"
+                                    class="btn btn-outline-danger btn-sm my-3 position-absolute top-0 end-0 me-3"
+                                    (click)="removeVillage(i)">
+                                    <i class="fa fa-trash me-2"></i>Remove
+                                </button>
+                            </ng-container>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary text-white" (click)="addVillage()" *ngIf="!needUpdate">
+                    <i class="fa fa-plus me-2"></i>Add More
+                </button>
+                <button class="btn btn-md btn-success ms-2" (click)="saveVillage()">Save</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
+                    (click)="villageModal.hide(false)">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

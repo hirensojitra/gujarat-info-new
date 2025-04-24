@@ -19,6 +19,7 @@ export interface District {
     id: string,
     name: string,
     gu_name?: string,
+    selected?: boolean,
     is_deleted: boolean
 }
 export interface Taluka {

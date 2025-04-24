@@ -246,7 +246,7 @@ export class UserProfileComponent implements OnInit, AfterViewInit {
   getVillage(id: any) {
     this.villageService.getVillageById(id).subscribe(
       (data) => {
-        const village = data.data;
+        const village = data;
         if (village) {
           this.village = village;
         }

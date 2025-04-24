@@ -65,7 +65,7 @@ export class VillageService {
       );
     };
   }
-  getDeletedVillageLength(districtId: string, talukaId: string): Observable<any> {
+  getDeletedVillageLength(talukaId: string): Observable<any> {
     return this.http.get<any[]>(`${this.apiUrl}/deleted/${talukaId}`);
   }
   getDeletedVillage(talukaId: any): Observable<any> {

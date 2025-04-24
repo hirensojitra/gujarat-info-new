@@ -74,6 +74,15 @@ export class HeaderComponent {
       link: '/view',
       role: ['master'],
       subItems: [{
+        label: 'Districts New',
+        link: '/view/district-new',
+      }, {
+        label: 'Taluka New',
+        link: '/view/taluka-new',
+      }, {
+        label: 'Village New',
+        link: '/view/village-new',
+      }, {
         label: 'Districts',
         link: '/view/district',
       }, {

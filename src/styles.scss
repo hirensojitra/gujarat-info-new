@@ -748,19 +748,31 @@ $fab-background-color-2: inherit;
 .progress-bar {
     transition: width 0.3s ease;
 }
+.table-responsive {
+    /* if you want a vertical scroll area: */
+    max-height: 60vh;
+    overflow-y: auto;
+}
+
+.table-responsive thead th {
+    position: sticky;
+    top: 0;
+    background-color: #fff; /* match your table background */
+    z-index: 2; /* higher than table body rows */
+    box-shadow: 10px 10px 10px#000;
+}
 @for $i from 2 through 10 {
     .text-truncate-#{$i} {
-      display: -webkit-box;
-      -webkit-line-clamp: $i; /* Limits text to $i lines */
-      -webkit-box-orient: vertical;
-      
-      display: box;
-      line-clamp: $i; /* Standard property */
-      box-orient: vertical;
-      
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: normal;
+        display: -webkit-box;
+        -webkit-line-clamp: $i; /* Limits text to $i lines */
+        -webkit-box-orient: vertical;
+
+        display: box;
+        line-clamp: $i; /* Standard property */
+        box-orient: vertical;
+
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: normal;
     }
-  }
-  
+}

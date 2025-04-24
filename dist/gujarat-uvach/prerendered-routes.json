@@ -27,6 +27,9 @@
     "/user-profile/view",
     "/verify-email",
     "/view",
-    "/view/district"
+    "/view/district",
+    "/view/district-new",
+    "/view/taluka-new",
+    "/view/village-new"
   ]
 }
