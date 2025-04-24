@@ -11,7 +11,7 @@ const routes: Routes = [{
     keywords: 'edit profile, user settings, update user details',
     robots: 'index, follow',
     image: '/assets/edit-profile-image.png',
-    canonical: 'https://gujarat-uvach.netlify.app/edit-profile',
+    canonical: 'https://postnew.in/edit-profile',
     breadcrumb: 'Edit Profile'
   }
 }];

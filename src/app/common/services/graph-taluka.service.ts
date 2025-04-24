@@ -1,234 +1,124 @@
 import { Injectable } from '@angular/core';
-import { Apollo, gql } from 'apollo-angular';
+import { Apollo } from 'apollo-angular';
 import { Observable } from 'rxjs';
+import { ApolloQueryResult } from '@apollo/client/core';
 
-@Injectable({
-  providedIn: 'root',
-})
+import {
+  CREATE_TALUKAS,
+  UPDATE_TALUKAS,
+  SOFT_DELETE_TALUKA,
+  SOFT_DELETE_TALUKAS,
+  RESTORE_TALUKA,
+  RESTORE_TALUKAS
+} from 'src/app/graphql/mutations/taluka.mutations';
+
+import {
+  GET_SELECTED_DISTRICT_ID,
+  GET_DISTRICTS,
+  GET_TALUKA_STATS_AND_DATA,
+  GET_TALUKAS,
+  GET_DELETED_TALUKAS
+} from 'src/app/graphql/queries/taluka.queries';
+
+import {
+  District,
+  Taluka,
+  TalukaStats,
+  PaginationInput
+} from 'src/app/graphql/types/taluka.types';
+
+@Injectable({ providedIn: 'root' })
 export class GraphTalukaService {
   constructor(private apollo: Apollo) {}
-  getSelectedDistrictId(): Observable<any> {
-    const GET_ID = gql`
-      query Query {
-        getSelectedDistrictId
-      }
-    `;
-    return this.apollo.watchQuery({ query: GET_ID }).valueChanges;
-  }
-  getAllDistricts(): Observable<any> {
-    const GET_DISTRICTS = gql`
-      query GetDistricts {
-        getDistricts {
-          id
-          name
-          gu_name
-          is_deleted
-        }
-      }
-    `;
-    return this.apollo.watchQuery({ query: GET_DISTRICTS }).valueChanges;
+
+  getSelectedDistrictId(): Observable<ApolloQueryResult<{ getSelectedDistrictId: string }>> {
+    return this.apollo.watchQuery<{ getSelectedDistrictId: string }>({
+      query: GET_SELECTED_DISTRICT_ID
+    }).valueChanges;
   }
 
-  // Fetch Taluka Stats and Data (Active and Deleted)
+  getAllDistricts(): Observable<ApolloQueryResult<{ getDistricts: District[] }>> {
+    return this.apollo.watchQuery<{ getDistricts: District[] }>({
+      query: GET_DISTRICTS
+    }).valueChanges;
+  }
+
   getTalukaStatsAndData(
     districtId: string,
-    activePagination: { page: number; limit: number },
-    deletedPagination: { page: number; limit: number }
-  ): Observable<any> {
-    const GET_TALUKA_STATS_AND_DATA = gql`
-      query GetTalukaStatsByDistrict(
-        $district_id: ID
-        $activePagination: PaginationInput
-        $deletedPagination: PaginationInput
-      ) {
-        getTalukaStatsByDistrict(
-          district_id: $district_id
-          activePagination: $activePagination
-          deletedPagination: $deletedPagination
-        ) {
-          selectedId
-          totalActiveTalukasByDistrictId
-          totalDeletedTalukasByDistrictId
-          totalTalukasByDistrictId
-          districts {
-            id
-            name
-            gu_name
-            is_deleted
-          }
-          activeTalukasByDistrictId {
-            id
-            name
-            gu_name
-          }
-          deletedTalukasByDistrictId {
-            id
-            name
-            gu_name
-          }
-        }
-      }
-    `;
-
-    return this.apollo.watchQuery({
+    activePagination: PaginationInput,
+    deletedPagination: PaginationInput
+  ): Observable<ApolloQueryResult<{ getTalukaStatsByDistrict: TalukaStats }>> {
+    return this.apollo.watchQuery<{ getTalukaStatsByDistrict: TalukaStats }>({
       query: GET_TALUKA_STATS_AND_DATA,
       variables: {
         district_id: districtId,
         activePagination,
-        deletedPagination,
+        deletedPagination
       },
       fetchPolicy: 'network-only'
     }).valueChanges;
   }
 
-  // Fetch Talukas with pagination
   getTalukas(
     district_id: string,
     page: number,
     limit: number
-  ): Observable<any> {
-    const GET_TALUKAS = gql`
-      query GetTalukas($district_id: ID!, $page: Int!, $limit: Int!) {
-        getTalukas(
-          district_id: $district_id
-          pagination: { page: $page, limit: $limit }
-        ) {
-          id
-          name
-          gu_name
-          district_id
-          is_deleted
-        }
-      }
-    `;
-    return this.apollo.watchQuery({
+  ): Observable<ApolloQueryResult<{ getTalukas: Taluka[] }>> {
+    return this.apollo.watchQuery<{ getTalukas: Taluka[] }>({
       query: GET_TALUKAS,
       variables: { district_id, page, limit },
+      fetchPolicy: 'network-only'
     }).valueChanges;
   }
 
-  // Fetch Deleted Talukas
-  getDeletedTalukas(page: number, limit: number): Observable<any> {
-    const GET_DELETED_TALUKAS = gql`
-      query GetDeletedTalukas($page: Int!, $limit: Int!) {
-        getDeletedTalukas(pagination: { page: $page, limit: $limit }) {
-          id
-          name
-          gu_name
-          district_id
-          is_deleted
-        }
-      }
-    `;
-    return this.apollo.watchQuery({
+  getDeletedTalukas(page: number, limit: number): Observable<ApolloQueryResult<{ getDeletedTalukas: Taluka[] }>> {
+    return this.apollo.watchQuery<{ getDeletedTalukas: Taluka[] }>({
       query: GET_DELETED_TALUKAS,
       variables: { page, limit },
+      fetchPolicy: 'network-only'
     }).valueChanges;
   }
 
-  // Create Talukas
-  createTalukas(talukas: any[]): Observable<any> {
-    const CREATE_TALUKAS = gql`
-      mutation CreateTalukas($districts: [TalukaInput]!) {
-        createTalukas(districts: $districts) {
-          id
-          name
-          gu_name
-          district_id
-          is_deleted
-        }
-      }
-    `;
+  createTalukas(talukas: Taluka[]): Observable<any> {
     return this.apollo.mutate({
       mutation: CREATE_TALUKAS,
-      variables: { districts: talukas },
+      variables: { talukas: talukas }
     });
   }
 
-  // Update Talukas
-  updateTalukas(talukas: any[]): Observable<any> {
-    const UPDATE_TALUKAS = gql`
-      mutation UpdateTalukas($districts: [UpdateTalukaInput]!) {
-        updateTalukas(districts: $districts) {
-          id
-          name
-          gu_name
-          district_id
-          is_deleted
-        }
-      }
-    `;
+  updateTalukas(talukas: Taluka[]): Observable<any> {
+    console.log({ talukas: talukas })
     return this.apollo.mutate({
       mutation: UPDATE_TALUKAS,
-      variables: { districts: talukas },
+      variables: { talukas: talukas }
     });
   }
 
-  // Soft Delete Taluka
   softDeleteTaluka(id: string): Observable<any> {
-    const SOFT_DELETE_TALUKA = gql`
-      mutation SoftDeleteTaluka($id: ID!) {
-        softDeleteTaluka(id: $id) {
-          id
-          name
-          is_deleted
-        }
-      }
-    `;
     return this.apollo.mutate({
       mutation: SOFT_DELETE_TALUKA,
-      variables: { id },
+      variables: { id }
     });
   }
 
-  // Soft Delete Multiple Talukas
   softDeleteTalukas(ids: string[]): Observable<any> {
-    const SOFT_DELETE_TALUKAS = gql`
-      mutation SoftDeleteTalukas($ids: [ID]!) {
-        softDeleteTalukas(ids: $ids) {
-          id
-          name
-          is_deleted
-        }
-      }
-    `;
     return this.apollo.mutate({
       mutation: SOFT_DELETE_TALUKAS,
-      variables: { ids },
+      variables: { ids }
     });
   }
 
-  // Restore Taluka
   restoreTaluka(id: string): Observable<any> {
-    const RESTORE_TALUKA = gql`
-      mutation RestoreTaluka($id: ID!) {
-        restoreTaluka(id: $id) {
-          id
-          name
-          is_deleted
-        }
-      }
-    `;
     return this.apollo.mutate({
       mutation: RESTORE_TALUKA,
-      variables: { id },
+      variables: { id }
     });
   }
 
-  // Restore Multiple Talukas
   restoreTalukas(ids: string[]): Observable<any> {
-    const RESTORE_TALUKAS = gql`
-      mutation RestoreTalukas($ids: [ID]!) {
-        restoreTalukas(ids: $ids) {
-          id
-          name
-          is_deleted
-        }
-      }
-    `;
     return this.apollo.mutate({
       mutation: RESTORE_TALUKAS,
-      variables: { ids },
+      variables: { ids }
     });
   }
 }

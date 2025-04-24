@@ -1,209 +1,116 @@
-// File 6: graph-village.service.ts
+// ./services/graph-village.service.ts
 import { Injectable } from '@angular/core';
 import { Apollo } from 'apollo-angular';
-import { gql } from 'apollo-angular';
 import { Observable } from 'rxjs';
+import {
+  GET_DISTRICTS,
+  GET_TALUKAS_BY_DISTRICT_ID,
+  GET_VILLAGES_BY_TALUKA_ID,
+  GET_DELETED_VILLAGES_BY_TALUKA_ID,
+  GET_VILLAGE_STATS_BY_TALUKA
+} from '../../graphql/queries/village.queries';
+import {
+  CREATE_VILLAGES,
+  UPDATE_VILLAGES,
+  SOFT_DELETE_VILLAGE,
+  SOFT_DELETE_VILLAGES,
+  RESTORE_VILLAGE,
+  RESTORE_VILLAGES
+} from '../../graphql/mutations/village.mutations';
+import { District, PaginationInput, Taluka, Village } from '../../graphql/types/village.types';
+import { ApolloQueryResult } from '@apollo/client';
 
 @Injectable({ providedIn: 'root' })
 export class GraphVillageService {
   constructor(private apollo: Apollo) {}
 
-  getAllTalukas(district_id: string): Observable<any> {
-    const query = gql`
-      query GetTalukasByDistrictId($district_id: ID!) {
-        getTalukasByDistrictId(district_id: $district_id) {
-          id
-          name
-          gu_name
-        }
-      }
-    `;
-    return this.apollo.watchQuery({
-      query,
-      variables: {
-        district_id: district_id, // Replace with actual district ID or pass dynamically
-      },
+  getAllDistricts(): Observable<ApolloQueryResult<{ getDistricts: District[] }>> {
+    return this.apollo.watchQuery<{ getDistricts: District[] }>({
+      query: GET_DISTRICTS
+    }).valueChanges;
+  }
+
+  getAllTalukas(district_id: string): Observable<ApolloQueryResult<{ getTalukasByDistrictId: Taluka[] }>> {
+    return this.apollo.watchQuery<{ getTalukasByDistrictId: Taluka[] }>({
+      query: GET_TALUKAS_BY_DISTRICT_ID,
+      variables: { district_id },
     }).valueChanges;
   }
 
   getVillageStatsByTaluka(
     talukaId: string,
-    activePagination: any,
-    deletedPagination: any
-  ): Observable<any> {
-    const query = gql`
-      query GetVillageStatsByTaluka(
-        $talukaId: ID
-        $activePagination: PaginationInput
-        $deletedPagination: PaginationInput
-      ) {
-        getVillageStatsByTaluka(
-          taluka_id: $talukaId
-          activePagination: $activePagination
-          deletedPagination: $deletedPagination
-        ) {
-          talukas {
-            name
-            gu_name
-            id
-          }
-          selectedDistrictId
-          selectedTalukaId
-          activeVillagesByTalukaId {
-            name
-            gu_name
-            id
-          }
-          deletedVillagesByTalukaId {
-            name
-            gu_name
-            id
-          }
-          totalVillagesByTalukaId
-          totalActiveVillagesByTalukaId
-          totalDeletedVillagesByTalukaId
-        }
-      }
-    `;
-
+    activePagination: PaginationInput,
+    deletedPagination: PaginationInput
+  ): Observable<ApolloQueryResult<any>> {
     return this.apollo.watchQuery({
-      query,
-      variables: {
-        talukaId,
-        activePagination,
-        deletedPagination,
-      },
+      query: GET_VILLAGE_STATS_BY_TALUKA,
+      variables: { talukaId, activePagination, deletedPagination },
       fetchPolicy: 'network-only',
     }).valueChanges;
   }
 
-  createVillages(villages: any[]): Observable<any> {
-    const mutation = gql`
-      mutation CreateVillages($villages: [VillageInput]!) {
-        createVillages(villages: $villages) {
-          id
-        }
-      }
-    `;
+  getVillagesByTalukaId(
+    talukaId: string,
+    pagination: PaginationInput
+  ): Observable<ApolloQueryResult<{ getVillagesByTalukaId: Village[] }>> {
+    return this.apollo.watchQuery<{ getVillagesByTalukaId: Village[] }>({
+      query: GET_VILLAGES_BY_TALUKA_ID,
+      variables: { talukaId, pagination },
+      fetchPolicy: 'network-only',
+    }).valueChanges;
+  }
+
+  getDeletedVillagesByTalukaId(
+    talukaId: string,
+    pagination: PaginationInput
+  ): Observable<ApolloQueryResult<{ getDeletedVillagesByTalukaId: Village[] }>> {
+    return this.apollo.watchQuery<{ getDeletedVillagesByTalukaId: Village[] }>({
+      query: GET_DELETED_VILLAGES_BY_TALUKA_ID,
+      variables: { talukaId, pagination },
+      fetchPolicy: 'network-only',
+    }).valueChanges;
+  }
+
+  createVillages(villages: Village[]): Observable<any> {
     return this.apollo.mutate({
-      mutation,
+      mutation: CREATE_VILLAGES,
       variables: { villages },
     });
   }
 
-  updateVillages(villages: any[]): Observable<any> {
-    const mutation = gql`
-      mutation UpdateVillages($villages: [UpdateVillageInput]!) {
-        updateVillages(villages: $villages) {
-          id
-        }
-      }
-    `;
+  updateVillages(villages: Village[]): Observable<any> {
+    console.log(villages)
     return this.apollo.mutate({
-      mutation,
+      mutation: UPDATE_VILLAGES,
       variables: { villages },
     });
   }
 
   softDeleteVillage(id: string): Observable<any> {
-    const mutation = gql`
-      mutation SoftDeleteVillage($id: ID!) {
-        softDeleteVillage(id: $id) {
-          id
-        }
-      }
-    `;
     return this.apollo.mutate({
-      mutation,
+      mutation: SOFT_DELETE_VILLAGE,
       variables: { id },
     });
   }
 
   softDeleteVillages(ids: string[]): Observable<any> {
-    const mutation = gql`
-      mutation SoftDeleteVillages($ids: [ID]!) {
-        softDeleteVillages(ids: $ids) {
-          id
-        }
-      }
-    `;
     return this.apollo.mutate({
-      mutation,
+      mutation: SOFT_DELETE_VILLAGES,
       variables: { ids },
     });
   }
 
   restoreVillage(id: string): Observable<any> {
-    const mutation = gql`
-      mutation RestoreVillage($id: ID!) {
-        restoreVillage(id: $id) {
-          id
-        }
-      }
-    `;
     return this.apollo.mutate({
-      mutation,
+      mutation: RESTORE_VILLAGE,
       variables: { id },
     });
   }
 
   restoreVillages(ids: string[]): Observable<any> {
-    const mutation = gql`
-      mutation RestoreVillages($ids: [ID]!) {
-        restoreVillages(ids: $ids) {
-          id
-        }
-      }
-    `;
     return this.apollo.mutate({
-      mutation,
+      mutation: RESTORE_VILLAGES,
       variables: { ids },
     });
   }
-  getAllDistricts(): Observable<any> {
-    const GET_DISTRICTS = gql`
-      query GetDistricts {
-        getDistricts {
-          id
-          name
-          gu_name
-          is_deleted
-        }
-      }
-    `;
-    return this.apollo.watchQuery({ query: GET_DISTRICTS }).valueChanges;
-  }
-  getVillagesByTalukaId(talukaId: string, pagination: any): Observable<any> {
-    const query = gql`
-      query GetVillagesByTalukaId($talukaId: ID!, $pagination: PaginationInput) {
-        getVillagesByTalukaId(taluka_id: $talukaId, pagination: $pagination) {
-          id
-          name
-          gu_name
-        }
-      }
-    `;
-    return this.apollo.watchQuery({
-      query,
-      variables: { talukaId, pagination },
-      fetchPolicy: 'network-only',
-    }).valueChanges;
-  }
-  getDeletedVillagesByTalukaId(talukaId: string, pagination: any): Observable<any> {
-    const query = gql`
-      query GetDeletedVillagesByTalukaId($talukaId: ID!, $pagination: PaginationInput) {
-        getDeletedVillagesByTalukaId(taluka_id: $talukaId, pagination: $pagination) {
-          id
-          name
-          gu_name
-        }
-      }
-    `;
-    return this.apollo.watchQuery({
-      query,
-      variables: { talukaId, pagination },
-      fetchPolicy: 'network-only',
-    }).valueChanges;
-  }
-  
 }

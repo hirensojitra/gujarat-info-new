@@ -20,16 +20,16 @@ describe('AppComponent', () => {
     expect(app).toBeTruthy();
   });
 
-  it(`should have as title 'gujarat-uvach'`, () => {
+  it(`should have as title 'postnew'`, () => {
     const fixture = TestBed.createComponent(AppComponent);
     const app = fixture.componentInstance;
-    expect(app.title).toEqual('gujarat-uvach');
+    expect(app.title).toEqual('postnew');
   });
 
   it('should render title', () => {
     const fixture = TestBed.createComponent(AppComponent);
     fixture.detectChanges();
     const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('h1')?.textContent).toContain('Hello, gujarat-uvach');
+    expect(compiled.querySelector('h1')?.textContent).toContain('Hello, postnew');
   });
 });

@@ -1,4 +1,4 @@
-// File 5: village-new.component.ts
+// ./components/village-new/village-new.component.ts
 import {
   ChangeDetectorRef,
   Component,
@@ -7,25 +7,26 @@ import {
 } from '@angular/core';
 import { FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
 import { GraphVillageService } from 'src/app/common/services/graph-village.service';
+import { District, Taluka, Village } from 'src/app/graphql/types/village.types';
+import { catchError } from 'rxjs/operators';
+import { of } from 'rxjs';
 
 declare const bootstrap: any;
-
-let seq = 1; // Sequence counter
 
 @Component({
   selector: 'app-village-new',
   templateUrl: './village-new.component.html',
-  styleUrls: ['./village-new.component.scss'],
+  styleUrls: ['./village-new.component.scss']
 })
 export class VillageNewComponent implements OnInit {
-  selectedActiveVillages: any[] = [];
-  selectedDeletedVillages: any[] = [];
-  villages: any[] = [];
-  deletedVillages: any[] = [];
-  talukas: any[] = [];
-  districts: any[] = [];
-  selectedTalukaId: string = '';
-  selectedDistrictId: string = '';
+  selectedActiveVillages: Village[] = [];
+  selectedDeletedVillages: Village[] = [];
+  villages: Village[] = [];
+  deletedVillages: Village[] = [];
+  talukas: Taluka[] = [];
+  districts: District[] = [];
+  selectedTalukaId = '';
+  selectedDistrictId = '';
   totalActiveVillages = 0;
   totalDeletedVillages = 0;
 
@@ -34,8 +35,9 @@ export class VillageNewComponent implements OnInit {
   currentForm: FormGroup;
   needUpdate = false;
 
-  activeVillagePagination = { page: 1, limit: 10 };
-  deletedVillagePagination = { page: 1, limit: 10 };
+  readonly DEFAULT_LIMIT = 10;
+  activeVillagePagination = { page: 1, limit: this.DEFAULT_LIMIT };
+  deletedVillagePagination = { page: 1, limit: this.DEFAULT_LIMIT };
 
   constructor(
     private fb: FormBuilder,
@@ -45,42 +47,28 @@ export class VillageNewComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    console.log('ngOnInit', seq++);
     this.initForm();
     this.loadAllDistricts();
     this.initModal();
   }
 
-  updateSelectedActiveVillages(): void {
-    this.selectedActiveVillages = this.villages.filter((v) => v.selected);
-  }
-
-  updateSelectedDeletedVillages(): void {
-    this.selectedDeletedVillages = this.deletedVillages.filter(
-      (v) => v.selected
-    );
-  }
-  initModal(): void {
-    console.log('initModal', seq++);
+  private initModal(): void {
     const element = this.el.nativeElement.querySelector('#villageModal');
     this.villageModal = new bootstrap.Modal(element);
   }
 
-  initForm(): void {
-    console.log('initForm', seq++);
+  private initForm(): void {
     this.currentForm = this.fb.group({
-      villages: this.fb.array([this.createVillageForm()]),
+      villages: this.fb.array([this.createVillageForm()])
     });
   }
 
-  createVillageForm(): FormGroup {
-    console.log('createVillageForm', seq++);
+  private createVillageForm(): FormGroup {
     return this.fb.group({
       id: [''],
       name: ['', Validators.required],
       gu_name: ['', Validators.required],
-      taluka_id: [this.selectedTalukaId, Validators.required],
-      is_deleted: [false],
+      taluka_id: [this.selectedTalukaId, Validators.required]
     });
   }
 
@@ -88,22 +76,29 @@ export class VillageNewComponent implements OnInit {
     return this.currentForm.get('villages') as FormArray;
   }
 
+  updateSelectedActiveVillages(): void {
+    this.selectedActiveVillages = this.villages.filter((v) => v.selected);
+  }
+
+  updateSelectedDeletedVillages(): void {
+    this.selectedDeletedVillages = this.deletedVillages.filter((v) => v.selected);
+  }
+
   onDistrictChange(): void {
-    console.log('onDistrictChange', seq++);
     this.selectedTalukaId = '';
     this.loadAllTalukas();
   }
 
   onTalukaChange(): void {
-    console.log('onTalukaChange', seq++);
-    this.activeVillagePagination = { page: 1, limit: 10 };
-    this.deletedVillagePagination = { page: 1, limit: 10 };
+    this.activeVillagePagination = { page: 1, limit: this.DEFAULT_LIMIT };
+    this.deletedVillagePagination = { page: 1, limit: this.DEFAULT_LIMIT };
     this.loadVillageData();
   }
 
-  loadAllDistricts(): void {
-    console.log('loadAllDistricts', seq++);
-    this.villageService.getAllDistricts().subscribe((res) => {
+  private loadAllDistricts(): void {
+    this.villageService.getAllDistricts().pipe(
+      catchError(err => { console.error(err); return of({ data: { getDistricts: [] } }); })
+    ).subscribe((res) => {
       this.districts = res?.data?.getDistricts || [];
       if (this.districts.length) {
         this.selectedDistrictId = this.districts[0].id;
@@ -112,58 +107,42 @@ export class VillageNewComponent implements OnInit {
     });
   }
 
-  loadAllTalukas(): void {
-    console.log('loadAllTalukas', seq++);
-    this.villageService
-      .getAllTalukas(this.selectedDistrictId)
-      .subscribe((res) => {
-        this.talukas = res?.data?.getTalukasByDistrictId || [];
-        if (this.talukas.length) {
-          this.selectedTalukaId = this.talukas[0].id;
-          this.loadVillageData();
-        }
-      });
+  private loadAllTalukas(): void {
+    this.villageService.getAllTalukas(this.selectedDistrictId).pipe(
+      catchError(err => { console.error(err); return of({ data: { getTalukasByDistrictId: [] } }); })
+    ).subscribe((res) => {
+      this.talukas = res?.data?.getTalukasByDistrictId || [];
+      if (this.talukas.length) {
+        this.selectedTalukaId = this.talukas[0].id;
+        this.loadVillageData();
+      }
+    });
   }
 
-  loadVillageData(): void {
-    console.log('loadVillageData', seq++);
+  private loadVillageData(): void {
     this.selectedActiveVillages = [];
     this.selectedDeletedVillages = [];
-    this.villageService
-      .getVillageStatsByTaluka(
-        this.selectedTalukaId,
-        this.activeVillagePagination,
-        this.deletedVillagePagination
-      )
-      .subscribe((res) => {
-        const response = res?.data?.getVillageStatsByTaluka;
-        if (!response) return;
-        setTimeout(() => {
-          // ← avoid ExpressionChangedAfterItHasBeenCheckedError
-          this.selectedDistrictId = response.selectedDistrictId;
-          this.selectedTalukaId = response.selectedTalukaId;
-          this.talukas = response.talukas || [];
-
-          this.villages = (response.activeVillagesByTalukaId || []).map(
-            (v) => ({
-              ...v,
-              selected: false,
-            })
-          );
-          this.deletedVillages = (response.deletedVillagesByTalukaId || []).map(
-            (v) => ({ ...v, selected: false })
-          );
-
-          this.totalActiveVillages = response.totalActiveVillagesByTalukaId;
-          this.totalDeletedVillages = response.totalDeletedVillagesByTalukaId;
-
-          this.cdr.detectChanges(); // <-- manually trigger change detection if needed
-        });
-      });
+    this.villageService.getVillageStatsByTaluka(
+      this.selectedTalukaId,
+      this.activeVillagePagination,
+      this.deletedVillagePagination
+    ).pipe(
+      catchError(err => { console.error(err); return of({ data: null }); })
+    ).subscribe((res) => {
+      const response = res?.data?.getVillageStatsByTaluka;
+      if (!response) return;
+      this.selectedDistrictId = response.selectedDistrictId;
+      this.selectedTalukaId = response.selectedTalukaId;
+      this.talukas = response.talukas || [];
+      this.villages = (response.activeVillagesByTalukaId || []).map(v => ({ ...v, selected: false }));
+      this.deletedVillages = (response.deletedVillagesByTalukaId || []).map(v => ({ ...v, selected: false }));
+      this.totalActiveVillages = response.totalActiveVillagesByTalukaId;
+      this.totalDeletedVillages = response.totalDeletedVillagesByTalukaId;
+      this.cdr.detectChanges();
+    });
   }
 
   openVillageModal(): void {
-    console.log('openVillageModal', seq++);
     this.villageModalTitle = 'Add Village';
     this.needUpdate = false;
     this.currentForm.reset();
@@ -173,156 +152,110 @@ export class VillageNewComponent implements OnInit {
   }
 
   addVillage(): void {
-    console.log('addVillage', seq++);
     this.villagesFormArray.push(this.createVillageForm());
   }
 
   removeVillage(i: number): void {
-    console.log('removeVillage', seq++);
     if (this.villagesFormArray.length > 1) {
       this.villagesFormArray.removeAt(i);
     }
   }
 
-  getSelectedVillages(list: any[]): any[] {
-    console.log('getSelectedVillages', seq++);
+  private getSelectedVillages(list: Village[]): Village[] {
     return list.filter((v) => v.selected);
   }
 
   saveVillage(): void {
-    console.log('saveVillage', seq++);
     if (this.currentForm.invalid) return;
     const data = this.currentForm.value.villages;
     const request = this.needUpdate
       ? this.villageService.updateVillages(data)
       : this.villageService.createVillages(data);
-    request.subscribe(() => {
+    request.pipe(
+      catchError(err => { console.error(err); return of(null); })
+    ).subscribe(() => {
       this.loadVillageData();
       this.villageModal.hide();
     });
   }
 
-  editVillage(village: any): void {
-    console.log('editVillage', seq++);
+  editVillage(village: Village): void {
     this.villageModalTitle = 'Update Village';
     this.needUpdate = true;
     this.villagesFormArray.clear();
-    this.villagesFormArray.push(
-      this.fb.group({
-        id: [village.id],
-        name: [village.name],
-        gu_name: [village.gu_name],
-        taluka_id: [this.selectedTalukaId],
-        is_deleted: [village.is_deleted],
-      })
-    );
+    this.villagesFormArray.push(this.fb.group({
+      id: [village.id],
+      name: [village.name, Validators.required],
+      gu_name: [village.gu_name, Validators.required],
+      taluka_id: [this.selectedTalukaId, Validators.required]
+    }));
     this.villageModal.show();
   }
 
   editSelectedVillages(): void {
-    console.log('editSelectedVillages', seq++);
     const selected = this.getSelectedVillages(this.villages);
     if (!selected.length) return;
     this.needUpdate = true;
     this.villageModalTitle = 'Edit Villages';
-    const formGroups = selected.map((v) =>
-      this.fb.group({
-        id: [v.id],
-        name: [v.name],
-        gu_name: [v.gu_name],
-        taluka_id: [this.selectedTalukaId],
-        is_deleted: [v.is_deleted],
-      })
-    );
+    const formGroups = selected.map((v) => this.fb.group({
+      id: [v.id],
+      name: [v.name, Validators.required],
+      gu_name: [v.gu_name, Validators.required],
+      taluka_id: [this.selectedTalukaId, Validators.required]
+    }));
     this.currentForm.setControl('villages', this.fb.array(formGroups));
     this.villageModal.show();
   }
 
   deleteVillage(id: string): void {
-    console.log('deleteVillage', seq++);
-    this.villageService.softDeleteVillage(id).subscribe(() => {
-      this.loadVillageData();
-    });
+    this.villageService.softDeleteVillage(id).pipe(
+      catchError(err => { console.error(err); return of(null); })
+    ).subscribe(() => this.loadVillageData());
   }
 
   deleteSelectedVillages(): void {
-    console.log('deleteSelectedVillages', seq++);
     const ids = this.getSelectedVillages(this.villages).map((v) => v.id);
-    this.villageService.softDeleteVillages(ids).subscribe(() => {
-      this.loadVillageData();
-    });
+    this.villageService.softDeleteVillages(ids).pipe(
+      catchError(err => { console.error(err); return of(null); })
+    ).subscribe(() => this.loadVillageData());
   }
 
   restoreVillage(id: string): void {
-    console.log('restoreVillage', seq++);
-    this.villageService.restoreVillage(id).subscribe(() => {
-      this.loadVillageData();
-    });
+    this.villageService.restoreVillage(id).pipe(
+      catchError(err => { console.error(err); return of(null); })
+    ).subscribe(() => this.loadVillageData());
   }
 
   restoreSelectedVillages(): void {
-    console.log('restoreSelectedVillages', seq++);
     const ids = this.getSelectedVillages(this.deletedVillages).map((v) => v.id);
-    this.villageService.restoreVillages(ids).subscribe(() => {
-      this.loadVillageData();
-    });
-  }
-
-  getVillagesByTalukaId(): void {
-    if (!this.selectedTalukaId) return;
-    console.log('getVillagesByTalukaId', seq++);
-    this.villageService
-      .getVillagesByTalukaId(
-        this.selectedTalukaId,
-        this.activeVillagePagination
-      )
-      .subscribe((res) => {
-        const villages = res?.data?.getVillagesByTalukaId || [];
-        this.villages = villages.map((v) => ({ ...v, selected: false }));
-      });
-  }
-
-  getDeletedVillagesByTalukaId(): void {
-    if (!this.selectedTalukaId) return;
-    console.log('getDeletedVillagesByTalukaId', seq++);
-    this.villageService
-      .getDeletedVillagesByTalukaId(
-        this.selectedTalukaId,
-        this.deletedVillagePagination
-      )
-      .subscribe((res) => {
-        const villages = res?.data?.getDeletedVillagesByTalukaId || [];
-        this.deletedVillages = villages.map((v) => ({ ...v, selected: false }));
-      });
+    this.villageService.restoreVillages(ids).pipe(
+      catchError(err => { console.error(err); return of(null); })
+    ).subscribe(() => this.loadVillageData());
   }
 
   changeActiveVillagePage(page: number): void {
     if (this.activeVillagePagination.page === page) return;
-    console.log('changeActiveVillagePage', seq++);
     this.activeVillagePagination.page = page;
-    this.getVillagesByTalukaId();
+    this.loadVillageData();
   }
 
   changeActiveVillagePageSize(limit: number): void {
     if (this.activeVillagePagination.limit === limit) return;
-    console.log('changeActiveVillagePageSize', seq++);
     this.activeVillagePagination.limit = limit;
     this.activeVillagePagination.page = 1;
-    this.getVillagesByTalukaId();
+    this.loadVillageData();
   }
 
   changeDeletedVillagePage(page: number): void {
     if (this.deletedVillagePagination.page === page) return;
-    console.log('changeDeletedVillagePage', seq++);
     this.deletedVillagePagination.page = page;
-    this.getDeletedVillagesByTalukaId();
+    this.loadVillageData();
   }
 
   changeDeletedVillagePageSize(limit: number): void {
     if (this.deletedVillagePagination.limit === limit) return;
-    console.log('changeDeletedVillagePageSize', seq++);
     this.deletedVillagePagination.limit = limit;
     this.deletedVillagePagination.page = 1;
-    this.getDeletedVillagesByTalukaId();
+    this.loadVillageData();
   }
 }

@@ -4,42 +4,45 @@ import {
   Component,
   ElementRef,
   OnInit,
+  OnDestroy,
 } from '@angular/core';
 import { FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
-import { District } from 'src/app/common/interfaces/commonInterfaces';
 import { GraphTalukaService } from 'src/app/common/services/graph-taluka.service';
+import { District } from 'src/app/graphql/types/village.types';
 declare const bootstrap: any;
 
+interface Taluka {
+  id: string;
+  name: string;
+  gu_name: string;
+  district?: { id: string };
+  selected?: boolean;
+}
 let seq = 1;
-
 @Component({
   selector: 'app-taluka-new',
   templateUrl: './taluka-new.component.html',
   styleUrls: ['./taluka-new.component.scss'],
 })
-export class TalukaNewComponent implements OnInit, AfterViewInit {
-  selectedActiveTalukas: any[] = [];
-  selectedDeletedTalukas: any[] = [];
-
+export class TalukaNewComponent implements OnInit, AfterViewInit, OnDestroy {
+  selectedActiveTalukas: Taluka[] = [];
+  selectedDeletedTalukas: Taluka[] = [];
   talukaData: any = {};
-  talukas: any[] = [];
-  deletedTalukas: any[] = [];
+  talukas: Taluka[] = [];
+  deletedTalukas: Taluka[] = [];
   districts: District[] = [];
   currentForm: FormGroup;
   needUpdate = false;
-
   talukaModal: any;
   talukaModalElement: any;
-  talukaModalOptions: any;
+  talukaModalOptions = { backdrop: false, keyboard: false };
   talukaModalTitle = 'Add Taluka';
-
   activeTalukaPagination = { page: 1, limit: 10 };
   deletedTalukaPagination = { page: 1, limit: 10 };
   totalActiveTalukas = 0;
   totalDeletedTalukas = 0;
-
   selectedDistrictId: string = '';
-  loading: boolean = true;
+  loading = true;
 
   constructor(
     private talukaService: GraphTalukaService,
@@ -49,34 +52,79 @@ export class TalukaNewComponent implements OnInit, AfterViewInit {
   ) {}
 
   ngAfterViewInit(): void {
-    console.log('ngAfterViewInit', seq++);
+    console.log(`${seq++} - ngAfterViewInit`);
     this.talukaModalElement =
       this.el.nativeElement.querySelector('#talukaModal');
-    this.talukaModalOptions = { backdrop: false, keyboard: false };
     this.talukaModal = new bootstrap.Modal(
       this.talukaModalElement,
       this.talukaModalOptions
     );
   }
 
+  ngOnDestroy(): void {
+    console.log(`${seq++} - ngOnDestroy`);
+    if (this.talukaModal) this.talukaModal.hide();
+  }
+
   async ngOnInit(): Promise<void> {
-    console.log('ngOnInit', seq++);
+    console.log(`${seq++} - ngOnInit`);
     this.initForm();
     if (!this.selectedDistrictId) await this.loadSelectedId();
     await this.loadAllDistricts();
     await this.loadTalukaData();
     this.loading = false;
   }
-  updateSelectedActiveTalukas() {
+
+  initForm(): void {
+    console.log(`${seq++} - initForm`);
+    this.currentForm = this.fb.group({
+      talukas: this.fb.array([this.createTalukaForm()]),
+    });
+  }
+
+  createTalukaForm(): FormGroup {
+    console.log(`${seq++} - createTalukaForm`);
+    return this.fb.group({
+      id: [''],
+      name: ['', Validators.required],
+      gu_name: ['', Validators.required],
+      district_id: ['', Validators.required],
+      is_deleted: [false],
+    });
+  }
+
+  private buildTalukaForm(t: Taluka): FormGroup {
+    console.log(`${seq++} - buildTalukaForm`);
+    return this.fb.group({
+      id: [t.id],
+      name: [t.name, Validators.required],
+      gu_name: [t.gu_name, Validators.required],
+      district_id: [
+        t.district?.id || this.selectedDistrictId,
+        Validators.required,
+      ],
+    });
+  }
+
+  updateSelectedActiveTalukas(): void {
+    console.log(`${seq++} - updateSelectedActiveTalukas`);
     this.selectedActiveTalukas = this.talukas.filter((t) => t.selected);
   }
 
-  updateSelectedDeletedTalukas() {
+  updateSelectedDeletedTalukas(): void {
+    console.log(`${seq++} - updateSelectedDeletedTalukas`);
     this.selectedDeletedTalukas = this.deletedTalukas.filter((t) => t.selected);
   }
 
+  onDistrictChange(): void {
+    console.log(`${seq++} - onDistrictChange`);
+    this.activeTalukaPagination = { page: 1, limit: 10 };
+    this.deletedTalukaPagination = { page: 1, limit: 10 };
+    this.loadTalukaData();
+  }
+
   async loadSelectedId(): Promise<void> {
-    console.log('loadSelectedId', seq++);
+    console.log(`${seq++} - loadSelectedId`);
     return new Promise((resolve, reject) => {
       this.talukaService.getSelectedDistrictId().subscribe(
         (res) => {
@@ -89,7 +137,7 @@ export class TalukaNewComponent implements OnInit, AfterViewInit {
   }
 
   async loadAllDistricts(): Promise<void> {
-    console.log('loadAllDistricts', seq++);
+    console.log(`${seq++} - loadAllDistricts`);
     return new Promise((resolve, reject) => {
       this.talukaService.getAllDistricts().subscribe(
         (res) => {
@@ -101,36 +149,8 @@ export class TalukaNewComponent implements OnInit, AfterViewInit {
     });
   }
 
-  initForm() {
-    console.log('initForm', seq++);
-    this.currentForm = this.fb.group({
-      talukas: this.fb.array([this.createTalukaForm()]),
-    });
-  }
-
-  createTalukaForm(): FormGroup {
-    console.log('createTalukaForm', seq++);
-    return this.fb.group({
-      id: [''],
-      name: ['', Validators.required],
-      gu_name: ['', Validators.required],
-      district_id: ['', Validators.required],
-      is_deleted: [false],
-    });
-  }
-
-  get talukasFormArray(): FormArray {
-    return this.currentForm.get('talukas') as FormArray;
-  }
-  onDistrictChange(): void {
-    console.log('onDistrictChange', seq++);
-    this.activeTalukaPagination = { page: 1, limit: 10 };
-    this.deletedTalukaPagination = { page: 1, limit: 10 };
-    this.loadTalukaData();
-  }
-
   loadTalukaData(): void {
-    console.log('loadTalukaData', ++seq);
+    console.log(`${seq++} - loadTalukaData`);
     this.loading = true;
     this.talukaService
       .getTalukaStatsAndData(
@@ -145,78 +165,66 @@ export class TalukaNewComponent implements OnInit, AfterViewInit {
 
           this.talukaData = response;
           this.selectedDistrictId = response.selectedId;
-
           this.talukas = (response.activeTalukasByDistrictId || []).map(
-            (t) => ({
-              ...t,
-              selected: false,
-            })
+            (t) => ({ ...t, selected: false })
           );
           this.deletedTalukas = (response.deletedTalukasByDistrictId || []).map(
-            (t) => ({
-              ...t,
-              selected: false,
-            })
+            (t) => ({ ...t, selected: false })
           );
-
-          // Clear selected arrays to prevent template recalculations
           this.selectedActiveTalukas = [];
           this.selectedDeletedTalukas = [];
-
           this.totalActiveTalukas = response.totalActiveTalukasByDistrictId;
           this.totalDeletedTalukas = response.totalDeletedTalukasByDistrictId;
           this.districts = response.districts;
 
           this.loading = false;
-
-          // ✅ Ensure Angular updates the view after model changes
           this.cdr.detectChanges();
         },
         error: (err) => {
+          console.error(`${seq++} - loadTalukaData error`, err);
           this.loading = false;
-          console.error('Error loading taluka data:', err);
-          this.cdr.detectChanges(); // Optional safety
+          this.cdr.detectChanges();
         },
       });
   }
-
-  addTaluka() {
-    console.log('addTaluka', seq++);
+  get talukasFormArray(): FormArray {
+    return this.currentForm.get('talukas') as FormArray;
+  }
+  addTaluka(): void {
+    console.log(`${seq++} - addTaluka`);
     this.talukasFormArray.push(this.createTalukaForm());
   }
 
-  removeTaluka(index: number) {
-    console.log('removeTaluka', seq++);
+  removeTaluka(index: number): void {
+    console.log(`${seq++} - removeTaluka`);
     if (this.talukasFormArray.length > 1) this.talukasFormArray.removeAt(index);
   }
 
-  saveTaluka() {
-    console.log('saveTaluka', seq++);
+  saveTaluka(): void {
+    console.log(`${seq++} - saveTaluka`);
     if (this.currentForm.invalid) return;
     const talukaData = this.currentForm.value.talukas;
-
     const request = this.needUpdate
       ? this.talukaService.updateTalukas(talukaData)
       : this.talukaService.createTalukas(talukaData);
 
-    request.subscribe(
-      () => {
+    request.subscribe({
+      next: () => {
         this.loadTalukaData();
         this.talukaModal.hide();
       },
-      (err) =>
+      error: (err) =>
         console.error(
           this.needUpdate ? 'Update failed:' : 'Create failed:',
           err
-        )
-    );
+        ),
+    });
   }
 
-  openTalukaModal() {
-    console.log('openTalukaModal', seq++);
+  openTalukaModal(): void {
+    console.log(`${seq++} - openTalukaModal`);
     this.talukaModalTitle = 'Add New Talukas';
     this.needUpdate = false;
-    this.currentForm.reset();
     this.currentForm.setControl(
       'talukas',
       this.fb.array([this.createTalukaForm()])
@@ -224,109 +232,98 @@ export class TalukaNewComponent implements OnInit, AfterViewInit {
     this.talukaModal.show();
   }
 
-  editTaluka(taluka: any) {
-    console.log('editTaluka', seq++);
+  editTaluka(taluka: Taluka): void {
+    console.log(`${seq++} - editTaluka`);
     this.needUpdate = true;
     this.talukaModalTitle = 'Edit Taluka';
-    const formGroup = this.fb.group({
-      id: [taluka.id],
-      name: [taluka.name, Validators.required],
-      gu_name: [taluka.gu_name, Validators.required],
-      district_id: [this.selectedDistrictId, Validators.required],
-      is_deleted: [taluka.is_deleted],
-    });
-    this.currentForm.setControl('talukas', this.fb.array([formGroup]));
+    this.currentForm.setControl(
+      'talukas',
+      this.fb.array([this.buildTalukaForm(taluka)])
+    );
     this.talukaModal.show();
   }
 
-  editSelectedTalukas() {
-    console.log('editSelectedTalukas', seq++);
+  editSelectedTalukas(): void {
+    console.log(`${seq++} - editSelectedTalukas`);
     const selected = this.getSelectedTalukas(this.talukas);
     if (!selected.length) return;
     this.needUpdate = true;
     this.talukaModalTitle = 'Edit Selected Talukas';
-
-    const formGroups = selected.map((t) =>
-      this.fb.group({
-        id: [t.id],
-        name: [t.name, Validators.required],
-        gu_name: [t.gu_name, Validators.required],
-        district_id: [
-          t.district?.id || this.selectedDistrictId,
-          Validators.required,
-        ],
-        is_deleted: [t.is_deleted],
-      })
-    );
-
+    const formGroups = selected.map((t) => this.buildTalukaForm(t));
     this.currentForm.setControl('talukas', this.fb.array(formGroups));
     this.talukaModal.show();
   }
 
-  deleteTaluka(id: string) {
-    console.log('deleteTaluka', seq++);
+  deleteTaluka(id: string): void {
+    console.log(`${seq++} - deleteTaluka`);
     this.talukaService
       .softDeleteTaluka(id)
-      .subscribe(() => this.loadTalukaData());
+      .subscribe({ next: () => this.loadTalukaData() });
   }
 
-  restoreTaluka(id: string) {
-    console.log('restoreTaluka', seq++);
-    this.talukaService.restoreTaluka(id).subscribe(() => this.loadTalukaData());
+  restoreTaluka(id: string): void {
+    console.log(`${seq++} - restoreTaluka`);
+    this.talukaService
+      .restoreTaluka(id)
+      .subscribe({ next: () => this.loadTalukaData() });
   }
 
-  deleteSelectedTalukas() {
-    console.log('deleteSelectedTalukas', seq++);
+  deleteSelectedTalukas(): void {
+    console.log(`${seq++} - deleteSelectedTalukas`);
     const ids = this.getSelectedTalukas(this.talukas).map((t) => t.id);
     if (ids.length) {
       this.talukaService
         .softDeleteTalukas(ids)
-        .subscribe(() => this.loadTalukaData());
+        .subscribe({ next: () => this.loadTalukaData() });
     }
   }
 
-  restoreSelectedTalukas() {
-    console.log('restoreSelectedTalukas', seq++);
+  restoreSelectedTalukas(): void {
+    console.log(`${seq++} - restoreSelectedTalukas`);
     const ids = this.getSelectedTalukas(this.deletedTalukas).map((t) => t.id);
     if (ids.length) {
       this.talukaService
         .restoreTalukas(ids)
-        .subscribe(() => this.loadTalukaData());
+        .subscribe({ next: () => this.loadTalukaData() });
     }
   }
 
-  getSelectedTalukas(list: any[]) {
-    console.log('getSelectedTalukas', seq++);
+  getSelectedTalukas(list: Taluka[]): Taluka[] {
+    console.log(`${seq++} - getSelectedTalukas`);
     return list.filter((t) => typeof t === 'object' && t.selected);
   }
 
-  changeActivePage(page: number) {
-    console.log('changeActivePage', seq++);
-    if (this.activeTalukaPagination.page === page) return;
-    this.activeTalukaPagination.page = page;
-    this.loadTalukaData();
+  changeActivePage(page: number): void {
+    console.log(`${seq++} - changeActivePage`);
+    if (this.activeTalukaPagination.page !== page) {
+      this.activeTalukaPagination.page = page;
+      this.loadTalukaData();
+    }
   }
 
-  changeActivePageSize(limit: number) {
-    console.log('changeActivePageSize', seq++);
-    if (this.activeTalukaPagination.limit === limit) return;
-    this.activeTalukaPagination.limit = limit;
-    this.activeTalukaPagination.page = 1;
-    this.loadTalukaData();
+  changeActivePageSize(limit: number): void {
+    console.log(`${seq++} - changeActivePageSize`);
+    if (this.activeTalukaPagination.limit !== limit) {
+      this.activeTalukaPagination.limit = limit;
+      this.activeTalukaPagination.page = 1;
+      this.loadTalukaData();
+    }
   }
 
-  changeDeletedPage(page: number) {
-    console.log('changeDeletedPage', seq++);
-    if (this.deletedTalukaPagination.page === page) return;
-    this.deletedTalukaPagination.page = page;
-    this.loadTalukaData();
+  changeDeletedPage(page: number): void {
+    console.log(`${seq++} - changeDeletedPage`);
+    if (this.deletedTalukaPagination.page !== page) {
+      this.deletedTalukaPagination.page = page;
+      this.loadTalukaData();
+    }
   }
 
-  changeDeletedPageSize(limit: number) {
-    console.log('changeDeletedPageSize', seq++);
-    if (this.deletedTalukaPagination.limit === limit) return;
-    this.deletedTalukaPagination.limit = limit;
-    this.deletedTalukaPagination.page = 1;
-    this.loadTalukaData();
+  changeDeletedPageSize(limit: number): void {
+    console.log(`${seq++} - changeDeletedPageSize`);
+    if (this.deletedTalukaPagination.limit !== limit) {
+      this.deletedTalukaPagination.limit = limit;
+      this.deletedTalukaPagination.page = 1;
+      this.loadTalukaData();
+    }
   }
 }
