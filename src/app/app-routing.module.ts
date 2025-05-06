@@ -7,7 +7,7 @@ import { NewAuthGuard } from './common/guards/new-auth.guard';
 import { RoleGuard } from './common/guards/role.guard';
 
 const routes: Routes = [
-  { path: '', redirectTo: 'home', pathMatch: 'full' },
+  { path: '', redirectTo: 'latest', pathMatch: 'full' },
   {
     path: '',
     component: LayoutComponent,
@@ -26,7 +26,6 @@ const routes: Routes = [
       },
       {
         path: 'broken-pages',
-        canActivate: [NewAuthGuard],
         children: [
           {
             path: '',
@@ -136,19 +135,6 @@ const routes: Routes = [
               import(
                 './module/email-verification/email-verification.module'
               ).then((m) => m.EmailVerificationModule),
-          },
-        ],
-      },
-      {
-        path: 'broken-pages',
-        children: [
-          { path: '', pathMatch: 'full', redirectTo: 'unauthorized' },
-          {
-            path: 'unauthorized',
-            loadChildren: () =>
-              import(
-                './module/broken-pages/unauthorized/unauthorized.module'
-              ).then((m) => m.UnauthorizedModule),
           },
         ],
       },
