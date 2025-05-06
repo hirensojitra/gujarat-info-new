@@ -102,8 +102,6 @@ const routes: Routes = [
       },
       {
         path: 'latest',
-        data: { roleCode: 'VIEWER' },
-        canActivate: [RoleGuard],
         children: [
           {
             path: '',
