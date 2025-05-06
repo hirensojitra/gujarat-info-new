@@ -1,8 +1,19 @@
-<div class="page-body">
-    <div class="lock"></div>
-    <div class="message text-center">
-        <h1>Access to this page is restricted</h1>
-        <p>Please check with the site admin if you believe this is a mistake.</p>
-        <button class="btn btn-dark" [routerLink]="''"><i class="fa fa-home me-2"></i>Home</button>
-    </div>
-</div>
+<!-- src/app/unauthorized/unauthorized.component.html -->
+<div class="page-body text-center">
+    <h1>Access Restricted</h1>
+  
+    <p *ngIf="expectedRoles.length">
+      This page is only accessible to:
+      <strong>{{ expectedRoles.join(', ') }}</strong>.
+    </p>
+    <p *ngIf="!expectedRoles.length">
+      You do not have the required permissions to view this page.
+    </p>
+  
+    <p>Please contact the site administrator if you believe this is an error.</p>
+  
+    <button class="btn btn-dark mt-3" [routerLink]="returnUrl">
+      <i class="fa fa-home me-2"></i>Go Back
+    </button>
+  </div>
+  

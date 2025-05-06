@@ -1,0 +1,56 @@
+.user-layout {
+    height: 100%;
+
+    .sidebar {
+        min-height: 100vh;
+        .sidebar-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .nav-link {
+            padding: 0.75rem 1rem;
+            margin: 0.25rem 0;
+            border-radius: 0.5rem;
+            color: #4a4a4a;
+            font-weight: 500;
+            transition:
+                background-color 0.2s,
+                color 0.2s;
+
+            &:hover {
+                background-color: #f8f9fa;
+                color: #2c3e50;
+            }
+
+            &.active {
+                background-color: #007bff;
+                color: #fff;
+            }
+        }
+    }
+
+    .content {
+        background-color: #fdfdfd;
+        min-height: 100vh;
+
+        // optional: style a container wrapper inside your routes
+        .page-header {
+            font-size: 1.75rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+    }
+}
+
+// Make sure the sidebar collapses on small screens
+@media (max-width: 767.98px) {
+    .sidebar {
+        position: relative;
+        min-height: auto;
+    }
+    .content {
+        min-height: auto;
+    }
+}

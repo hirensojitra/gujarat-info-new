@@ -24,6 +24,7 @@ import { provideApollo } from 'apollo-angular';
 import { HttpLink }      from 'apollo-angular/http';
 import { InMemoryCache } from '@apollo/client/core';
 import { environment }   from '../environments/environment';
+import { CookieService } from 'ngx-cookie-service';
 
 @NgModule({
   declarations: [
@@ -49,17 +50,24 @@ import { environment }   from '../environments/environment';
       useClass: HttpLoaderInterceptor,
       multi: true,
     },
-
+    CookieService,
     // ─── Apollo GraphQL Setup ──────────────────────────────────────────
     provideApollo(() => {
       // inject the HttpLink service that uses Angular's HttpClient:
+      
       const httpLink = inject(HttpLink);
 
       return {
         link:  httpLink.create({ uri: `${environment.GraphApi}/graphql` }),
         cache: new InMemoryCache(),
+        defaultOptions: {
+          watchQuery: { errorPolicy: 'none' },
+          query:      { errorPolicy: 'none' },
+          mutate:     { errorPolicy: 'none' },
+        }
       };
     }),
+    
     // ───────────────────────────────────────────────────────────────────
   ],
   bootstrap: [AppComponent],

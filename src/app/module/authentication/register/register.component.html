@@ -1,0 +1,37 @@
+<div class="text-center mb-4">
+    <h4>Create an account</h4>
+    <p>Please enter your email and password to sign up.</p>
+</div>
+
+<form [formGroup]="registrationForm" (ngSubmit)="register()">
+    <div class="form-group mb-3">
+        <label for="email" class="form-label">E-Mail Address</label>
+        <input type="email" id="email" class="form-control" formControlName="email" placeholder="Enter your email"
+            [ngClass]="{ 'is-invalid': registrationForm.get('email')?.invalid && registrationForm.get('email')?.touched }" />
+    </div>
+    <div class="form-group mb-4">
+        <label for="pass_key" class="form-label">Password</label>
+        <input type="password" id="pass_key" class="form-control" formControlName="pass_key"
+            placeholder="Enter password"
+            [ngClass]="{ 'is-invalid': registrationForm.get('pass_key')?.invalid && registrationForm.get('pass_key')?.touched }" />
+    </div>
+
+    <button type="submit" class="btn btn-dark w-100 mb-3" [disabled]="registrationForm.invalid || loading">
+        Sign Up
+    </button>
+</form>
+
+<div class="my-3" *ngIf="errorMessage">
+    <div class="alert alert-danger" role="alert">
+        <h4 class="alert-heading">Registration Error</h4>
+        <p>The email address you provided is already registered with us.</p>
+        <hr>
+        <p class="mb-0">
+            Please <a routerLink="/login">log in</a> instead, or use a different email address.
+        </p>
+    </div>
+
+</div>
+<div class="text-center">
+    <p>Already have an account? <a [routerLink]="'/authentication/login'" class="text-decoration-none">Sign In</a></p>
+</div>

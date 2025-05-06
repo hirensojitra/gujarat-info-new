@@ -1,0 +1,124 @@
+<!-- home.component.html -->
+<div class="container text-center mt-5">
+  <img src="assets/images/svg/logo-large.svg" alt="logo" class="w-66-p mx-auto mb-3 max-w-250-px">
+  <h2 class="fade-in mb-4">{{ welcomeMessage }}</h2>
+  <div class="mt-4">
+    <a *ngIf="!isLoggedIn && isLoggedIn!==null" routerLink="/authentication/login"
+      class="btn btn-primary me-2">Login</a>
+    <a *ngIf="!isLoggedIn && isLoggedIn!==null" routerLink="/authentication/register"
+      class="btn btn-outline-primary">Register</a>
+
+    <a *ngIf=" isLoggedIn && isLoggedIn!==null" routerLink="/dashboard" class="btn btn-success me-2">Go to Dashboard</a>
+    <a *ngIf=" isLoggedIn && isLoggedIn!==null" routerLink="/settings" class="btn btn-info me-2"><i class="fa fa-gear"></i> Setting</a>
+    <button *ngIf="isLoggedIn && isLoggedIn!==null" (click)="logout()" class="btn btn-outline-danger">Logout</button>
+  </div>
+</div>
+
+
+<!-- profile.component.html -->
+<div class="container my-5" *ngIf="user">
+  <div class="card mx-auto shadow-lg" style="max-width:900px; border-radius:1rem; overflow:hidden;">
+    <!-- Header with subtle gradient -->
+    <div class="text-center text-white py-4" style="background: linear-gradient(135deg,#007bff,#6610f2);">
+      <h2 class="mb-0">USER PROFILE</h2>
+    </div>
+    <div class="card-body px-4 pt-4">
+      <div class="row gx-2">
+        <div class="col-md-6 d-flex align-items-center pb-2 mb-2 border-bottom">
+          <div class="icon-circle bg-white text-primary me-3">
+            <i class="fa fa-id-card"></i>
+          </div>
+          <div>
+            <div class="fw-bold">ID</div>
+            <div class="text-muted small">{{user.id}}</div>
+          </div>
+        </div>
+        <div class="col-6">
+          <div class="row">
+            <div class="col-md-6 d-flex align-items-center pb-2 mb-2 border-bottom" *ngIf="user.firstname">
+              <div class="icon-circle bg-white text-primary me-3">
+                <i class="fa fa-user"></i>
+              </div>
+              <div>
+                <div class="fw-bold">First Name</div>
+                <div class="text-muted small">{{user.firstname}}</div>
+              </div>
+            </div>
+            <div class="col-md-6 d-flex align-items-center pb-2 mb-2 border-bottom" *ngIf="user.middlename">
+              <div class="icon-circle bg-white text-primary me-3">
+                <i class="fa fa-user"></i>
+              </div>
+              <div>
+                <div class="fw-bold">Middle Name</div>
+                <div class="text-muted small">{{user.middlename}}</div>
+              </div>
+            </div>
+            <div class="col-md-6 d-flex align-items-center pb-2 mb-2 border-bottom" *ngIf="user.lastname">
+              <div class="icon-circle bg-white text-primary me-3">
+                <i class="fa fa-user"></i>
+              </div>
+              <div>
+                <div class="fw-bold">Last Name</div>
+                <div class="text-muted small">{{user.lastname}}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6 d-flex align-items-center pb-2 mb-2 border-bottom">
+          <div class="icon-circle bg-white text-success me-3">
+            <i class="fa fa-phone"></i>
+          </div>
+          <div>
+            <div class="fw-bold">Mobile Number</div>
+            <div class="text-muted small">{{user.number||'Not Updated'}}</div>
+          </div>
+        </div>
+        <div class="col-md-6 d-flex align-items-center pb-2 mb-2 border-bottom" *ngIf="user.number">
+          <div class="icon-circle bg-white me-3" [ngClass]="user.number_verified?'text-success':'text-danger'">
+            <i class="fa" [ngClass]="user.number_verified?'fa-check':'fa-close'"></i>
+          </div>
+          <div>
+            <div class="fw-bold">Number Verified</div>
+            <div class="text-muted small">{{user.number_verified}}</div>
+          </div>
+        </div>
+        <div class="col-md-6 d-flex align-items-center pb-2 mb-2 border-bottom">
+          <div class="icon-circle bg-white text-warning me-3">
+            <i class="fa fa-envelope"></i>
+          </div>
+          <div>
+            <div class="fw-bold">Email</div>
+            <div class="text-muted small">{{user.email}}</div>
+          </div>
+        </div>
+        <div class="col-md-6 d-flex align-items-center pb-2 mb-2 border-bottom">
+          <div class="icon-circle bg-white me-3" [ngClass]="user.email?'text-success':'text-danger'">
+            <i class="fa" [ngClass]="user.email_verified?'fa-check':'fa-close'"></i>
+          </div>
+          <div>
+            <div class="fw-bold">Email Verified</div>
+            <div class="text-muted small">{{user.email_verified}}</div>
+          </div>
+        </div>
+        <div class="col-md-6 d-flex align-items-center pb-2 mb-2 border-bottom">
+          <div class="icon-circle bg-white text-info me-3">
+            <i class="fa fa-tag"></i>
+          </div>
+          <div>
+            <div class="fw-bold">Role ID</div>
+            <div class="text-muted small">{{user.role_id}}</div>
+          </div>
+        </div>
+        <div class="col-md-6 d-flex align-items-center pb-2 mb-2 border-bottom">
+          <div class="icon-circle bg-white text-primary me-3">
+            <i class="fa fa-user-circle"></i>
+          </div>
+          <div>
+            <div class="fw-bold">Username</div>
+            <div class="text-muted small">{{user.username || 'Not Uvailable'}}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

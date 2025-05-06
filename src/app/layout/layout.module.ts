@@ -4,6 +4,7 @@ import { LayoutComponent } from './layout.component';
 import { EmptyLayoutModule } from './empty-layout/empty-layout.module';
 import { DashboardLayoutModule } from './dashboard-layout/dashboard-layout.module';
 import { RouterModule, RouterOutlet } from '@angular/router';
+import { UserLayoutModule } from './user-layout/user-layout.module';
 
 
 
@@ -15,6 +16,7 @@ import { RouterModule, RouterOutlet } from '@angular/router';
     CommonModule,
     EmptyLayoutModule,
     DashboardLayoutModule,
+    UserLayoutModule,
     RouterModule,
     RouterOutlet
   ],

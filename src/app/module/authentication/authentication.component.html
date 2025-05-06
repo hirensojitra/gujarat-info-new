@@ -1,0 +1,16 @@
+<div class="container d-flex align-items-center justify-content-center min-vh-100 flex-column">
+    <div class="card shadow p-4" style="width: 400px; border-radius: 15px;">
+        <img src="assets/images/svg/logo-large.svg" alt="logo" class="w-66-p mx-auto mb-3"  />
+        <hr>
+        <router-outlet></router-outlet>
+        <span class="or-container"></span>
+        <p class="text-center">Connect with us by</p>
+        <div class="d-flex justify-content-between mb-3">
+            <!-- <button class="btn btn-outline-light border w-100 me-2"><i class="fa fa-apple text-dark"></i></button> -->
+            <button class="btn btn-outline-danger border w-100 me-2" (click)="registerWithGoogle()"><i
+                    class="fa fa-google me-3"></i>Google</button>
+            <!-- <button class="btn btn-outline-light border w-100" (click)="registerWithFacebook()"><i
+                    class="fa fa-twitter text-primary"></i></button> -->
+        </div>
+    </div>
+</div>

@@ -8,7 +8,7 @@ import { filter } from 'rxjs/operators';
   styleUrls: ['./layout.component.scss'],
 })
 export class LayoutComponent implements OnInit {
-  currentLayout: string = 'dashboard-layout'; // Default layout
+  currentLayout: string = 'empty-layout';
 
   constructor(private activatedRoute: ActivatedRoute) {
     

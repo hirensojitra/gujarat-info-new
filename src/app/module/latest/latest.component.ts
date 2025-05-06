@@ -1,18 +1,24 @@
-import { isPlatformBrowser } from '@angular/common';
+// src/app/module/latest/latest.component.ts
+
 import {
-  ChangeDetectorRef,
   Component,
+  OnInit,
+  AfterViewInit,
+  OnDestroy,
+  ChangeDetectorRef,
   ElementRef,
   Inject,
   PLATFORM_ID,
   ViewChild,
 } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
-import { PostDetails } from 'src/app/common/interfaces/image-element';
+import { isPlatformBrowser } from '@angular/common';
+import { ActivatedRoute, Router, Params } from '@angular/router';
+import { Subscription } from 'rxjs';
+
 import { AuthService } from 'src/app/common/services/auth.service';
 import { ColorService } from 'src/app/common/services/color.service';
-import { PlatformService } from 'src/app/common/services/platform.service';
-import { PostDetailService } from 'src/app/common/services/post-detail.service';
+import { NewPostDetailService } from 'src/app/common/services/new-post-detail.service';
+import { PostDetails } from 'src/app/graphql/types/post-detail.types';
 import { environment } from 'src/environments/environment';
 declare const Masonry: any;
 
@@ -21,59 +27,62 @@ declare const Masonry: any;
   templateUrl: './latest.component.html',
   styleUrl: './latest.component.scss',
 })
-export class LatestComponent {
-  posts: PostDetails[] = [];
-  currentPage: number = 1;
-  limit: number = 12;
-  search: string = '';
-  sortBy: string = 'created_at';
-  order: string = 'desc';
-  pagination: any = { totalPosts: 0, currentPage: 1, totalPages: 0 };
+export class LatestComponent implements OnInit, AfterViewInit, OnDestroy {
+  /** now holds only the minimal shape + image */
+  posts: Array<Partial<PostDetails>> = [];
+
+  currentPage = 1;
+  limit = 10;
+  search = '';
+  sortBy = 'created_at';
+  order = 'desc';
+  pagination = { totalPosts: 0, currentPage: 1, totalPages: 0 };
+
+  loading = false;
+  progress = 0;
   isBrowser: boolean;
+
+  private routeSub!: Subscription;
   private masonryInstance: any;
-  loading: boolean = false;
-  progress: number = 0;
 
   @ViewChild('masonryGrid', { static: false }) masonryGridRef!: ElementRef;
-
   imgUrl = environment.MasterApi + '/thumb-images/';
 
   constructor(
-    private PS: PostDetailService,
+    private postService: NewPostDetailService,
     private route: ActivatedRoute,
     private router: Router,
     private authService: AuthService,
     @Inject(PLATFORM_ID) private platformId: Object,
     private cdr: ChangeDetectorRef,
-    private platformService: PlatformService,
     private colorService: ColorService
   ) {
     this.isBrowser = isPlatformBrowser(this.platformId);
   }
 
-  async ngOnInit(): Promise<void> {
-    this.route.queryParams.subscribe(async (params) => {
-      this.currentPage = +params['page'] || 1;
+  ngOnInit(): void {
+    this.routeSub = this.route.queryParams.subscribe((params: Params) => {
+      this.currentPage = +params['page'] || this.currentPage;
       this.limit = +params['limit'] || this.limit;
-      this.search = params['search'] || this.search;
-      this.sortBy = params['sortBy'] || this.sortBy;
-      this.order = params['order'] || this.order;
-      await this.getAllPosts();
+      this.search = params['search'] ?? this.search;
+      this.sortBy = params['sortBy'] ?? this.sortBy;
+      this.order = params['order'] ?? this.order;
+      this.loadPosts();
     });
   }
 
   ngAfterViewInit(): void {
     if (this.isBrowser) {
-      this.initializeMasonry();
-      window.addEventListener('resize', () => {
-        if (this.masonryInstance) {
-          this.masonryInstance.layout();
-        }
-      });
+      this.initMasonry();
+      window.addEventListener('resize', () => this.masonryInstance?.layout());
     }
   }
 
-  private initializeMasonry(): void {
+  ngOnDestroy(): void {
+    this.routeSub?.unsubscribe();
+  }
+
+  private initMasonry(): void {
     if (this.masonryGridRef && this.isBrowser) {
       this.masonryInstance = new Masonry(this.masonryGridRef.nativeElement, {
         itemSelector: '.masonry-box',
@@ -82,77 +91,81 @@ export class LatestComponent {
     }
   }
 
-  private async getAllPosts(): Promise<void> {
+  private loadPosts(): void {
     this.loading = true;
     this.progress = 0;
 
-    this.PS.getAllPosts({
-      page: this.currentPage,
-      limit: this.limit,
-      search: this.search,
-      sortBy: this.sortBy,
-      order: this.order,
-      published: true,
-      info_show: true
-    }).subscribe(async (response) => {
-      const totalPosts = response.posts.length;
-      let processedCount = 0;
-      this.posts = await Promise.all(
-        response.posts.map(async (post) => {
-          const imageUrl = this.imgUrl + post.id;
-          post.image = await this.convertImageToDataURI(imageUrl);
-          processedCount++;
-          this.progress = Math.round((processedCount / totalPosts) * 100);
-          return post;
-        })
-      );
-      this.pagination = response.pagination;
-      this.loading = false;
-      this.progress = 100;
-      this.cdr.detectChanges();
-      this.initializeMasonry();
-    });
-  }
+    this.postService
+      .getMinimalPosts({
+        page: this.currentPage,
+        limit: this.limit,
+        search: this.search,
+        sortBy: this.sortBy,
+        order: this.order,
+        published: true,
+        info_show: true,
+      })
+      .subscribe((resp) => {
+        const total = resp.posts.length;
+        let count = 0;
 
-  async convertImageToDataURI(imageUrl: string): Promise<string> {
-    if (!this.isBrowser) {
-      return imageUrl;
-    }
-    try {
-      const response = await fetch(imageUrl, { mode: 'cors' });
-      const blob = await response.blob();
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onloadend = () => resolve(reader.result as string);
-        reader.onerror = reject;
-        reader.readAsDataURL(blob);
+        // for each minimal post, fetch the thumbnail and update progress
+        const tasks = resp.posts.map((post) =>
+          this.toDataURI(this.imgUrl + post.id!).then((uri) => {
+            count++;
+            this.progress = Math.round((count / total) * 100);
+            this.cdr.detectChanges();
+            // return a fresh object with image
+            return { ...post, image: uri } as Partial<PostDetails>;
+          })
+        );
+
+        Promise.all(tasks).then((newPosts) => {
+          this.posts = newPosts;
+          this.pagination = resp.pagination;
+          this.loading = false;
+          this.progress = 100;
+          this.cdr.detectChanges();
+          this.initMasonry();
+        });
       });
-    } catch (error) {
-      console.error('Error converting image to Data URI:', error);
-      return '';
-    }
   }
 
-  async changePage(page: number): Promise<void> {
-    if (this.currentPage !== page) {
+  private toDataURI(url: string): Promise<string> {
+    if (!this.isBrowser) return Promise.resolve(url);
+    return fetch(url, { mode: 'cors' })
+      .then((r) => r.blob())
+      .then(
+        (blob) =>
+          new Promise<string>((res, rej) => {
+            const reader = new FileReader();
+            reader.onloadend = () => res(reader.result as string);
+            reader.onerror = rej;
+            reader.readAsDataURL(blob);
+          })
+      )
+      .catch((err) => {
+        console.error('convertImage error', err);
+        return '';
+      });
+  }
+
+  changePage(page: number): void {
+    if (page !== this.currentPage) {
       this.currentPage = page;
-      this.progress = 0;
-      this.loading = true;
-      await this.updateUrlParams();
+      this.updateUrl();
     }
   }
 
-  async changePageSize(newLimit: number): Promise<void> {
-    if (this.limit !== newLimit) {
+  changePageSize(newLimit: number): void {
+    if (newLimit !== this.limit) {
       this.limit = newLimit;
       this.currentPage = 1;
-      this.progress = 0;
-      this.loading = true;
-      await this.updateUrlParams();
+      this.updateUrl();
     }
   }
 
-  updateUrlParams(): void {
+  private updateUrl(): void {
     this.router.navigate([], {
       relativeTo: this.route,
       queryParams: {
@@ -170,38 +183,32 @@ export class LatestComponent {
     return this.authService.hasRole(['admin', 'master']);
   }
 
-  onSvgLoad(post: PostDetails, event?: Event): void {
-    if (this.masonryInstance && this.isBrowser) {
-      window.dispatchEvent(new Event('resize'));
-    }
-
-    // Parent element of the SVG
-    const parentElement = (event?.target as SVGElement)?.parentElement;
-    const imageUrl = post.image; // post.image is already the Data URI now
-    if (imageUrl && parentElement) {
-      this.getColors(imageUrl, 5)
-        .then((colors) => {
-          if (colors.length > 0) {
-            parentElement.style.backgroundColor = colors[4];
-            // parentElement.style.borderColor = colors[2];
-            parentElement.style.color = colors[2];
-            const images = parentElement.querySelectorAll('img');
-          images.forEach((img) => {
-            img.style.boxShadow = `0 0.5rem 1rem ${colors[2]}`;
-          });
+  onSvgLoad(post: Partial<PostDetails>, ev?: Event): void {
+    if (!this.isBrowser) return;
+    window.dispatchEvent(new Event('resize'));
+    const parent = (ev?.target as any)?.parentElement;
+    if (parent && post.image) {
+      this.colorService
+        .getColors(post.image, 5)
+        .then((cols) => {
+          if (cols.length >= 3) {
+            parent.style.backgroundColor = cols[4] || '';
+            parent.style.color = cols[2];
+            parent
+              .querySelectorAll('img')
+              .forEach(
+                (img: any) => (img.style.boxShadow = `0 0.5rem 1rem ${cols[2]}`)
+              );
           }
         })
-        .catch((error) => {
-          console.error('Failed to fetch colors:', error);
-        });
+        .catch(console.error);
     }
   }
 
-  async getColors(image: string, colorCounts: number) {
+  async getColors(image: string, count: number) {
     try {
-      return await this.colorService.getColors(image, colorCounts);
-    } catch (error) {
-      console.error('Error updating colors:', error);
+      return await this.colorService.getColors(image, count);
+    } catch {
       return [];
     }
   }
