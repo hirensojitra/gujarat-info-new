@@ -15,7 +15,7 @@ export interface MenuItem {
   subItems?: MenuItem[];
 }
 @Directive({
-  selector: '[sidebarMenu]'
+  selector: '[sidebarMenu]',
 })
 export class ABSDirective implements OnInit, AfterViewInit {
   private isMenuActive: boolean = false;
@@ -47,13 +47,13 @@ export class ABSDirective implements OnInit, AfterViewInit {
       this.updateSidebarVisibility();
       this.toggleMenuOpenClass(isMenuActive);
       this.checkActive(this.isMenuActive);
-    })
+    });
     this.menuHoverSubject.subscribe((isMenuHover: boolean) => {
       this.handleMenuHoverChange(isMenuHover);
-    })
+    });
     this.menuDataSubject.subscribe((menuData: MenuItem[]) => {
       this.createSidebar(menuData);
-      this.checkActive(this.isMenuActive)
+      this.checkActive(this.isMenuActive);
     });
   }
   private handleMenuActiveChange(isMenuActive: boolean) {
@@ -71,20 +71,26 @@ export class ABSDirective implements OnInit, AfterViewInit {
     }
   }
   private findSiblingListItems(el: HTMLElement, className: string) {
-    let items = (el.parentElement) ? (Array.from(el.parentElement.children) as HTMLElement[]).filter(child => child !== el && child.classList.contains(className)) : null;
-    return items ? items.forEach(siblingLi => {
-      const siblingLiElement = siblingLi as HTMLElement;
-      const submenuOfSiblingUls = siblingLiElement.querySelectorAll('ul');
-      submenuOfSiblingUls.forEach(submenu => {
-        if (submenu instanceof HTMLElement) {
-          submenu.classList.add('collapse');
-        }
-      });
-      const aElements = siblingLiElement.querySelectorAll('a.clicked');
-      aElements.forEach(a => {
-        a.classList.remove('clicked');
-      });
-    }) : false;
+    let items = el.parentElement
+      ? (Array.from(el.parentElement.children) as HTMLElement[]).filter(
+          (child) => child !== el && child.classList.contains(className)
+        )
+      : null;
+    return items
+      ? items.forEach((siblingLi) => {
+          const siblingLiElement = siblingLi as HTMLElement;
+          const submenuOfSiblingUls = siblingLiElement.querySelectorAll('ul');
+          submenuOfSiblingUls.forEach((submenu) => {
+            if (submenu instanceof HTMLElement) {
+              submenu.classList.add('collapse');
+            }
+          });
+          const aElements = siblingLiElement.querySelectorAll('a.clicked');
+          aElements.forEach((a) => {
+            a.classList.remove('clicked');
+          });
+        })
+      : false;
   }
   private updateSidebarVisibility() {
     const submenuElements = this.el.nativeElement.querySelectorAll('.submenu');
@@ -97,15 +103,15 @@ export class ABSDirective implements OnInit, AfterViewInit {
       parentElement = parentElement.parentElement;
     }
     submenuElements.forEach((ul: HTMLElement) => {
-      ul.classList.add('collapse')
+      ul.classList.add('collapse');
       if (this.isMenuActive) {
-        parentElement.classList.add('menu-open')
+        parentElement.classList.add('menu-open');
       } else {
-        parentElement.classList.remove('menu-open')
+        parentElement.classList.remove('menu-open');
       }
     });
     clickedElements.forEach((a: HTMLElement) => {
-      a.classList.remove('clicked')
+      a.classList.remove('clicked');
     });
 
     const closeMenu = this.el.nativeElement.querySelector('.close-menu');
@@ -116,8 +122,8 @@ export class ABSDirective implements OnInit, AfterViewInit {
     navLink.forEach((a: HTMLElement) => {
       const href = a.getAttribute('href')?.toString();
       if (href) {
-        let link = href.split('/').filter(value => value !== "");
-        link = link.map(value => {
+        let link = href.split('/').filter((value) => value !== '');
+        link = link.map((value) => {
           const indexOfSpecialChar = value.search(/[^\w\s-]/gi);
           if (indexOfSpecialChar !== -1) {
             return value.substring(0, indexOfSpecialChar);
@@ -125,8 +131,10 @@ export class ABSDirective implements OnInit, AfterViewInit {
           return value;
         });
 
-        let currentLink = this.router.url.split('/').filter(value => value !== "");
-        currentLink = currentLink.map(value => {
+        let currentLink = this.router.url
+          .split('/')
+          .filter((value) => value !== '');
+        currentLink = currentLink.map((value) => {
           const indexOfSpecialChar = value.search(/[^\w\s-]/gi);
           if (indexOfSpecialChar !== -1) {
             return value.substring(0, indexOfSpecialChar);
@@ -136,7 +144,8 @@ export class ABSDirective implements OnInit, AfterViewInit {
 
         const minLength = Math.min(link.length, currentLink.length);
         currentLink = currentLink.slice(0, minLength);
-        const areIdentical = JSON.stringify(link) === JSON.stringify(currentLink);
+        const areIdentical =
+          JSON.stringify(link) === JSON.stringify(currentLink);
         if (areIdentical) {
           a.classList.add('active');
           if (activate) {
@@ -153,78 +162,50 @@ export class ABSDirective implements OnInit, AfterViewInit {
   }
   private createSidebar(menuData: MenuItem[], parentElement?: any) {
     const ul = this.renderer.createElement('ul');
-    menuData.forEach((menuItem: MenuItem) => {
-      const li = this.renderer.createElement('li');
-      const a = this.renderer.createElement('a');
-      li.classList.add('nav-item');
-      this.renderer.setAttribute(a, 'href', menuItem.link!);
-      if (this.router.url.includes(menuItem.link!)) {
-        a.classList.add('active')
-      }
-      a.setAttribute('routerLinkActive', 'current');
-      a.setAttribute('title', menuItem.label);
-      a.classList.add('nav-link', 'text-nowrap', 'link');
-      const menuItemSpan = this.renderer.createElement('span');
-      this.renderer.appendChild(menuItemSpan, this.renderer.createText(menuItem.label));
+    menuData &&
+      menuData.forEach((menuItem: MenuItem) => {
+        const li = this.renderer.createElement('li');
+        const a = this.renderer.createElement('a');
+        li.classList.add('nav-item');
+        this.renderer.setAttribute(a, 'href', menuItem.link!);
+        if (this.router.url.includes(menuItem.link!)) {
+          a.classList.add('active');
+        }
+        a.setAttribute('routerLinkActive', 'current');
+        a.setAttribute('title', menuItem.label);
+        a.classList.add('nav-link', 'text-nowrap', 'link');
+        const menuItemSpan = this.renderer.createElement('span');
+        this.renderer.appendChild(
+          menuItemSpan,
+          this.renderer.createText(menuItem.label)
+        );
 
-      if (menuItem.icon) {
-        const menuItemIcon = this.renderer.createElement('i');
-        this.renderer.addClass(menuItemSpan, 'has-icon');
-        this.renderer.addClass(menuItemIcon, 'fa');
-        this.renderer.addClass(menuItemIcon, menuItem.icon);
-        this.renderer.appendChild(a, menuItemIcon);
-      }
+        if (menuItem.icon) {
+          const menuItemIcon = this.renderer.createElement('i');
+          this.renderer.addClass(menuItemSpan, 'has-icon');
+          this.renderer.addClass(menuItemIcon, 'fa');
+          this.renderer.addClass(menuItemIcon, menuItem.icon);
+          this.renderer.appendChild(a, menuItemIcon);
+        }
 
-      this.renderer.appendChild(a, menuItemSpan);
+        this.renderer.appendChild(a, menuItemSpan);
 
-      this.renderer.appendChild(li, a);
-      if (menuItem.subItems && menuItem.subItems.length > 0) {
-        const arrow = this.renderer.createElement('i');
-        arrow.classList.add('fa', 'fa-angle-down', 'control-arrow');
-        this.renderer.appendChild(a, arrow);
-        a.addEventListener('click', (event: Event) => {
-          event.preventDefault();
-          const submenuElement = li.querySelector('ul');
-          submenuElement.classList.toggle('collapse');
-          const closeMenu = this.el.nativeElement.querySelector('.close-menu');
-          if (!submenuElement.classList.contains('collapse')) {
-            a.classList.add('clicked');
-            closeMenu ? closeMenu.remove() : null;
-            const closeMenuAdd = this.renderer.createElement('div');
-            closeMenuAdd.addEventListener('click', () => {
-              const toggleLiSubmenu = li.querySelectorAll('ul');
-              toggleLiSubmenu.forEach((submenu: HTMLElement) => {
-                if (submenu instanceof HTMLElement) {
-                  submenu.classList.add('collapse');
-                }
-              });
-              this.updateSidebarVisibility();
-              closeMenuAdd.remove();
-            })
-            closeMenuAdd.classList.add('close-menu');
-            this.renderer.appendChild(this.el.nativeElement, closeMenuAdd);
-            this.findSiblingListItems(li, 'has-submenu');
-          } else {
-            a.classList.remove('clicked');
-            const toggleLiSubmenu = li.querySelectorAll('ul');
-            toggleLiSubmenu.forEach((submenu: HTMLElement) => {
-              if (submenu instanceof HTMLElement) {
-                submenu.classList.add('collapse');
-              }
-            });
-          }
-          return false;
-        });
-        a.addEventListener('mouseenter', (event: Event) => {
-          if (!this.isMenuActive && this.isMenuHover) {
+        this.renderer.appendChild(li, a);
+        if (menuItem.subItems && menuItem.subItems.length > 0) {
+          const arrow = this.renderer.createElement('i');
+          arrow.classList.add('fa', 'fa-angle-down', 'control-arrow');
+          this.renderer.appendChild(a, arrow);
+          a.addEventListener('click', (event: Event) => {
+            event.preventDefault();
             const submenuElement = li.querySelector('ul');
             submenuElement.classList.toggle('collapse');
-            const closeMenu = this.el.nativeElement.querySelector('.close-menu');
+            const closeMenu =
+              this.el.nativeElement.querySelector('.close-menu');
             if (!submenuElement.classList.contains('collapse')) {
               a.classList.add('clicked');
               closeMenu ? closeMenu.remove() : null;
               const closeMenuAdd = this.renderer.createElement('div');
-              closeMenuAdd.addEventListener('mouseenter', () => {
+              closeMenuAdd.addEventListener('click', () => {
                 const toggleLiSubmenu = li.querySelectorAll('ul');
                 toggleLiSubmenu.forEach((submenu: HTMLElement) => {
                   if (submenu instanceof HTMLElement) {
@@ -233,7 +214,7 @@ export class ABSDirective implements OnInit, AfterViewInit {
                 });
                 this.updateSidebarVisibility();
                 closeMenuAdd.remove();
-              })
+              });
               closeMenuAdd.classList.add('close-menu');
               this.renderer.appendChild(this.el.nativeElement, closeMenuAdd);
               this.findSiblingListItems(li, 'has-submenu');
@@ -246,46 +227,83 @@ export class ABSDirective implements OnInit, AfterViewInit {
                 }
               });
             }
-          }
-          return false;
-        })
-        this.createSidebar(menuItem.subItems, li);
-        li.classList.add('has-submenu');
-      }
-      else {
-        a.addEventListener('mouseenter', (event: Event) => {
-          !this.isMenuActive && this.isMenuHover ? this.findSiblingListItems(li, 'has-submenu') : null;
-        })
-        a.addEventListener('click', (event: Event) => {
-          event.preventDefault();
-          // Find siblings of the parent li and remove 'clicked' class
-          const parentLi = a.parentElement as HTMLElement;
-          const siblings = Array.from(parentLi.parentElement?.children || []) as HTMLElement[];
-          siblings.forEach(sibling => {
-            if (sibling !== parentLi) {
-              const siblingLink = sibling.querySelector('a');
-              if (siblingLink) {
-                siblingLink.classList.remove('active');
+            return false;
+          });
+          a.addEventListener('mouseenter', (event: Event) => {
+            if (!this.isMenuActive && this.isMenuHover) {
+              const submenuElement = li.querySelector('ul');
+              submenuElement.classList.toggle('collapse');
+              const closeMenu =
+                this.el.nativeElement.querySelector('.close-menu');
+              if (!submenuElement.classList.contains('collapse')) {
+                a.classList.add('clicked');
+                closeMenu ? closeMenu.remove() : null;
+                const closeMenuAdd = this.renderer.createElement('div');
+                closeMenuAdd.addEventListener('mouseenter', () => {
+                  const toggleLiSubmenu = li.querySelectorAll('ul');
+                  toggleLiSubmenu.forEach((submenu: HTMLElement) => {
+                    if (submenu instanceof HTMLElement) {
+                      submenu.classList.add('collapse');
+                    }
+                  });
+                  this.updateSidebarVisibility();
+                  closeMenuAdd.remove();
+                });
+                closeMenuAdd.classList.add('close-menu');
+                this.renderer.appendChild(this.el.nativeElement, closeMenuAdd);
+                this.findSiblingListItems(li, 'has-submenu');
+              } else {
+                a.classList.remove('clicked');
+                const toggleLiSubmenu = li.querySelectorAll('ul');
+                toggleLiSubmenu.forEach((submenu: HTMLElement) => {
+                  if (submenu instanceof HTMLElement) {
+                    submenu.classList.add('collapse');
+                  }
+                });
               }
             }
+            return false;
           });
-          this.findSiblingListItems(li, 'has-submenu');
-          const link = menuItem.link!;
-          setTimeout(() => {
-            this.router.navigate([link]).then(() => {
-              this.checkActive();
-              const screenWidth = window.innerWidth;
-              if (screenWidth < 1200) {
-                this.absService.toggleMenu();
+          this.createSidebar(menuItem.subItems, li);
+          li.classList.add('has-submenu');
+        } else {
+          a.addEventListener('mouseenter', (event: Event) => {
+            !this.isMenuActive && this.isMenuHover
+              ? this.findSiblingListItems(li, 'has-submenu')
+              : null;
+          });
+          a.addEventListener('click', (event: Event) => {
+            event.preventDefault();
+            // Find siblings of the parent li and remove 'clicked' class
+            const parentLi = a.parentElement as HTMLElement;
+            const siblings = Array.from(
+              parentLi.parentElement?.children || []
+            ) as HTMLElement[];
+            siblings.forEach((sibling) => {
+              if (sibling !== parentLi) {
+                const siblingLink = sibling.querySelector('a');
+                if (siblingLink) {
+                  siblingLink.classList.remove('active');
+                }
               }
             });
-            !this.isMenuActive ? this.updateSidebarVisibility() : null;
-            a.classList.add('active')
-          }, 200);
-        });
-      }
-      this.renderer.appendChild(ul, li);
-    });
+            this.findSiblingListItems(li, 'has-submenu');
+            const link = menuItem.link!;
+            setTimeout(() => {
+              this.router.navigate([link]).then(() => {
+                this.checkActive();
+                const screenWidth = window.innerWidth;
+                if (screenWidth < 1200) {
+                  this.absService.toggleMenu();
+                }
+              });
+              !this.isMenuActive ? this.updateSidebarVisibility() : null;
+              a.classList.add('active');
+            }, 200);
+          });
+        }
+        this.renderer.appendChild(ul, li);
+      });
     const container = parentElement || this.el.nativeElement;
     this.renderer.appendChild(container, ul);
     if (!parentElement) {
@@ -299,13 +317,11 @@ export class ABSDirective implements OnInit, AfterViewInit {
     }
   }
   ngOnInit() {
-
-    this.router.events.subscribe(event => {
+    this.router.events.subscribe((event) => {
       if (event instanceof NavigationEnd) {
         this.checkActive(this.isMenuActive);
       }
     });
   }
-  ngAfterViewInit(): void {
-  }
+  ngAfterViewInit(): void {}
 }

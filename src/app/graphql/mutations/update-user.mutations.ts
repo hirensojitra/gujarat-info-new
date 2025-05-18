@@ -1,23 +1,21 @@
-// src/app/graphql/mutations/update-user.mutations.ts
+// update-user.mutations.ts
 
 import { gql } from 'apollo-angular';
 
 export const UPDATE_USER_PROFILE = gql`
-  mutation UpdateUserProfile($input: UpdateUserInput!) {
-    updateUserProfile(input: $input) {
+  mutation UpdateUserProfile($input: UpdateUserInput!, $image: Upload) {
+    updateUserProfile(input: $input, image: $image) {
       id
       firstname
-      middlename
       lastname
+      middlename
+      email
       number
       number_verified
-      role_id
-      email
-      email_verified
-      username
-      birthday
       gender
+      birthday
       marital_status
+      role_id
       language {
         id
         name

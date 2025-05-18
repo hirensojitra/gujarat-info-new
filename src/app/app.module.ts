@@ -1,10 +1,14 @@
 // src/app/app.module.ts
 import { NgModule, inject } from '@angular/core';
-import { BrowserModule, provideClientHydration } from '@angular/platform-browser';
+import {
+  BrowserModule,
+  provideClientHydration,
+} from '@angular/platform-browser';
+import createUploadLink from 'apollo-upload-client/createUploadLink.mjs';
 
-import { AppRoutingModule }   from './app-routing.module';
-import { AppComponent }       from './app.component';
-import { LayoutModule }       from './layout/layout.module';
+import { AppRoutingModule } from './app-routing.module';
+import { AppComponent } from './app.component';
+import { LayoutModule } from './layout/layout.module';
 
 import {
   HTTP_INTERCEPTORS,
@@ -13,24 +17,20 @@ import {
   withFetch,
 } from '@angular/common/http';
 
-import { LoaderModule }            from './common/component/loader/loader.module';
-import { ToastModule }             from './common/component/toast/toast.module';
+import { LoaderModule } from './common/component/loader/loader.module';
+import { ToastModule } from './common/component/toast/toast.module';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { AuthGuard }               from './common/guards/auth.guard';
-import { HttpLoaderInterceptor }   from './common/interceptor/http-loader.interceptor';
+import { AuthGuard } from './common/guards/auth.guard';
+import { HttpLoaderInterceptor } from './common/interceptor/http-loader.interceptor';
 import { EmailVerificationComponent } from './module/email-verification/email-verification.component';
 
 import { provideApollo } from 'apollo-angular';
-import { HttpLink }      from 'apollo-angular/http';
-import { InMemoryCache } from '@apollo/client/core';
-import { environment }   from '../environments/environment';
+import { ApolloLink, InMemoryCache } from '@apollo/client/core';
+import { environment } from '../environments/environment';
 import { CookieService } from 'ngx-cookie-service';
 
 @NgModule({
-  declarations: [
-    AppComponent,
-    EmailVerificationComponent
-  ],
+  declarations: [AppComponent, EmailVerificationComponent],
   imports: [
     BrowserModule,
     AppRoutingModule,
@@ -53,23 +53,31 @@ import { CookieService } from 'ngx-cookie-service';
     CookieService,
     // ─── Apollo GraphQL Setup ──────────────────────────────────────────
     provideApollo(() => {
-      // inject the HttpLink service that uses Angular's HttpClient:
-      
-      const httpLink = inject(HttpLink);
+      const cookieService = inject(CookieService);
+      const authLink = new ApolloLink((operation, forward) => {
+        const token = cookieService.get('token');
+        console.log('Token:', token);
+        operation.setContext({
+          headers: {
+            Authorization: token ? `Bearer ${token}` : '',
+          },
+        });
+        return forward(operation);
+      });
+
+      const uploadLink = createUploadLink({
+        uri: `${environment.GraphApi}/graphql`,
+        credentials: 'include',
+      }) as ApolloLink;
 
       return {
-        link:  httpLink.create({ uri: `${environment.GraphApi}/graphql` }),
+        link: authLink.concat(uploadLink),
         cache: new InMemoryCache(),
-        defaultOptions: {
-          watchQuery: { errorPolicy: 'none' },
-          query:      { errorPolicy: 'none' },
-          mutate:     { errorPolicy: 'none' },
-        }
       };
     }),
-    
+
     // ───────────────────────────────────────────────────────────────────
   ],
   bootstrap: [AppComponent],
 })
-export class AppModule { }
+export class AppModule {}

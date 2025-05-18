@@ -14,6 +14,5 @@ export class UserNewService {
   registerUser(userData: any): Observable<any> {
     console.log(userData);
     return this.http.post(`${this.apiUrl}/register`, userData, { headers: { 'Content-Type': 'application/json' } });
-
   }
 }

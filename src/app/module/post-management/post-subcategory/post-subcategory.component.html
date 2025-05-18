@@ -1,0 +1,266 @@
+<div class="h-100 overflow-only-y d-flex flex-column position-relative">
+  <ul class="nav nav-pills p-3 pb-0" role="tablist">
+    <li class="nav-item me-2" role="presentation">
+      <select class="form-select" [(ngModel)]="selectedPostCategoryId" (change)="onCategoryChange()">
+        <option [ngValue]="null" disabled>Select Post Category</option>
+        <option *ngFor="let postCategory of postCategories" [ngValue]="postCategory.id">
+          {{ postCategory.name }}
+        </option>
+      </select>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link active" id="tab-postSubcategory-active" data-bs-toggle="pill"
+        data-bs-target="#postSubcategory-active" type="button" role="tab">
+        Active PostSubcategories
+        <span class="badge bg-success ms-1">{{ totalActive }}</span>
+      </button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link" id="tab-postSubcategory-deleted" data-bs-toggle="pill"
+        data-bs-target="#postSubcategory-deleted" type="button" role="tab">
+        Deleted PostSubcategories
+        <span class="badge bg-danger ms-1">{{ totalDeleted }}</span>
+      </button>
+    </li>
+  </ul>
+
+  <div class="tab-content flex-grow-1 p-3 bg-white">
+    <!-- Active -->
+    <div class="tab-pane fade show active position-relative h-100" id="postSubcategory-active" role="tabpanel">
+      <div class="position-absolute h-100 w-100 d-flex flex-column">
+        <div class="row g-2 align-items-center">
+          <div class="col-12 ms-auto d-flex">
+            <button class="btn btn-danger me-2 flex-grow-1" *ngIf="selectedActivePostSubcategories.length > 0"
+              (click)="deactivateMany()">
+              <i class="fa fa-trash me-2"></i> Delete Selected
+            </button>
+            <button class="btn btn-secondary me-2 flex-grow-1" *ngIf="selectedActivePostSubcategories.length > 0"
+              (click)="openBulkEdit()">
+              <i class="fa fa-edit me-2"></i> Edit Selected
+            </button>
+            <button class="btn btn-success text-white flex-grow-1" (click)="openAdd()">
+              <i class="fa fa-plus me-2"></i> Add PostSubcategory
+            </button>
+          </div>
+        </div>
+
+        <div class="flex-grow-1 position-relative">
+          <div class="position-absolute overflow-y-auto h-100 w-100">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Select</th>
+                  <th>#</th>
+                  <th>ID</th>
+                  <th>Name</th>
+                  <th>Description</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="
+                      let postSub of postSubcategories;
+                      let i = index
+                    " class="align-middle" [ngClass]="{ 'table-secondary': postSub.selected }">
+                  <td>
+                    <input type="checkbox" [(ngModel)]="postSub.selected" (change)="updateSelectedActive()" />
+                  </td>
+                  <td>
+                    {{
+                    i +
+                    activePagination.limit *
+                    (activePagination.page - 1) +
+                    1
+                    }}
+                  </td>
+                  <td>{{ postSub.id }}</td>
+                  <td>{{ postSub.name }}</td>
+                  <td>{{ postSub.description }}</td>
+                  <td>
+                    <button class="btn btn-dark btn-md me-2" (click)="openEdit(postSub)">
+                      <i class="fa fa-edit"></i>
+                    </button>
+                    <button class="btn btn-danger btn-md" (click)="deactivateOne(postSub.id)">
+                      <i class="fa fa-close"></i>
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div pagination [currentPage]="activePagination.page" [totalItems]="totalActive"
+          [pageSize]="activePagination.limit" [pageSizes]="[10,20,30]" (currentPageChange)="changeActivePage($event)"
+          (pageSizeChange)="changeActiveSize($event)" class="mt-0 mb-0 px-3"></div>
+      </div>
+    </div>
+
+    <!-- Deleted -->
+    <div class="tab-pane fade position-relative h-100" id="postSubcategory-deleted" role="tabpanel">
+      <div class="position-absolute h-100 w-100 d-flex flex-column">
+        <div class="row g-2 align-items-center">
+          <div class="col-12 ms-auto d-flex">
+            <button class="btn btn-secondary flex-grow-1" *ngIf="selectedDeletedPostSubcategories.length > 0"
+              (click)="activateMany()">
+              <i class="fa fa-refresh me-2"></i> Restore Selected
+            </button>
+            <button class="btn btn-danger flex-grow-1 me-2" *ngIf="selectedDeletedPostSubcategories.length > 0"
+              (click)="deleteMany()">
+              <i class="fa fa-refresh me-2"></i> Delete Selected
+            </button>
+          </div>
+        </div>
+
+        <div class="flex-grow-1 position-relative">
+          <div class="position-absolute overflow-y-auto h-100 w-100">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Select</th>
+                  <th>#</th>
+                  <th>ID</th>
+                  <th>Name</th>
+                  <th>Description</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="
+                      let postSub of deletedPostSubcategories;
+                      let i = index
+                    " class="align-middle" [ngClass]="{ 'table-secondary': postSub.selected }">
+                  <td>
+                    <input type="checkbox" [(ngModel)]="postSub.selected" (change)="updateSelectedDeleted()" />
+                  </td>
+                  <td>
+                    {{
+                    i +
+                    deletedPagination.limit *
+                    (deletedPagination.page - 1) +
+                    1
+                    }}
+                  </td>
+                  <td>{{ postSub.id }}</td>
+                  <td>{{ postSub.name }}</td>
+                  <td>{{ postSub.description }}</td>
+                  <td>
+                    <button class="btn btn-success btn-md" (click)="activateOne(postSub.id)">
+                      <i class="fa fa-refresh"></i>
+                    </button>
+                    <button class="btn btn-danger btn-md" (click)="deleteOne(postSub.id)">
+                      <i class="fa fa-trash"></i>
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div pagination [currentPage]="deletedPagination.page" [totalItems]="totalDeleted"
+          [pageSize]="deletedPagination.limit" [pageSizes]="[10,20,30]" (currentPageChange)="changeDeletedPage($event)"
+          (pageSizeChange)="changeDeletedSize($event)" class="mt-0 mb-0 px-3"></div>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="loading" class="text-center py-3 position-absolute h-100 w-100 start-0 top-0 bg-dark bg-opacity-25">
+    <div class="spinner-border text-success" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteModalLabel">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-danger">
+        <h5 class="modal-title text-white" id="confirmDeleteModalLabel">
+          Confirm Permanent Delete
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        Are you sure you want to permanently delete
+        <strong>{{ deleteManyMode ? selectedDeletedPostSubcategories.length + ' items' : 'this item' }}</strong>?
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="confirmDeleteModal.hide()">
+          Cancel
+        </button>
+        <button type="button" class="btn btn-danger" (click)="onConfirmHardDelete()">
+          Delete
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal fade" id="postSubcategoryModal" tabindex="-1" aria-labelledby="postSubcategoryModalLabel">
+  <div class="modal-dialog modal-dialog-scrollable p-0 my-0 modal-dialog-centered position-relative h-100">
+    <div class="modal-content">
+      <div class="modal-header bg-success py-2">
+        <h5 class="modal-title text-white" id="postSubcategoryModalLabel">
+          {{ modalTitle }}
+        </h5>
+        <button type="button" class="btn ms-auto" data-bs-dismiss="modal" aria-label="Close" (click)="modal.hide()">
+          <i class="fa fa-close btn-flat text-white"></i>
+        </button>
+      </div>
+
+      <div class="modal-body h-100 overflow-auto py-0 my-3 d-flex flex-column">
+        <form [formGroup]="currentForm" class="mt-3">
+          <div formArrayName="postSubcategories">
+            <div *ngFor="
+                  let ctrl of postFormArray.controls;
+                  let i = index
+                " [formGroupName]="i"
+              class="d-flex align-items-stretch border border-light rounded px-2 position-relative"
+              [ngClass]="{ 'mb-3': i < postFormArray.controls.length - 1 }">
+              <div class="py-3 flex-grow-1">
+                <div class="form-group p-2">
+                  <label for="postSubcategory-name" class="form-label mb-2">Name</label>
+                  <input class="form-control" type="text" formControlName="name" id="postSubcategory-name" />
+                </div>
+
+                <div class="form-group p-2">
+                  <label for="postSubcategory-description" class="form-label mb-2">Description</label>
+                  <input class="form-control" type="text" formControlName="description"
+                    id="postSubcategory-description" />
+                </div>
+
+                <div class="form-group p-2">
+                  <label for="postSubcategory-category" class="form-label mb-2">Post Category</label>
+                  <select class="form-select" formControlName="category_id" id="postSubcategory-category">
+                    <option *ngFor="let postCategory of postCategories" [value]="postCategory.id">
+                      {{ postCategory.name }}
+                    </option>
+                  </select>
+                </div>
+              </div>
+
+              <ng-container *ngIf="postFormArray.length > 1">
+                <button type="button" class="btn btn-outline-danger btn-sm my-3 position-absolute top-0 end-0 me-3"
+                  (click)="removeFormRow(i)">
+                  <i class="fa fa-trash me-2"></i>Remove
+                </button>
+              </ng-container>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <div class="modal-footer">
+        <button *ngIf="!needUpdate" type="button" class="btn btn-primary text-white" (click)="addFormRow()">
+          <i class="fa fa-plus me-2"></i>Add More
+        </button>
+        <button class="btn btn-md btn-success ms-2" (click)="save()">
+          <i class="fa fa-save me-2"></i>Save
+        </button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" (click)="modal.hide(false)">
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

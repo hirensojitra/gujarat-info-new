@@ -1,0 +1,113 @@
+<div class="container-fluid py-3">
+  <!-- Upload Files Section -->
+  <div *ngIf="canUpload()" class="mb-4">
+    <h4>Upload Files</h4>
+    <div class="border border-2 rounded p-3 text-center bg-light" (dragover)="onDragOver($event)"
+      (drop)="onDrop($event)">
+      <p class="mb-2">Choose files or drag & drop them here.</p>
+      <button class="btn btn-primary" type="button" (click)="fileInput.click()">Browse Files</button>
+      <input type="file" #fileInput hidden multiple (change)="onFileSelected($event)" />
+    </div>
+
+    <!-- Upload Progress -->
+    <div *ngIf="uploads.length > 0" class="mt-3">
+      <div *ngFor="let file of uploads" class="mb-3">
+        <div class="d-flex justify-content-between align-items-center mb-1">
+          <strong>{{ file.name }}</strong>
+          <small>{{ file.progress }}%</small>
+        </div>
+        <div class="progress">
+          <div class="progress-bar" role="progressbar" [style.width.%]="file.progress"
+            [class.bg-success]="file.status === 'completed'" [class.bg-danger]="file.status === 'error'">
+            {{ file.status === 'uploading' ? 'Uploading...' : file.status === 'completed' ? 'Completed' : 'Failed' }}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Folder List and Images Grid -->
+  <div *ngIf="canView(); else noAccess">
+    <div class="row">
+      <!-- Folders Sidebar -->
+      <div class="col-md-3">
+        <h5>Folders</h5>
+        <input type="text" class="form-control mb-2" placeholder="Search folders..." [(ngModel)]="search"
+          (ngModelChange)="loadFolders()" />
+        <ul class="list-group">
+          <li *ngFor="let folder of folders" class="list-group-item list-group-item-action"
+            [class.active]="folder.id === selectedFolder?.id" (click)="selectFolder(folder)">
+            {{ folder.name }} <small class="text-muted d-block">{{ folder.created_at | date:'short' }}</small>
+          </li>
+        </ul>
+
+      </div>
+
+      <!-- Images Section -->
+      <!-- Images Section -->
+      <div class="col-md-9">
+        <h5 class="mb-3">Images in "{{ selectedFolder?.name }}"</h5>
+
+        <div class="row g-3">
+          <div class="col-lg-2 col-sm-4 col-md-3" *ngFor="let image of images">
+            <div class="position-relative image-card d-flex flex-column" [squareSize]="'width'">
+              <div
+                class="position-absolute p-2 overflow-hidden h-100 w-100 d-flex justify-content-center align-items-center bg-light rounded-3 border bg-opacity-25 shadow-sm">
+                <img [src]="apiUrl + '/user-img/uploads/' + image.id + '?quality=30'"
+                  class="img-fluid max-w-100 max-h-100 rounded-3" [alt]="image.metadata || 'Image preview'"
+                  loading="lazy" />
+              </div>
+              <div class="dropdown position-absolute top-0 end-0 m-2">
+                <button class="btn btn-sm btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown"
+                  aria-expanded="false">
+                  ⋯
+                </button>
+                <ul class="dropdown-menu">
+                  <li><button class="dropdown-item" (click)="refreshImage(image)" title="Refresh">
+                      <i class="fa fa-refresh me-2"></i>Refresh
+                    </button></li>
+                  <li><button class="dropdown-item" (click)="openConfirmModal(image)" title="Delete">
+                      <i class="fa fa-trash me-2"></i>Delete
+                    </button></li>
+                  <li><a class="dropdown-item" [href]="apiUrl + '/user-img/uploads/' + image.id" target="_blank"><i
+                        class="fa fa-folder me-2"></i>Open</a></li>
+                  <li><a class="dropdown-item" [href]="apiUrl + '/user-img/uploads/' + image.id" download><i
+                        class="fa fa-download me-2"></i>Download</a>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pagination -->
+        <div *ngIf="totalImages > 0" pagination [currentPage]="imagePage" [totalItems]="totalImages"
+          [pageSize]="imageLimit" [pageSizes]="[12,24,36]" (currentPageChange)="onImagePageChange($event)"
+          (pageSizeChange)="onImagePageSizeChange($event)" class="rounded-3 mt-3"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- No Access Template -->
+  <ng-template #noAccess>
+    <div class="alert alert-warning mt-3">You do not have permission to view this content.</div>
+  </ng-template>
+
+  <!-- Confirm Delete Modal -->
+  <div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="confirmModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="confirmModalLabel">{{ modalTitle }}</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">{{ modalMessage }}</div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-danger" (click)="confirmModal()">Yes</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -19,3 +19,8 @@ export const VALIDATE_TOKEN = gql`
     }
   }
 `;
+export const HAS_ROLE = gql`
+  query HasRole($user_id: String!, $role_code: String!) {
+    hasRole(user_id: $user_id, role_code: $role_code)
+  }
+`;

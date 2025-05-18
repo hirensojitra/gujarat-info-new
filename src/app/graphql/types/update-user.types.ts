@@ -7,7 +7,7 @@ export interface UpdateUserInput {
   middlename?: string;
   lastname?: string;
   number?: string;
-  birthday?: string; // ISO date, e.g. "1980-04-23"
+  birthday?: string;
   gender?: Gender;
   marital_status?: MaritalStatus;
   language_id?: string;
@@ -19,6 +19,7 @@ export interface UpdateUserProfileResponse {
 
 export interface UpdateUserProfileVariables {
   input: UpdateUserInput;
+  image?: File;
 }
 
 export interface GetCurrentUserResponse {

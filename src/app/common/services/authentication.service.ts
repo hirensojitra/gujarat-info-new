@@ -7,16 +7,13 @@ import { UserPublicInfo } from 'src/app/graphql/types/login.types';
 
 @Injectable({ providedIn: 'root' })
 export class AuthenticationService {
-  private userSubject = new BehaviorSubject<UserPublicInfo|null>(this.loadUser());
+  private userSubject = new BehaviorSubject<UserPublicInfo | null>(this.loadUser());
   public user$ = this.userSubject.asObservable();
 
-  constructor(
-    private cookie: CookieService,
-    private router: Router
-  ) {}
+  constructor(private cookie: CookieService, private router: Router) {}
 
   /** Read & parse the `user` cookie on startup */
-  private loadUser(): UserPublicInfo|null {
+  private loadUser(): UserPublicInfo | null {
     const json = this.cookie.get('user');
     try {
       return json ? JSON.parse(json) : null;
@@ -26,16 +23,25 @@ export class AuthenticationService {
   }
 
   /** Get the current user value */
-  public getUser(): UserPublicInfo|null {
+  public getUser(): UserPublicInfo | null {
     return this.userSubject.value;
   }
 
   /** Save user in a cookie and broadcast it */
   public setUser(user: UserPublicInfo): void {
     const json = JSON.stringify(user);
-    // Expires in 7 days, secure if on HTTPS
-    this.cookie.set('user', json, 7, '/', undefined, window.location.protocol === 'https:', 'Lax');
+    const secure = window.location.protocol === 'https:';
+    this.cookie.set('user', json, 7, '/', undefined, secure, 'Lax');
     this.userSubject.next(user);
+  }
+
+  /** Safely update just the image URL */
+  public setImageUrl(imageUrl: string | null): void {
+    const currentUser = this.getUser();
+    if (currentUser) {
+      const updatedUser = { ...currentUser, image: imageUrl }; // clone to prevent mutation loop
+      this.setUser(updatedUser);
+    }
   }
 
   /** Store the JWT in its own cookie */
@@ -61,11 +67,17 @@ export class AuthenticationService {
   public isLoggedIn(): boolean {
     return !!this.getToken() && !!this.getUser();
   }
-  saveSession(token: string, user: UserPublicInfo): void {
+
+  /** Save both token and user in session */
+  public saveSession(token: string, user: UserPublicInfo): void {
     this.cookie.deleteAll('/');
     const isSecure = window.location.protocol === 'https:';
-    this.cookie.set('token', token, { path: '/', secure: isSecure, sameSite: 'Lax' });
+    this.cookie.set('token', token, {
+      path: '/',
+      secure: isSecure,
+      sameSite: 'Lax',
+    });
     this.setUser(user);
-    console.log(token)
+    console.log(token);
   }
 }

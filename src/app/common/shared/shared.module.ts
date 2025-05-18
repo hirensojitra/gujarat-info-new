@@ -20,6 +20,7 @@ import { DecimalDirective } from '../directives/decimal.directive';
 import { ConfirmationModalComponent } from '../component/confirmation-modal/confirmation-modal.component';
 import { RemSizeDirective } from '../directives/rem-size.directive';
 import { FileSizePipe } from '../pipes/filesize.pipe';
+import { SquareSizeDirective } from '../directives/square-size.directive';
 
 @NgModule({
   imports: [
@@ -45,7 +46,8 @@ import { FileSizePipe } from '../pipes/filesize.pipe';
     ScrollCenterDirective,
     ConfirmationModalComponent,
     RemSizeDirective,
-    FileSizePipe
+    FileSizePipe,
+    SquareSizeDirective
   ],
   exports: [
     CaptchaDirective,
@@ -65,8 +67,9 @@ import { FileSizePipe } from '../pipes/filesize.pipe';
     ScrollCenterDirective,
     ConfirmationModalComponent,
     RemSizeDirective,
-    FileSizePipe
+    FileSizePipe,
+    SquareSizeDirective
   ],
-  providers: [KeysPipe, ColorService, ColorPickerComponent, DependencyListPipe, RemSizeDirective]
+  providers: [KeysPipe, ColorService, ColorPickerComponent, DependencyListPipe, RemSizeDirective, SquareSizeDirective]
 })
 export class SharedModule { }

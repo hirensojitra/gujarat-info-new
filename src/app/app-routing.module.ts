@@ -30,7 +30,9 @@ const routes: Routes = [
           {
             path: '',
             loadChildren: () =>
-              import('./module/broken-pages/broken-pages.module').then((m) => m.BrokenPagesModule),
+              import('./module/broken-pages/broken-pages.module').then(
+                (m) => m.BrokenPagesModule
+              ),
           },
         ],
       },
@@ -249,6 +251,19 @@ const routes: Routes = [
           },
         ],
       },
+      {
+        path: 'post-management',
+        canActivate: [NewAuthGuard],
+        children: [
+          {
+            path: '',
+            loadChildren: () =>
+              import('./module/post-management/post-management.module').then(
+                (m) => m.PostManagementModule
+              ),
+          },
+        ],
+      }
     ],
   },
   {

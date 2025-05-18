@@ -59,6 +59,11 @@ const routes: Routes = [
         loadChildren: () =>
           import('./help-support/help-support.module').then((m) => m.HelpSupportModule),
       },
+      {
+        path: 'image-manager',
+        loadChildren: () =>
+          import('./image-manager/image-manager.module').then((m) => m.ImageManagerModule)
+      },
     ],
   },
 ];

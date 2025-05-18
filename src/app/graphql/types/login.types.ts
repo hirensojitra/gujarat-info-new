@@ -23,6 +23,7 @@ export interface UserPublicInfo {
   id: string;
   firstname: string | null;
   middlename: string | null;
+  image: string | null;
   lastname: string | null;
   number: string | null;
   number_verified: boolean;
@@ -30,9 +31,7 @@ export interface UserPublicInfo {
   email: string;
   email_verified: boolean;
   username: string | null;
-
-  // Newly added fields
-  birthday: string | null;            // ISO date string, e.g. "1980-04-23"
+  birthday: string | null;
   gender: Gender | null;
   marital_status: MaritalStatus | null;
   language: Language;

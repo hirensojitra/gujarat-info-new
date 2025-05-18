@@ -713,7 +713,8 @@ $fab-background-color-2: inherit;
 }
 .img-container {
     position: relative;
-    &:before {
+    z-index: 0;
+    &:after {
         content: "";
         position: absolute;
         top: calc(50% - 20px);
@@ -724,6 +725,7 @@ $fab-background-color-2: inherit;
         border-top-color: #3498db;
         border-radius: 50%;
         animation: spin 1s linear infinite;
+        z-index: -1;
     }
 }
 .loading-container {

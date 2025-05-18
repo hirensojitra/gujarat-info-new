@@ -22,6 +22,13 @@ export interface District {
     selected?: boolean,
     is_deleted: boolean
 }
+export interface PostCategory {
+    id: string,
+    name: string,
+    description?: string,
+    selected?: boolean,
+    active: boolean
+}
 export interface Taluka {
     id: string,
     name: string,

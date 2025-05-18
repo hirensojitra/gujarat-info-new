@@ -34,7 +34,7 @@ export class SessionService implements OnDestroy {
 
   private handleResponse(payload: any) {
     if (payload?.user) {
-      // 1) update token if server sent a refreshed one
+      debugger;
       if (payload.token) {
         this.authService.setToken(payload.token);
       }

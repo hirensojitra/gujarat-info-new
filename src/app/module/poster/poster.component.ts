@@ -364,7 +364,6 @@ export class PosterComponent implements OnInit {
             }
           }
         }
-
         // Update post status with download counter
         if (this.postDetails.download_counter) {
           this.postStatus =
@@ -372,9 +371,8 @@ export class PosterComponent implements OnInit {
         } else {
           this.postStatus = 'No download counter available';
         }
-
         // Initialize post UI
-        this.initialize();
+        await this.initialize();
       } else if (post.deleted && post.msg) {
         this.postStatus = post.msg;
       }

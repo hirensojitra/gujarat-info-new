@@ -33,28 +33,30 @@ export class UpdateUserService {
   }
 
   /** Update any subset of profile fields */
-  updateProfile(input: UpdateUserInput): Observable<UserPublicInfo> {
-    const token = this.authenticationService.getToken(); // ← grab the JWT
-    console.log('input', input);
+  updateProfile(
+    input: UpdateUserInput & { image?: File }
+  ): Observable<UserPublicInfo> {
+    const token = this.authenticationService.getToken();
+    const { image, ...rest } = input;
+
     return this.apollo
       .mutate<UpdateUserProfileResponse, UpdateUserProfileVariables>({
         mutation: UPDATE_USER_PROFILE,
-        variables: { input },
+        variables: {
+          input: rest,
+          image,
+        },
         context: {
           headers: {
-            Authorization: `Bearer ${token}`, // ← set it here
+            Authorization: `Bearer ${token}`,
           },
         },
       })
       .pipe(
-        map((result) => {
-          const updated = result.data!.updateUserProfile;
-          // keep the watchQuery up to date
-          this.userQuery?.refetch();
-          return updated;
-        })
+        map((res) => res.data!.updateUserProfile) // ✅ extract just the user
       );
   }
+
   getLanguages(): Observable<Language[]> {
     return this.apollo
       .watchQuery<{ languages: Language[] }>({ query: GET_LANGUAGES })

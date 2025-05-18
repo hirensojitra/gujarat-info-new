@@ -11,6 +11,7 @@ interface NavItem {
 export class UserLayoutComponent {
   navItems: NavItem[] = [
     { label: 'Public profile', path: 'settings/profile' },
+    { label: 'Image Manager', path: 'settings/image-manager' },
     { label: 'Account settings', path: 'settings/account' },
     { label: 'Notifications', path: 'settings/notifications' },
     { label: 'Privacy settings', path: 'settings/privacy' },
