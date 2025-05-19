@@ -146,7 +146,6 @@ export class ImageDataComponent implements OnInit {
     document.execCommand('copy');
     this.renderer.removeChild(this.elementRef.nativeElement, el);
     this.toastService.show("Image File path copied to clipboard", { title: 'Copy Successed', class: 'bg-success' });
-
   }
   formatSize(bytes: number): string {
     const KB = bytes / 1024;

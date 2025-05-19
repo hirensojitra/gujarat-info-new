@@ -1,17 +1,26 @@
-<div class="user-layout container-fluid px-0 h-100 w-100">
+<div class="user-layout container-fluid h-100 w-100">
   <div class="row gx-0">
-    <nav class="col-12 col-lg-2 col-md-3 sidebar bg-white border-end">
-      <h4 class="sidebar-title px-4 pt-4">Settings</h4>
-      <ul class="nav flex-column mt-3 px-2">
-        <li *ngFor="let item of navItems" class="nav-item">
-          <a class="nav-link" routerLink="{{ item.path }}" routerLinkActive="active"
-            [routerLinkActiveOptions]="{ exact: true }">
-            {{ item.label }}
-          </a>
-        </li>
-      </ul>
+    <!-- Toggle Button (visible on small screens) -->
+    <button class="btn btn-outline-secondary d-md-none my-2" type="button" data-bs-toggle="collapse" data-bs-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false" aria-label="Toggle navigation">
+      ☰ Menu
+    </button>
+
+    <!-- Sidebar -->
+    <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bg-white border-end collapse">
+      <div class="position-sticky pt-3">
+        <h4 class="sidebar-title px-4">Settings</h4>
+        <ul class="nav flex-column mt-3 px-2">
+          <li *ngFor="let item of navItems" class="nav-item">
+            <a class="nav-link" [routerLink]="item.path" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
+              {{ item.label }}
+            </a>
+          </li>
+        </ul>
+      </div>
     </nav>
-    <main class="col-12 col-lg-10 col-md-9 content p-4">
+
+    <!-- Main Content -->
+    <main class="col-12 col-md-9 col-lg-10 ms-sm-auto px-3">
       <router-outlet></router-outlet>
     </main>
   </div>

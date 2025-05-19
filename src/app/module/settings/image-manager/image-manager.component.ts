@@ -1,7 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, ElementRef, OnInit, Renderer2 } from '@angular/core';
 import { AuthenticationService } from 'src/app/common/services/authentication.service';
 import { ImgService } from 'src/app/common/services/img.service';
 import { RoleService } from 'src/app/common/services/role.service';
+import { ToastService } from 'src/app/common/services/toast.service';
 import {
   Folder,
   Image,
@@ -45,10 +46,16 @@ export class ImageManagerComponent implements OnInit {
     uploading: false,
   };
 
+  newFolderName: string = '';
+  folderError: string = '';
+
   constructor(
     private imgService: ImgService,
     private authService: AuthenticationService,
-    private roleService: RoleService
+    private roleService: RoleService,
+    private elementRef: ElementRef,
+    private renderer: Renderer2,
+    private toastService: ToastService
   ) {}
 
   async ngOnInit(): Promise<void> {
@@ -59,6 +66,40 @@ export class ImageManagerComponent implements OnInit {
       const matched = roles.find((r) => r.id === user.role_id);
       this.role = matched?.code ?? 'VIEWER';
       this.loadInitialData();
+    });
+  }
+  createFolder(): void {
+    if (!this.newFolderName.trim()) return;
+    this.imgService.createFolder(this.newFolderName.trim()).subscribe({
+      next: (res) => {
+        this.folderError = '';
+        this.newFolderName = '';
+        this.loadFolders();
+      },
+      error: (err) => {
+        console.error('Folder creation failed', err);
+        this.folderError = err?.message || 'Error creating folder.';
+      },
+    });
+  }
+  deleteFolder(folder: Folder): void {
+    if (!folder || !folder.id) return;
+    const confirmDelete = confirm(
+      `Are you sure you want to delete the folder "${folder.name}"?`
+    );
+    if (!confirmDelete) return;
+    this.imgService.deleteFolder(folder.id).subscribe({
+      next: (res) => {
+        if (folder.id === this.selectedFolder?.id) {
+          this.selectedFolder = null;
+          this.loadFolders();
+          this.images = [];
+        }
+      },
+      error: (err) => {
+        console.error('Failed to delete folder:', err);
+        alert('Error deleting folder.');
+      },
     });
   }
 
@@ -286,23 +327,38 @@ export class ImageManagerComponent implements OnInit {
     return this.role !== 'VIEWER';
   }
   modalTitle = '';
-modalMessage = '';
-pendingDeleteImage: Image | null = null;
+  modalMessage = '';
+  pendingDeleteImage: Image | null = null;
 
-openConfirmModal(image: Image): void {
-  this.modalTitle = 'Confirm Delete';
-  this.modalMessage = `Are you sure you want to delete "${image.id}"?`;
-  this.pendingDeleteImage = image;
-  const modal = new bootstrap.Modal(document.getElementById('confirmModal')!);
-  modal.show();
-}
+  openConfirmModal(image: Image): void {
+    this.modalTitle = 'Confirm Delete';
+    this.modalMessage = `Are you sure you want to delete "${image.id}"?`;
+    this.pendingDeleteImage = image;
+    const modal = new bootstrap.Modal(document.getElementById('confirmModal')!);
+    modal.show();
+  }
 
-confirmModal(): void {
-  if (!this.selectedFolder || !this.pendingDeleteImage) return;
-  this.imgService.deleteImage(this.selectedFolder.id, this.pendingDeleteImage.id).subscribe({
-    next: () => this.loadImages(),
-    error: () => alert('Failed to delete image.'),
-  });
-  this.pendingDeleteImage = null;
-}
+  confirmModal(): void {
+    if (!this.selectedFolder || !this.pendingDeleteImage) return;
+    this.imgService
+      .deleteImage(this.selectedFolder.id, this.pendingDeleteImage.id)
+      .subscribe({
+        next: () => this.loadImages(),
+        error: () => alert('Failed to delete image.'),
+      });
+    this.pendingDeleteImage = null;
+  }
+  copyHrefToClipboard(event: MouseEvent, image: Image): void {
+    event.preventDefault();
+    const el = this.renderer.createElement('textarea');
+    el.value = environment.MasterApi +`/user-img/uploads/`+ image.id;
+    this.renderer.appendChild(this.elementRef.nativeElement, el);
+    el.select();
+    document.execCommand('copy');
+    this.renderer.removeChild(this.elementRef.nativeElement, el);
+    this.toastService.show('Image File path copied to clipboard', {
+      title: 'Copy Successed',
+      class: 'bg-success',
+    });
+  }
 }

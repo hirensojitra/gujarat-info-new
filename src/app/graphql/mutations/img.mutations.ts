@@ -5,9 +5,9 @@ import { gql } from 'apollo-angular';
 export const CREATE_FOLDER = gql`
   mutation CreateFolder($name: String!) {
     createFolder(name: $name) {
-      message
-      folderId
-      createdAt
+      id
+      name
+      created_at
     }
   }
 `;
@@ -33,19 +33,15 @@ export const REFRESH_IMAGE = gql`
 
 // ✏️ Rename an existing folder
 export const RENAME_FOLDER = gql`
-  mutation RenameFolder($folderId: String!, $name: String!) {
-    renameFolder(folderId: $folderId, name: $name) {
-      message
-    }
+  mutation RenameFolder($folderId: ID!, $name: String!) {
+    renameFolder(folderId: $folderId, name: $name)
   }
 `;
 
 // ❌ Delete a folder
 export const DELETE_FOLDER = gql`
-  mutation DeleteFolder($folderId: String!) {
-    deleteFolder(folderId: $folderId) {
-      message
-    }
+  mutation DeleteFolder($folderId: ID!) {
+    deleteFolder(folderId: $folderId)
   }
 `;
 

@@ -45,6 +45,7 @@ export class ImgService {
       .watchQuery<GetInitialDataResponse>({
         query: GET_INITIAL_FOLDER_DATA,
         variables: {
+          fetchPolicy: 'no-cache',
           folderLimit,
           imageLimit,
         },
@@ -63,6 +64,7 @@ export class ImgService {
       .watchQuery<GetFoldersResponse>({
         query: GET_FOLDERS,
         variables: params,
+        fetchPolicy: 'no-cache',
       })
       .valueChanges.pipe(map((result) => result.data.getFolders));
   }
@@ -72,6 +74,7 @@ export class ImgService {
       .watchQuery<TotalCountResponse>({
         query: GET_TOTAL_FOLDER_COUNT,
         variables: { search },
+        fetchPolicy: 'no-cache',
       })
       .valueChanges.pipe(
         map((result) => result.data.getTotalFolderCount.count)
@@ -83,6 +86,7 @@ export class ImgService {
       .mutate<{ createFolder: CreateFolderResponse }>({
         mutation: CREATE_FOLDER,
         variables: { name },
+        fetchPolicy: 'no-cache',
       })
       .pipe(map((res) => res.data!.createFolder));
   }
@@ -95,6 +99,7 @@ export class ImgService {
       .mutate<{ renameFolder: RenameFolderResponse }>({
         mutation: RENAME_FOLDER,
         variables: { folderId, name },
+        fetchPolicy: 'no-cache',
       })
       .pipe(map((res) => res.data!.renameFolder));
   }
@@ -104,6 +109,7 @@ export class ImgService {
       .mutate<{ deleteFolder: DeleteResponse }>({
         mutation: DELETE_FOLDER,
         variables: { folderId },
+        fetchPolicy: 'no-cache',
       })
       .pipe(map((res) => res.data!.deleteFolder));
   }
@@ -119,6 +125,7 @@ export class ImgService {
       .watchQuery<GetImagesResponse>({
         query: GET_IMAGES_IN_FOLDER,
         variables: { folderId, page, limit, search, sort },
+        fetchPolicy: 'no-cache',
       })
       .valueChanges.pipe(map((result) => result.data.getImagesInFolder));
   }
@@ -131,6 +138,7 @@ export class ImgService {
       .watchQuery<{ getTotalImageCountInFolder: { totalCount: number } }>({
         query: GET_TOTAL_IMAGE_COUNT,
         variables: { folderId, search },
+        fetchPolicy: 'no-cache',
       })
       .valueChanges.pipe(
         map((result) => result.data.getTotalImageCountInFolder.totalCount)
@@ -145,6 +153,7 @@ export class ImgService {
     return this.apollo.mutate({
       mutation: UPLOAD_IMAGE,
       variables: { folderId, image: file, metadata }, // metadata should be a plain string
+      fetchPolicy: 'no-cache',
       context: {
         useMultipart: true,
       },
@@ -156,6 +165,7 @@ export class ImgService {
       .mutate<{ deleteImage: DeleteResponse }>({
         mutation: DELETE_IMAGE,
         variables: { folderId, imageId },
+        fetchPolicy: 'no-cache',
       })
       .pipe(map((res) => res.data!.deleteImage));
   }
@@ -169,6 +179,7 @@ export class ImgService {
       .mutate<{ refreshImage: RefreshImageResponse }>({
         mutation: REFRESH_IMAGE,
         variables: { folderId, imageId, image: file },
+        fetchPolicy: 'no-cache',
       })
       .pipe(map((res) => res.data!.refreshImage));
   }
