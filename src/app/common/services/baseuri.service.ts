@@ -22,8 +22,6 @@ export class BaseUrlService {
             }
             this.baseUrl = baseUrl;
         } else {
-            // Handle SSR: Return a default base URL or some fallback logic
-            console.warn('Document is not available in SSR. Returning fallback base URL.');
             this.baseUrl = 'https://postnew.in/'; // Replace with a sensible fallback for SSR
         }
         return this.baseUrl;

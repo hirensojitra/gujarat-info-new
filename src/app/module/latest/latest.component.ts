@@ -21,6 +21,7 @@ import { NewPostDetailService } from 'src/app/common/services/new-post-detail.se
 import { PostDetails } from 'src/app/graphql/types/post-detail.types';
 import { environment } from 'src/environments/environment';
 declare const Masonry: any;
+declare const bootstrap: any;
 
 @Component({
   selector: 'app-latest',
@@ -47,6 +48,7 @@ export class LatestComponent implements OnInit, AfterViewInit, OnDestroy {
 
   @ViewChild('masonryGrid', { static: false }) masonryGridRef!: ElementRef;
   imgUrl = environment.MasterApi + '/thumb-images/';
+  myInfo: any;
 
   constructor(
     private postService: NewPostDetailService,
@@ -61,6 +63,11 @@ export class LatestComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    this.myInfo = new bootstrap.Modal(document.getElementById('myInfo')!, {
+      focus: false,
+      keyboard: false,
+      static: false,
+    });
     this.routeSub = this.route.queryParams.subscribe((params: Params) => {
       this.currentPage = +params['page'] || this.currentPage;
       this.limit = +params['limit'] || this.limit;

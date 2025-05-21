@@ -123,7 +123,7 @@
             "styles": [
               "src/styles.scss",
               "./node_modules/cropperjs/src/css/cropper.scss",
-              "src/assets/fonts/font-icons/style.css",
+              "src/assets/fonts/font-awesome-4.7.0/css/font-awesome.min.css",
               "src/assets/fonts/font-icons/style.css"
             ],
             "scripts": [

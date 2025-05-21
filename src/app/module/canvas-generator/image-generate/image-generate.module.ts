@@ -6,6 +6,7 @@ import { ImageGenerateRoutingModule } from './image-generate-routing.module';
 import { ImageGenerateComponent } from './image-generate.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { SharedModule } from 'src/app/common/shared/shared.module';
+import { MatTabsModule } from '@angular/material/tabs';
 
 
 @NgModule({
@@ -18,7 +19,8 @@ import { SharedModule } from 'src/app/common/shared/shared.module';
     FormsModule,
     ReactiveFormsModule,
     SharedModule,
-    DragDropModule
+    DragDropModule,
+    MatTabsModule
   ]
 })
 export class ImageGenerateModule { }

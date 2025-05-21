@@ -1,0 +1,19 @@
+@use '@angular/material' as mat;
+
+$bootstrap-font-family: '"Poppins", sans-serif';
+
+$bootstrap-typography: mat.define-typography-config(
+  $headline-1: mat.define-typography-level(96px, 300, -1.5px, $bootstrap-font-family),
+  $headline-2: mat.define-typography-level(60px, 300, -0.5px, $bootstrap-font-family),
+  $headline-3: mat.define-typography-level(48px, 400, 0px, $bootstrap-font-family),
+  $headline-4: mat.define-typography-level(34px, 400, 0.25px, $bootstrap-font-family),
+  $headline-5: mat.define-typography-level(24px, 400, 0px, $bootstrap-font-family),
+  $headline-6: mat.define-typography-level(20px, 500, 0.15px, $bootstrap-font-family),
+  $subtitle-1: mat.define-typography-level(16px, 400, 0.15px, $bootstrap-font-family),
+  $subtitle-2: mat.define-typography-level(14px, 500, 0.1px, $bootstrap-font-family),
+  $body-1:     mat.define-typography-level(16px, 400, 0.5px, $bootstrap-font-family),
+  $body-2:     mat.define-typography-level(14px, 400, 0.25px, $bootstrap-font-family),
+  $caption:    mat.define-typography-level(12px, 400, 0.4px, $bootstrap-font-family),
+  $button:     mat.define-typography-level(14px, 500, 0.1px, $bootstrap-font-family),
+  $overline:   mat.define-typography-level(10px, 400, 1.5px, $bootstrap-font-family)
+);

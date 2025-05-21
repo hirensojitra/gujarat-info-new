@@ -5,6 +5,7 @@ import { AuthGuard } from './common/guards/auth.guard';
 import { RolesGuard } from './common/guards/roles.guard';
 import { NewAuthGuard } from './common/guards/new-auth.guard';
 import { RoleGuard } from './common/guards/role.guard';
+import { FrameManagementModule } from './module/frame-management/frame-management.module';
 
 const routes: Routes = [
   { path: '', redirectTo: 'latest', pathMatch: 'full' },
@@ -156,6 +157,26 @@ const routes: Routes = [
             loadChildren: () =>
               import('./module/settings/settings.module').then(
                 (m) => m.SettingsModule
+              ),
+          },
+        ],
+      },
+    ],
+  },
+  {
+    path: '',
+    component: LayoutComponent,
+    data: { layout: 'empty-layout' },
+    canActivate: [NewAuthGuard],
+    children: [
+      {
+        path: 'frame-management',
+        children: [
+          {
+            path: '',
+            loadChildren: () =>
+              import('./module/frame-management/frame-management.module').then(
+                (m) => m.FrameManagementModule
               ),
           },
         ],

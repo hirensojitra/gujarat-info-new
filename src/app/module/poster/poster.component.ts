@@ -37,6 +37,18 @@ import { isPlatformBrowser, isPlatformServer } from '@angular/common';
 import { environment } from 'src/environments/environment';
 import { lastValueFrom } from 'rxjs';
 import { trackService } from 'src/app/common/services/track.service';
+import {
+  trigger,
+  style,
+  animate,
+  transition,
+  query,
+  stagger,
+  animateChild,
+  group,
+} from '@angular/animations';
+import { ColorService } from 'src/app/common/services/color.service';
+declare const bootstrap: any;
 declare var FB: any;
 interface MatchObject {
   components: string;
@@ -49,7 +61,6 @@ interface FontStyles {
   [fontFamily: string]: Set<string>;
 }
 
-declare const bootstrap: any;
 interface data {
   id: string;
   value: string;
@@ -65,6 +76,26 @@ interface data {
   selector: 'app-poster',
   templateUrl: './poster.component.html',
   styleUrls: ['./poster.component.scss'],
+  animations: [
+    // Trigger to fade in each block one after another
+    trigger('fadeInList', [
+      transition('* => *', [
+        // query all children with @fadeIn
+        query('@fadeIn', stagger(200, animateChild()), { optional: true }),
+      ]),
+    ]),
+
+    // Simple fade + slide up for single elements
+    trigger('fadeIn', [
+      transition(':enter', [
+        style({ opacity: 0, transform: 'translateY(10px)' }),
+        animate(
+          '200ms ease-out',
+          style({ opacity: 1, transform: 'translateY(0)' })
+        ),
+      ]),
+    ]),
+  ],
 })
 export class PosterComponent implements OnInit {
   postDetailsDefault: PostDetails | undefined;
@@ -119,6 +150,8 @@ export class PosterComponent implements OnInit {
   facebookAccessToken: string | null = null;
   isInAppBrowser: boolean = false;
   POST_DETAILS_KEY = makeStateKey<PostDetails>('postDetails');
+
+  isBrowser: boolean;
   constructor(
     private route: ActivatedRoute,
     private titleService: Title,
@@ -140,7 +173,8 @@ export class PosterComponent implements OnInit {
     private seoService: SEOService,
     @Inject(PLATFORM_ID) private platformId: Object,
     private transferState: TransferState,
-    private trackService: trackService
+    private trackService: trackService,
+    private colorService: ColorService
   ) {
     this.inputTextForm = this.fb.group({
       text: ['', Validators.required],
@@ -150,11 +184,17 @@ export class PosterComponent implements OnInit {
     });
     this.formData = this.fb.group({});
     this.baseUrl = this.baseUrlService.getBaseUrl();
+    this.isBrowser = isPlatformBrowser(this.platformId);
   }
 
   async ngOnInit(): Promise<void> {
     if (isPlatformBrowser(this.platformId)) {
       this.detectInAppBrowser();
+      this.myInfo = new bootstrap.Modal(document.getElementById('myInfo')!, {
+        focus: false,
+        keyboard: false,
+        static: false,
+      });
       await this.seoService.initSEO();
       if (this.transferState.hasKey(this.POST_DETAILS_KEY)) {
         this.postDetailsDefault = this.transferState.get(
@@ -177,7 +217,7 @@ export class PosterComponent implements OnInit {
               !this.postDetailsDefault.deleted &&
               this.postDetailsDefault.published
             ) {
-              await this.getPostById(); // Process full details
+              !this.isInAppBrowser && (await this.getPostById()); // Process full details
               this.pageLink = window.location.href;
             } else {
               // Show thumbnail for invalid posts
@@ -392,11 +432,7 @@ export class PosterComponent implements OnInit {
     this.textModal._element.addEventListener('shown.bs.modal', () => {
       this.textInput.nativeElement.focus();
     });
-    this.myInfo = new bootstrap.Modal(document.getElementById('myInfo')!, {
-      focus: false,
-      keyboard: false,
-      static: false,
-    });
+
     this.cropperModal = new bootstrap.Modal(
       document.getElementById('cropperModal')!,
       { focus: false, keyboard: false, static: false }
@@ -1166,12 +1202,14 @@ export class PosterComponent implements OnInit {
         }
       });
       const formDataValues = { ...this.formData.value };
-      
+
       this.dataset.forEach((field) => {
         delete formDataValues[field.id];
         delete formDataValues[field.id + '-file'];
-        
-        if (!(field.type === 'image' || (field.id && field.id.endsWith('-file')))) {
+
+        if (
+          !(field.type === 'image' || (field.id && field.id.endsWith('-file')))
+        ) {
           formDataValues[field.title] = field.value;
         }
       });
@@ -1801,5 +1839,64 @@ export class PosterComponent implements OnInit {
       (field: any) => field.controlName === controlName
     );
     return item ? item.id : null;
+  }
+  getLuminance({ r, g, b }: { r: number; g: number; b: number }) {
+    const srgb = [r, g, b].map((v) => {
+      v /= 255;
+      return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+    });
+    return 0.2126 * srgb[0] + 0.7152 * srgb[1] + 0.0722 * srgb[2];
+  }
+  hexToRGB(hex: string) {
+    const r = parseInt(hex.slice(1, 3), 16);
+    const g = parseInt(hex.slice(3, 5), 16);
+    const b = parseInt(hex.slice(5, 7), 16);
+    return { r, g, b };
+  }
+  onImgLoad(postImage:string, ev?: Event): void {
+    if (!this.isBrowser) return;
+     const imgEl = ev.target as HTMLElement;
+    const parent = imgEl.closest('.poster-container') as HTMLElement;;
+    console.log(parent, postImage)
+    if (parent && postImage) {
+      this.colorService
+        .getColors(postImage, 10)
+        .then((cols) => {
+          if (!cols || cols.length === 0) return;
+
+          if (cols.length >= 3) {
+            const palette = cols.slice(2);
+            const withLuminance = palette.map((hex) => {
+              const rgb = this.hexToRGB(hex);
+              const luminance = this.getLuminance(rgb);
+              return { hex, luminance };
+            });
+
+            withLuminance.sort((a, b) => a.luminance - b.luminance);
+
+            const darkest = withLuminance[1].hex;
+            const lightest = withLuminance[withLuminance.length - 1].hex;
+            parent.style.backgroundColor = darkest || '';
+            parent.style.color = lightest;
+            parent
+              .querySelectorAll('img')
+              .forEach(
+                (img: any) => (
+                  (img.style.boxShadow = `0 0.5rem 1rem ${lightest}`),
+                  'important'
+                )
+              );
+          }
+        })
+        .catch(console.error);
+    }
+  }
+
+  async getColors(image: string, count: number) {
+    try {
+      return await this.colorService.getColors(image, count);
+    } catch {
+      return [];
+    }
   }
 }
