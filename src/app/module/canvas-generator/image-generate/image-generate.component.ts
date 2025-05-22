@@ -36,6 +36,8 @@ import { ToastService } from 'src/app/common/services/toast.service';
 import { animate, style, transition, trigger } from '@angular/animations';
 import { ThumbImagesService } from 'src/app/common/services/thumb-images.service';
 import { environment } from 'src/environments/environment';
+import { PostThumbService } from 'src/app/common/services/post-thumb.service';
+import { forkJoin, Observable } from 'rxjs';
 declare const bootstrap: any;
 interface FontStyles {
   [fontFamily: string]: Set<string>;
@@ -347,7 +349,8 @@ export class ImageGenerateComponent implements OnInit, AfterViewInit {
     private router: Router,
     private http: HttpClient,
     private toastService: ToastService,
-    private TS: ThumbImagesService
+    private TS: ThumbImagesService,
+    private postThumb: PostThumbService
   ) {
     this.route.queryParams.subscribe((params) => {
       this.imgParam = params['img'];
@@ -1552,6 +1555,8 @@ export class ImageGenerateComponent implements OnInit, AfterViewInit {
     const formData = new FormData();
     formData.append('thumbnail', blob, `${postId}.jpg`);
     formData.append('postId', postId);
+    console.log('Uploading thumbnail:', formData.get('thumbnail'));
+    console.log('Thumbnail URL:', this.getThumbnailUrl(postId));
     this.TS.uploadThumbnail(postId, formData).subscribe({
       next: () => {
         this.toastService.show('Thumbnail saved successfully', {
@@ -1568,6 +1573,34 @@ export class ImageGenerateComponent implements OnInit, AfterViewInit {
       },
     });
   }
+  uploadThumbnailsBulk(items: [string, Blob][]): void {
+    const calls: Observable<any>[] = items.map(([postId, blob]) => {
+      const file = new File(
+        [blob],
+        `${postId}.jpg`,
+        { type: blob.type || 'image/jpeg' }
+      );
+      return this.postThumb.uploadPostThumbs(postId, [file]);
+    });
+
+    // forkJoin will fire when ALL inner observables complete (or error out if any fail)
+    forkJoin(calls).subscribe({
+      next: () => {
+        this.toastService.show('All thumbnails saved successfully', {
+          class: 'bg-success text-light',
+          delay: 3000,
+        });
+      },
+      error: (err) => {
+        console.error('One or more thumbnail uploads failed', err);
+        this.toastService.show('Some thumbnails failed to save', {
+          class: 'bg-danger text-light',
+          delay: 5000,
+        });
+      },
+    });
+  }
+
   updatePost(newData: PostDetails): void {
     this.PS.updatePost(newData).subscribe(
       (response) => {},

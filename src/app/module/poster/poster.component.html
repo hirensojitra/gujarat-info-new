@@ -100,13 +100,13 @@
                 </div>
                 <div class="col-lg-6 col-md-5 d-flex flex-column justify-content-center"
                     *ngIf="!isInAppBrowser&&colors.length">
-                    <div *ngIf="postDetails" class="p-3 m-4 border border-light rounded-4 shadow-sm bg-white"
+                    <div *ngIf="postDetails" class="p-3 m-4 border border-light rounded-4 shadow-sm bg-white d-flex flex-column gap-3 align-items-center justify-content-center flex-grow-1"
                         [ngClass]="{'d-none d-md-block':canDownload}" @fadeIn>
-                        <h1 class="d-none d-md-block text-center my-4 fw-b h5" *ngIf="postDetails.title" @fadeIn>
+                        <h1 class="d-none d-md-block text-center fw-b h5" *ngIf="postDetails.title" @fadeIn>
                             {{postDetails.title}}</h1>
-                        <h2 class="d-none d-md-block text-center mb-4 lh-base h6" *ngIf="postDetails.info" @fadeIn>
+                        <h2 class="d-none d-md-block text-center lh-base h6" *ngIf="postDetails.info" @fadeIn>
                             {{postDetails.info}}</h2>
-                        <h5 class="d-none d-md-block text-center mb-4" *ngIf="postDetails.title" @fadeIn>Downloads
+                        <h5 class="d-none d-md-block text-center" *ngIf="postDetails.title" @fadeIn>Downloads
                             <b>{{postDetails.download_counter}}</b>
                         </h5>
                         <form [formGroup]="formData" (ngSubmit)="onSubmitFormData()"

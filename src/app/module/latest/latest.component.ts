@@ -10,6 +10,7 @@ import {
   Inject,
   PLATFORM_ID,
   ViewChild,
+  Renderer2,
 } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { ActivatedRoute, Router, Params } from '@angular/router';
@@ -51,6 +52,7 @@ export class LatestComponent implements OnInit, AfterViewInit, OnDestroy {
   myInfo: any;
 
   constructor(
+    private renderer: Renderer2,
     private postService: NewPostDetailService,
     private route: ActivatedRoute,
     private router: Router,
@@ -63,11 +65,6 @@ export class LatestComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.myInfo = new bootstrap.Modal(document.getElementById('myInfo')!, {
-      focus: false,
-      keyboard: false,
-      static: false,
-    });
     this.routeSub = this.route.queryParams.subscribe((params: Params) => {
       this.currentPage = +params['page'] || this.currentPage;
       this.limit = +params['limit'] || this.limit;
@@ -80,6 +77,11 @@ export class LatestComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngAfterViewInit(): void {
     if (this.isBrowser) {
+      this.myInfo = new bootstrap.Modal(document.getElementById('myInfo')!, {
+      focus: false,
+      keyboard: false,
+      static: false,
+    });
       this.initMasonry();
       window.addEventListener('resize', () => this.masonryInstance?.layout());
     }
@@ -230,7 +232,10 @@ export class LatestComponent implements OnInit, AfterViewInit, OnDestroy {
             parent
               .querySelectorAll('img')
               .forEach(
-                (img: any) => (img.style.boxShadow = `0 0.5rem 1rem ${lightest}`, 'important')
+                (img: any) => (
+                  (img.style.boxShadow = `0 0.5rem 1rem ${lightest}`),
+                  'important'
+                )
               );
           }
         })

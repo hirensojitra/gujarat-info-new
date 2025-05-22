@@ -20,6 +20,8 @@ export class ThumbImagesService {
   // Upload new thumbnail
   // In your PostDetailService
   uploadThumbnail(postId: string, formData: FormData): Observable<any> {
+    console.log('Uploading thumbnail for post ID:', postId);
+    console.log('FormData:', formData.get('thumbnail'));
     return this.http.post(`${this.baseUrl}/upload`, formData, {
       headers: {
         Accept: 'application/json',

@@ -35,7 +35,7 @@ import { BaseUrlService } from '../../common/services/baseuri.service';
 import { SEOService } from 'src/app/common/services/seo.service';
 import { isPlatformBrowser, isPlatformServer } from '@angular/common';
 import { environment } from 'src/environments/environment';
-import { catchError, lastValueFrom, of, switchMap, tap } from 'rxjs';
+import { catchError, firstValueFrom, lastValueFrom, of, switchMap, tap } from 'rxjs';
 import { trackService } from 'src/app/common/services/track.service';
 import {
   trigger,
@@ -154,7 +154,7 @@ export class PosterComponent implements OnInit {
   isBrowser: boolean;
   thumbnailUrl: string | null = null;
   public showThumbnail = false;
-  colors: string[] = []; 
+  colors: string[] = [];
   constructor(
     private route: ActivatedRoute,
     private titleService: Title,
@@ -190,22 +190,85 @@ export class PosterComponent implements OnInit {
     this.isBrowser = isPlatformBrowser(this.platformId);
   }
 
-  ngOnInit() {
-    if (!this.isBrowser) return;
-    this.detectInAppBrowser();
+  async ngOnInit(): Promise<void> {
+    // --- 1) SERVER: init SEO, set defaults, fetch post, then override via changeMetadataDynamically() ---
+    if (isPlatformServer(this.platformId)) {
+      // 1a) kick off any default SEO (fonts, baseline tags, etc)
+      await this.seoService.initSEO();
+
+      // 1b) pull in any static data from your route config
+      const data = await firstValueFrom(this.route.data);
+      this.titleService.setTitle(data['title'] || 'Poster Download');
+      this.metaService.updateTag({
+        name: 'description',
+        content:
+          data['description'] || 'Discover our web app for generating posters…',
+      });
+      this.metaService.updateTag({
+        name: 'keywords',
+        content:
+          data['keywords'] ||
+          'poster generation, campaign, festival, customization…',
+      });
+      this.metaService.updateTag({
+        name: 'robots',
+        content: data['robots'] || 'index, follow',
+      });
+      this.metaService.updateTag({
+        property: 'og:title',
+        content: data['og:title'] || 'Default OG title',
+      });
+      this.metaService.updateTag({
+        property: 'og:description',
+        content: data['og:description'] || 'Default OG description',
+      });
+      this.metaService.updateTag({
+        property: 'og:image',
+        content:
+          data['og:image'] ||
+          'https://api.postnew.in/api/v1/img/uploads/default?quality=30',
+      });
+
+      // 1c) read the :img param once
+      const params = await firstValueFrom(this.route.paramMap);
+      const id = params.get('img');
+      if (id) {
+        // fetch the real post from your service
+        this.postDetailsDefault = await firstValueFrom(this.PS.getPostById(id));
+        if (this.postDetailsDefault) {
+          // now override all SEO tags with the actual post data
+          await this.changeMetadataDynamically();
+          // stash for the browser to hydrate
+          this.transferState.set(
+            this.POST_DETAILS_KEY,
+            this.postDetailsDefault
+          );
+        }
+      }
+
+      // done—no need to run the client pipeline on server
+      return;
+    }
+
+    // --- 2) BROWSER: reuse TransferState + RxJS load & render pipeline ---
     if (this.isBrowser) {
+      this.detectInAppBrowser();
+      await this.seoService.initSEO();
+      // hydrate from TransferState if present
+      const saved = this.transferState.get(this.POST_DETAILS_KEY, null as any);
+      if (saved) {
+        this.postDetailsDefault = saved;
+        this.transferState.remove(this.POST_DETAILS_KEY);
+      }
+
       this.route.paramMap
         .pipe(
-          // extract your imgParam
           tap((params) => {
             this.imgParam = params.get('img')!;
             this.postStatus = 'loading';
           }),
-
-          // cancel any pending API call when the route param changes
           switchMap((params) => {
             const id = params.get('img')!;
-            // if we already have default details and they are published, skip the HTTP call
             if (
               this.postDetailsDefault &&
               !this.postDetailsDefault.deleted &&
@@ -213,31 +276,28 @@ export class PosterComponent implements OnInit {
             ) {
               return of(this.postDetailsDefault);
             }
-            // otherwise fetch fresh details
             return this.PS.getPostById(id);
           }),
-
           tap((post) => {
             this.postDetailsDefault = post;
-            if (this.postDetailsDefault) {
-              this.setupThumbnail();
-            }
             this.isDeleted = post.deleted;
             this.postStatus = post.deleted
               ? 'This image has been deleted'
               : !post.published
               ? 'This image is not published'
               : 'loading';
-          }),
 
-          // only do the SVG + form initialization if we’re not in an in-app browser
+            if (!post.deleted && post.published) {
+              this.changeMetadataDynamically();
+              this.setupThumbnail();
+            }
+          }),
           switchMap((post) => {
             if (!this.isInAppBrowser && !post.deleted && post.published) {
-              return this.getPostById(); // note: make getPostById return a Promise or Observable
+              return this.getPostById();
             }
             return of(null);
           }),
-
           catchError((err) => {
             console.error('Error fetching post:', err);
             this.postStatus = 'Error loading image';
@@ -245,8 +305,15 @@ export class PosterComponent implements OnInit {
           })
         )
         .subscribe();
+
+      this.myInfo = new bootstrap.Modal(document.getElementById('myInfo')!, {
+        focus: false,
+        keyboard: false,
+        static: false,
+      });
     }
   }
+
   private async setupThumbnail() {
     if (!this.postDetailsDefault) return;
     // construct the URL
@@ -1818,21 +1885,27 @@ export class PosterComponent implements OnInit {
       const cols = await this.colorService.getColors(imageUrl, 10);
       if (!cols?.length) return;
       this.colors = cols.slice(2, 9);
-      // pick a color (you can refine this)
-      const bgHex = cols[0];
-      const { r, g, b } = this.hexToRGB(bgHex);
-      const lum = this.getLuminance({ r, g, b });
-      const textHex = lum < 0.5 ? '#FFF' : '#000';
 
-      container.style.backgroundColor = bgHex;
-      container.style.color = textHex;
-      container.querySelectorAll('img').forEach((img) => {
-        (img as HTMLElement).style.setProperty(
-          'box-shadow',
-          `0 0.5rem 1rem ${textHex}`,
-          'important'
-        );
+      const palette = this.colors;
+      const withLuminance = palette.map((hex) => {
+        const rgb = this.hexToRGB(hex);
+        const luminance = this.getLuminance(rgb);
+        return { hex, luminance };
       });
+
+      withLuminance.sort((a, b) => a.luminance - b.luminance);
+
+      const darkest = withLuminance[1].hex;
+      const lightest = withLuminance[withLuminance.length - 1].hex;
+      container.style.backgroundColor = darkest || '';
+      container.style.color = lightest;
+      container
+        .querySelectorAll('img')
+        .forEach(
+          (img: any) => (
+            (img.style.boxShadow = `0 0.5rem 1rem ${lightest}`), 'important'
+          )
+        );
     } catch (err) {
       console.error('Color extraction failed', err);
     }
