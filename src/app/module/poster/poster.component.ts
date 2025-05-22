@@ -191,6 +191,8 @@ export class PosterComponent implements OnInit {
   }
 
   ngOnInit() {
+    if (!this.isBrowser) return;
+    this.detectInAppBrowser();
     if (this.isBrowser) {
       this.route.paramMap
         .pipe(
