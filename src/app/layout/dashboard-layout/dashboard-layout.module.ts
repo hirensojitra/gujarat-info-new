@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { DashboardLayoutComponent } from './dashboard-layout.component';
 import { RouterModule } from '@angular/router';
 import { HeaderModule } from '../../common/component/header/header.module';
+import { AdminHeaderModule } from 'src/app/common/component/admin-header/admin-header.module';
 
 
 
@@ -13,7 +14,8 @@ import { HeaderModule } from '../../common/component/header/header.module';
   imports: [
     CommonModule,
     RouterModule,
-    HeaderModule
+    HeaderModule,
+    AdminHeaderModule
   ],
   exports: [
     DashboardLayoutComponent

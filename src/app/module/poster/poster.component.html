@@ -12,7 +12,6 @@
                 <i class="fa fa-home me-3"></i>Home
             </button>
         </div>
-
         <div *ngIf="isInAppBrowser" class="container mt-4">
             <div *ngIf="postDetailsDefault" class="px-3">
                 <h1 class="text-center my-4 fw-b h5" *ngIf="postDetailsDefault.title">{{postDetailsDefault.title}}</h1>
@@ -68,7 +67,7 @@
                                     <img *ngIf="thumbnailUrl" #thumb [src]="thumbnailUrl"
                                         [alt]="postDetailsDefault?.title"
                                         class="max-w-100 max-h-100 shadow rounded-4 img-fluid opacity-75"
-                                        (load)="onThumbLoad($event)">
+                                        (load)="onThumbLoad($event)" (error)="onThumbError($event)">
                                 </div>
                                 <svg #imageDraw class="max-w-100 max-h-100 m-3 shadow rounded-4"
                                     [ngClass]="{'d-none':showThumbnail}" @fadeIn></svg>
@@ -100,7 +99,8 @@
                 </div>
                 <div class="col-lg-6 col-md-5 d-flex flex-column justify-content-center"
                     *ngIf="!isInAppBrowser&&colors.length">
-                    <div *ngIf="postDetails" class="p-3 m-4 border border-light rounded-4 shadow-sm bg-white d-flex flex-column gap-3 align-items-center justify-content-center flex-grow-1"
+                    <div *ngIf="postDetails"
+                        class="p-3 m-4 border border-light rounded-4 shadow-sm bg-white d-flex flex-column gap-3 align-items-center justify-content-center flex-grow-1"
                         [ngClass]="{'d-none d-md-block':canDownload}" @fadeIn>
                         <h1 class="d-none d-md-block text-center fw-b h5" *ngIf="postDetails.title" @fadeIn>
                             {{postDetails.title}}</h1>

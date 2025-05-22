@@ -150,7 +150,6 @@ export class PosterComponent implements OnInit {
   facebookAccessToken: string | null = null;
   isInAppBrowser: boolean = false;
   POST_DETAILS_KEY = makeStateKey<PostDetails>('postDetails');
-
   isBrowser: boolean;
   thumbnailUrl: string | null = null;
   public showThumbnail = false;
@@ -1919,16 +1918,24 @@ export class PosterComponent implements OnInit {
     }
   }
   // poster.component.ts
-
   async onThumbLoad(ev: Event) {
-    // 1) wait for the theming to finish
     await this.onImgLoad(
       this.imgUrl + this.postDetailsDefault.id + '?quality=100',
       ev
     );
-
-    // 2) only now build your SVG + form
     await this.initialize();
     this.showThumbnail = false;
+  }
+  fallbackUrl = 'assets/images/svg/logo-large.svg';
+  async onThumbError(event: Event) {
+    const img = event.target as HTMLImageElement;
+    // prevent infinite loop if your fallback also fails
+    if (img.src !== this.fallbackUrl) {
+      img.src = this.fallbackUrl;
+      img.classList.remove('opacity-75'); // if you want different styling
+    }
+    await this.initialize();
+    this.showThumbnail = false;
+    this.colors = ['#000000', '#FFFFFF', '#FFFFFF'];
   }
 }

@@ -9,10 +9,7 @@ import { UserPublicInfo } from 'src/app/graphql/types/login.types';
 export class AuthenticationService {
   private userSubject = new BehaviorSubject<UserPublicInfo | null>(this.loadUser());
   public user$ = this.userSubject.asObservable();
-
   constructor(private cookie: CookieService, private router: Router) {}
-
-  /** Read & parse the `user` cookie on startup */
   private loadUser(): UserPublicInfo | null {
     const json = this.cookie.get('user');
     try {

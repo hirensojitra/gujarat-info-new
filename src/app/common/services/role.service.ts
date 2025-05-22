@@ -32,22 +32,21 @@ const GET_ROLE_BY_ID = gql`
 @Injectable({ providedIn: 'root' })
 export class RoleService {
   constructor(private apollo: Apollo) {}
-
   getRoles(): Observable<Role[]> {
     return this.apollo
       .watchQuery<{ roles: Role[] }>({ query: GET_ROLES })
       .valueChanges.pipe(map(({ data }) => data.roles));
   }
-
   getRoleById(id: string): Observable<Role | null> {
     return this.apollo
       .watchQuery<{ role: Role | null }>({
         query: GET_ROLE_BY_ID,
         variables: { id },
       })
-      .valueChanges.pipe(map(({ data }) => {
-        console.log(data);
-        return data.role
-      }));
+      .valueChanges.pipe(
+        map(({ data }) => {
+          return data.role;
+        })
+      );
   }
 }

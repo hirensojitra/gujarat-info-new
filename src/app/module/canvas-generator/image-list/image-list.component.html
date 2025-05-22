@@ -1,62 +1,58 @@
-<div class="h-100 d-flex flex-column p-3" *ngIf="isBrowser">
-    <div class="flex-grow-1 position-relative overflow-hidden">
-        <div class="position-absolute h-100 w-100 d-flex overflow-auto flex-column">
-            <div class="container h-100 w-100">
-                <div class="row g-3">
-                    <div class="col-6 pb-3">
-                        <button class="btn btn-success" [routerLink]="'/images/generate'" target="_blank"
-                            type="button"><i class="fa fa-plus me-2"></i>Image</button>
-                    </div>
-                    <div class="col-6 pb-3">
-                        <div class="search-sort-container">
-                            <input [(ngModel)]="search" placeholder="Search posts" (input)="changePage(1)" />
-                            <select [(ngModel)]="sortBy" (change)="changePage(1)">
-                                <option value="created_at">Date Created</option>
-                                <option value="title">Title</option>
-                            </select>
-                            <select [(ngModel)]="order" (change)="changePage(1)">
-                                <option value="asc">Ascending</option>
-                                <option value="desc">Descending</option>
-                            </select>
-                        </div>
-                    </div>
-                    <ng-container *ngIf="posts.length">
-                        <div class="col-12 px-md-3 px-2">
-                            <div class="row g-md-3 g-2" #masonryGrid data-masonry="{'percentPosition': true}">
-                                <div class="col-lg-3 col-md-3 col-sm-4 col-6 masonry-box"
-                                    *ngFor="let post of posts; let i= index">
-                                    <div class="shadow img-container">
-                                        <div class="position-relative border p-1 opacity-0">
-                                            <img [src]="imgUrl + post.id" [attr.alt]="post.title"
-                                                class="w-100 img-fluid d-block" (load)="onSvgLoad($event)">
-                                            <div class="btn-group w-100" role="group">
-                                                <a class="btn btn-secondary btn-sm rounded-0 m-1"
-                                                    (click)="navigateToEdit(post.id); false;" target="_blank"
-                                                    *ngIf="isUserAdmin">
-                                                    <i class="fa fa-edit me-2"></i>Edit
-                                                </a>
-                                                <a class="btn btn-secondary btn-sm rounded-0 m-1"
-                                                    [routerLink]="'/poster/' + post.id" target="_blank">
-                                                    <i class="fa fa-eye me-2"></i>View
-                                                </a>
-                                            </div>
-                                            <span
-                                                class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-danger d-none d-md-block">
-                                                Download: {{post.download_counter}}
-                                                <span class="visually-hidden">unread messages</span>
-                                            </span>
-                                        </div>
+<div class="position-absolute h-100 w-100 d-flex overflow-auto flex-column" *ngIf="isBrowser">
+    <div class="container h-100 w-100">
+        <div class="row g-3">
+            <div class="col-6 pb-3">
+                <button class="btn btn-success" [routerLink]="'/images/generate'" target="_blank" type="button"><i
+                        class="fa fa-plus me-2"></i>Image</button>
+            </div>
+            <div class="col-6 pb-3">
+                <div class="search-sort-container">
+                    <input [(ngModel)]="search" placeholder="Search posts" (input)="changePage(1)" />
+                    <select [(ngModel)]="sortBy" (change)="changePage(1)">
+                        <option value="created_at">Date Created</option>
+                        <option value="title">Title</option>
+                    </select>
+                    <select [(ngModel)]="order" (change)="changePage(1)">
+                        <option value="asc">Ascending</option>
+                        <option value="desc">Descending</option>
+                    </select>
+                </div>
+            </div>
+            <ng-container *ngIf="posts.length">
+                <div class="col-12 px-md-3 px-2">
+                    <div class="row g-md-3 g-2" #masonryGrid data-masonry="{'percentPosition': true}">
+                        <div class="col-lg-3 col-md-3 col-sm-4 col-6 masonry-box"
+                            *ngFor="let post of posts; let i= index">
+                            <div class="shadow img-container">
+                                <div class="position-relative border p-1 opacity-0">
+                                    <img [src]="imgUrl + post.id" [attr.alt]="post.title"
+                                        class="w-100 img-fluid d-block" (load)="onSvgLoad($event)">
+                                    <div class="btn-group w-100" role="group">
+                                        <a class="btn btn-secondary btn-sm rounded-0 m-1"
+                                            (click)="navigateToEdit(post.id); false;" target="_blank"
+                                            *ngIf="isUserAdmin">
+                                            <i class="fa fa-edit me-2"></i>Edit
+                                        </a>
+                                        <a class="btn btn-secondary btn-sm rounded-0 m-1"
+                                            [routerLink]="'/poster/' + post.id" target="_blank">
+                                            <i class="fa fa-eye me-2"></i>View
+                                        </a>
                                     </div>
+                                    <span
+                                        class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-danger d-none d-md-block">
+                                        Download: {{post.download_counter}}
+                                        <span class="visually-hidden">unread messages</span>
+                                    </span>
                                 </div>
                             </div>
                         </div>
-                    </ng-container>
+                    </div>
                 </div>
-                <div pagination [currentPage]="currentPage" [totalItems]="pagination.totalPosts" [pageSize]="limit"
-                    [pageSizes]="[10, 20, 30]" (currentPageChange)="changePage($event)"
-                    (pageSizeChange)="changePageSize($event)" class="mt-0 mb-0 px-3">
-                </div>
-            </div>
+            </ng-container>
+        </div>
+        <div pagination [currentPage]="currentPage" [totalItems]="pagination.totalPosts" [pageSize]="limit"
+            [pageSizes]="[10, 20, 30]" (currentPageChange)="changePage($event)"
+            (pageSizeChange)="changePageSize($event)" class="mt-0 mb-0 px-3">
         </div>
     </div>
 </div>
