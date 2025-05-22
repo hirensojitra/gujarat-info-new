@@ -35,7 +35,7 @@ import { BaseUrlService } from '../../common/services/baseuri.service';
 import { SEOService } from 'src/app/common/services/seo.service';
 import { isPlatformBrowser, isPlatformServer } from '@angular/common';
 import { environment } from 'src/environments/environment';
-import { lastValueFrom } from 'rxjs';
+import { catchError, lastValueFrom, of, switchMap, tap } from 'rxjs';
 import { trackService } from 'src/app/common/services/track.service';
 import {
   trigger,
@@ -152,6 +152,9 @@ export class PosterComponent implements OnInit {
   POST_DETAILS_KEY = makeStateKey<PostDetails>('postDetails');
 
   isBrowser: boolean;
+  thumbnailUrl: string | null = null;
+  public showThumbnail = false;
+  colors: string[] = []; 
   constructor(
     private route: ActivatedRoute,
     private titleService: Title,
@@ -187,118 +190,67 @@ export class PosterComponent implements OnInit {
     this.isBrowser = isPlatformBrowser(this.platformId);
   }
 
-  async ngOnInit(): Promise<void> {
-    if (isPlatformBrowser(this.platformId)) {
-      this.detectInAppBrowser();
-      this.myInfo = new bootstrap.Modal(document.getElementById('myInfo')!, {
-        focus: false,
-        keyboard: false,
-        static: false,
-      });
-      await this.seoService.initSEO();
-      if (this.transferState.hasKey(this.POST_DETAILS_KEY)) {
-        this.postDetailsDefault = this.transferState.get(
-          this.POST_DETAILS_KEY,
-          null as any
-        );
-        this.transferState.remove(this.POST_DETAILS_KEY);
-        this.dataProccessed = true;
-        await this.changeMetadataDynamically(); // Remove to avoid reusing stale data
-      }
-      await this.route.paramMap.subscribe(async (params) => {
-        this.imgParam = params.get('img');
-        if (this.imgParam) {
-          try {
-            // Show loading state
+  ngOnInit() {
+    if (this.isBrowser) {
+      this.route.paramMap
+        .pipe(
+          // extract your imgParam
+          tap((params) => {
+            this.imgParam = params.get('img')!;
             this.postStatus = 'loading';
-            this.postDetails = undefined;
+          }),
+
+          // cancel any pending API call when the route param changes
+          switchMap((params) => {
+            const id = params.get('img')!;
+            // if we already have default details and they are published, skip the HTTP call
             if (
               this.postDetailsDefault &&
               !this.postDetailsDefault.deleted &&
               this.postDetailsDefault.published
             ) {
-              !this.isInAppBrowser && (await this.getPostById()); // Process full details
-              this.pageLink = window.location.href;
-            } else {
-              // Show thumbnail for invalid posts
-              this.postDetails = this.postDetailsDefault;
-              this.isDeleted = this.postDetailsDefault?.deleted;
-              this.postStatus = this.postDetailsDefault?.deleted
-                ? 'This image has been deleted'
-                : 'This image is not published';
+              return of(this.postDetailsDefault);
             }
-          } catch (error) {
-            // Handle API errors
-            console.error('Error fetching post:', error);
-            this.postStatus = 'Error loading image';
-            this.postDetails = undefined;
-            this.dataProccessed = true;
-          }
-        }
-      });
-    }
+            // otherwise fetch fresh details
+            return this.PS.getPostById(id);
+          }),
 
-    if (isPlatformServer(this.platformId)) {
-      await this.seoService.initSEO();
-      this.route.data.subscribe(async (data) => {
-        this.titleService.setTitle(data['title'] || 'Poster Download');
-        this.metaService.updateTag({
-          name: 'description',
-          content:
-            data['description'] ||
-            'Discover our web application for generating election campaign posters, festival posts, and other promotional activities. Customize posters with photos, names, addresses, designations, and contact details for efficient and personalized promotional material.',
-        });
-        this.metaService.updateTag({
-          name: 'keywords',
-          content:
-            data['keywords'] ||
-            'poster generation, campaign posters, election posters, festival posts, promotional activities, customization, PostNew, web application',
-        });
-        this.metaService.updateTag({
-          name: 'robots',
-          content: data['robots'] || 'index, follow',
-        });
-        this.metaService.updateTag({
-          property: 'og:title',
-          content: data['og:title'] || 'Default OG title',
-        });
-        this.metaService.updateTag({
-          property: 'og:description',
-          content: data['og:description'] || 'Default OG description',
-        });
-        this.metaService.updateTag({
-          property: 'og:image',
-          content:
-            data['og:image'] ||
-            'https://api.postnew.in/api/v1/img/uploads/wLmyK?quality=30',
-        });
-      });
-      await this.route.paramMap.subscribe(async (params) => {
-        this.imgParam = params.get('img');
-        if (this.imgParam) {
-          try {
-            // Attempt to fetch the post details
-            this.postDetailsDefault = (await this.PS.getPostById(
-              this.imgParam.toString()
-            ).toPromise()) as PostDetails;
-
-            // Check if the post details were fetched successfully
+          tap((post) => {
+            this.postDetailsDefault = post;
             if (this.postDetailsDefault) {
-              await this.changeMetadataDynamically();
-
-              // Set the post details in TransferState
-              this.transferState.set(
-                this.POST_DETAILS_KEY,
-                this.postDetailsDefault
-              );
+              this.setupThumbnail();
             }
-          } catch (error) {
-            this.dataProccessed = true;
-          }
-        }
-      });
+            this.isDeleted = post.deleted;
+            this.postStatus = post.deleted
+              ? 'This image has been deleted'
+              : !post.published
+              ? 'This image is not published'
+              : 'loading';
+          }),
+
+          // only do the SVG + form initialization if we’re not in an in-app browser
+          switchMap((post) => {
+            if (!this.isInAppBrowser && !post.deleted && post.published) {
+              return this.getPostById(); // note: make getPostById return a Promise or Observable
+            }
+            return of(null);
+          }),
+
+          catchError((err) => {
+            console.error('Error fetching post:', err);
+            this.postStatus = 'Error loading image';
+            return of(null);
+          })
+        )
+        .subscribe();
     }
-    await new Promise((resolve) => setTimeout(resolve, 1500));
+  }
+  private async setupThumbnail() {
+    if (!this.postDetailsDefault) return;
+    // construct the URL
+    this.thumbnailUrl =
+      this.imgUrl + this.postDetailsDefault.id + '?quality=100';
+    this.showThumbnail = true;
   }
   detectInAppBrowser() {
     const userAgent = navigator.userAgent || navigator.vendor;
@@ -411,8 +363,6 @@ export class PosterComponent implements OnInit {
         } else {
           this.postStatus = 'No download counter available';
         }
-        // Initialize post UI
-        await this.initialize();
       } else if (post.deleted && post.msg) {
         this.postStatus = post.msg;
       }
@@ -1853,42 +1803,36 @@ export class PosterComponent implements OnInit {
     const b = parseInt(hex.slice(5, 7), 16);
     return { r, g, b };
   }
-  onImgLoad(postImage:string, ev?: Event): void {
+  // poster.component.ts
+
+  async onImgLoad(imageUrl: string, ev: Event): Promise<void> {
     if (!this.isBrowser) return;
-     const imgEl = ev.target as HTMLElement;
-    const parent = imgEl.closest('.poster-container') as HTMLElement;;
-    console.log(parent, postImage)
-    if (parent && postImage) {
-      this.colorService
-        .getColors(postImage, 10)
-        .then((cols) => {
-          if (!cols || cols.length === 0) return;
 
-          if (cols.length >= 3) {
-            const palette = cols.slice(2);
-            const withLuminance = palette.map((hex) => {
-              const rgb = this.hexToRGB(hex);
-              const luminance = this.getLuminance(rgb);
-              return { hex, luminance };
-            });
+    const imgEl = ev.target as HTMLElement;
+    const container = imgEl.closest('.poster-container') as HTMLElement;
+    if (!container) return;
 
-            withLuminance.sort((a, b) => a.luminance - b.luminance);
+    try {
+      const cols = await this.colorService.getColors(imageUrl, 10);
+      if (!cols?.length) return;
+      this.colors = cols.slice(2, 9);
+      // pick a color (you can refine this)
+      const bgHex = cols[0];
+      const { r, g, b } = this.hexToRGB(bgHex);
+      const lum = this.getLuminance({ r, g, b });
+      const textHex = lum < 0.5 ? '#FFF' : '#000';
 
-            const darkest = withLuminance[1].hex;
-            const lightest = withLuminance[withLuminance.length - 1].hex;
-            parent.style.backgroundColor = darkest || '';
-            parent.style.color = lightest;
-            parent
-              .querySelectorAll('img')
-              .forEach(
-                (img: any) => (
-                  (img.style.boxShadow = `0 0.5rem 1rem ${lightest}`),
-                  'important'
-                )
-              );
-          }
-        })
-        .catch(console.error);
+      container.style.backgroundColor = bgHex;
+      container.style.color = textHex;
+      container.querySelectorAll('img').forEach((img) => {
+        (img as HTMLElement).style.setProperty(
+          'box-shadow',
+          `0 0.5rem 1rem ${textHex}`,
+          'important'
+        );
+      });
+    } catch (err) {
+      console.error('Color extraction failed', err);
     }
   }
 
@@ -1898,5 +1842,18 @@ export class PosterComponent implements OnInit {
     } catch {
       return [];
     }
+  }
+  // poster.component.ts
+
+  async onThumbLoad(ev: Event) {
+    // 1) wait for the theming to finish
+    await this.onImgLoad(
+      this.imgUrl + this.postDetailsDefault.id + '?quality=100',
+      ev
+    );
+
+    // 2) only now build your SVG + form
+    await this.initialize();
+    this.showThumbnail = false;
   }
 }
