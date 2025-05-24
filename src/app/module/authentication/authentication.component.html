@@ -7,8 +7,8 @@
         <p class="text-center">Connect with us by</p>
         <div class="d-flex justify-content-between mb-3">
             <!-- <button class="btn btn-outline-light border w-100 me-2"><i class="fa fa-apple text-dark"></i></button> -->
-            <button class="btn btn-outline-danger border w-100 me-2" (click)="registerWithGoogle()"><i
-                    class="fa fa-google me-3"></i>Google</button>
+            <button class="btn btn-outline-danger border w-100 me-2" (click)="registerWithGoogle()" [disabled]="isLoading"><i
+                    class="fa fa-google me-3"></i>{{ isLoading ? 'Google Signing In ...' : 'Google' }}</button>
             <!-- <button class="btn btn-outline-light border w-100" (click)="registerWithFacebook()"><i
                     class="fa fa-twitter text-primary"></i></button> -->
         </div>

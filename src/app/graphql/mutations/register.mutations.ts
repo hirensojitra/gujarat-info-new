@@ -50,9 +50,26 @@ export const GOOGLE_AUTH = gql`
   mutation GoogleAuth($idToken: String!) {
     googleAuth(idToken: $idToken) {
       token
-      userId
-      email
       requiresPassword
+      user {
+        id
+        firstname
+        middlename
+        lastname
+        number
+        number_verified
+        role_id
+        email
+        email_verified
+        username
+        birthday
+        gender
+        marital_status
+        language {
+          id
+          name
+        }
+      }
     }
   }
 `;

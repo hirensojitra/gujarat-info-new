@@ -30,11 +30,6 @@ export class SessionService implements OnDestroy {
   }
   private handleResponse(payload: { token?: string; user?: any }) {
     if (payload?.user) {
-      if (payload.token) {
-        this.authService.setToken(payload.token);
-      }
-      // 2) replace stored user info
-      this.authService.setUser(payload.user);
       if (this.router.url.startsWith('/authentication')) {
         if (payload.user.email_verified) {
           this.router.navigate(['/home']);
