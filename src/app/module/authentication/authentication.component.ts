@@ -106,25 +106,25 @@ export class AuthenticationComponent {
       callback: (resp) => this.handleGoogleCredential(resp),
     });
 
-    // // Force FedCM & listen for prompt diagnostics:
-    // google.accounts.id.prompt((notif: any) => {
-    //   console.group('GSI Prompt Notification');
-    //   console.log(
-    //     'NotDisplayed?',
-    //     notif.isNotDisplayed(),
-    //     notif.getNotDisplayedReason()
-    //   );
-    //   console.log(
-    //     'Skipped?',
-    //     notif.isSkippedMoment(),
-    //     notif.getSkippedReason()
-    //   );
-    //   console.log(
-    //     'Dismissed?',
-    //     notif.isDismissedMoment(),
-    //     notif.getDismissedReason()
-    //   );
-    //   console.groupEnd();
-    // });
+    // Force FedCM & listen for prompt diagnostics:
+    google.accounts.id.prompt((notif: any) => {
+      // console.group('GSI Prompt Notification');
+      // console.log(
+      //   'NotDisplayed?',
+      //   notif.isNotDisplayed(),
+      //   notif.getNotDisplayedReason()
+      // );
+      // console.log(
+      //   'Skipped?',
+      //   notif.isSkippedMoment(),
+      //   notif.getSkippedReason()
+      // );
+      // console.log(
+      //   'Dismissed?',
+      //   notif.isDismissedMoment(),
+      //   notif.getDismissedReason()
+      // );
+      // console.groupEnd();
+    });
   }
 }
