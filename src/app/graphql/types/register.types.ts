@@ -1,3 +1,5 @@
+import { UserPublicInfo } from './login.types';
+
 export interface RegisterInput {
   email: string;
   pass_key: string;
@@ -14,8 +16,7 @@ export interface RegisterPayload {
 }
 
 export interface GoogleAuthPayload {
-  token?: string | null;
-  userId: string;
-  email: string;
-  requiresPassword: boolean;
+  token: string;
+  requiresPassword: Boolean;
+  user: UserPublicInfo;
 }

@@ -68,7 +68,7 @@ export class AuthenticationComponent {
                     String(result.requiresPassword),
                     common
                   );
-                  this.cookie.set('google_user_id', result.userId, common);
+                  this.cookie.set('google_user_id', result.user.id, common);
                   this.router.navigate(['/set-password']);
                 }
               : () => {
@@ -113,32 +113,5 @@ export class AuthenticationComponent {
       );
       console.groupEnd();
     });
-  }
-
-  onSubmitNewPassword(): void {
-    if (this.newPassword !== this.confirmPassword) {
-      this.errorMessage = 'Passwords do not match';
-      return;
-    }
-    this.isLoading = true;
-
-    this.registerService
-      .setPassword(this.googleUserId, this.newPassword)
-      .pipe(
-        catchError((err) => {
-          this.isLoading = false;
-          this.toast.show(err.message || 'Could not set password', {
-            class: 'bg-danger',
-          });
-          return of(null);
-        })
-      )
-      .subscribe((res) => {
-        this.isLoading = false;
-        if (res?.token) {
-          this.authService.setToken(res.token);
-          this.router.navigate(['/home']);
-        }
-      });
   }
 }
