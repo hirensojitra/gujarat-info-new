@@ -12,3 +12,10 @@ export interface RegisterPayload {
   email_otp_token: string;
   otp_expires_at: string;
 }
+
+export interface GoogleAuthPayload {
+  token?: string | null;
+  userId: string;
+  email: string;
+  requiresPassword: boolean;
+}

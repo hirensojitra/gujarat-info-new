@@ -6,10 +6,13 @@ import {
   REGISTER_USER,
   VERIFY_EMAIL_OTP,
   RESEND_EMAIL_OTP,
+  SET_PASSWORD,
+  GOOGLE_AUTH,
 } from 'src/app/graphql/mutations/register.mutations';
 import {
   RegisterPayload,
   RegisterInput,
+  GoogleAuthPayload,
 } from 'src/app/graphql/types/register.types';
 import { AuthPayload } from 'src/app/graphql/types/login.types';
 import { ApolloError } from '@apollo/client';
@@ -31,7 +34,7 @@ export class RegisterService {
         errorPolicy: 'none',
       })
       .pipe(
-        map(res => {
+        map((res) => {
           if (!res.data) {
             throw new Error('No data received');
           }
@@ -58,7 +61,7 @@ export class RegisterService {
         errorPolicy: 'none',
       })
       .pipe(
-        map(res => {
+        map((res) => {
           if (!res.data) {
             throw new Error('No data received');
           }
@@ -83,7 +86,47 @@ export class RegisterService {
       variables: { email },
     });
   }
+  googleAuth(idToken: string): Observable<GoogleAuthPayload> {
+    return this.apollo
+      .mutate<{ googleAuth: GoogleAuthPayload }>({
+        mutation: GOOGLE_AUTH,
+        variables: { idToken },
+        fetchPolicy: 'network-only',
+        errorPolicy: 'none',
+      })
+      .pipe(
+        map((res) => {
+          if (!res.data) {
+            throw new Error('No data received');
+          }
+          return res.data.googleAuth;
+        }),
+        catchError(this.extractError)
+      );
+  }
 
+  /**
+   * Once the user provides a new password (after GoogleAuth.requiresPassword===true),
+   * call setPassword to finalize registration and receive a JWT.
+   */
+  setPassword(userId: string, newPassword: string): Observable<AuthPayload> {
+    return this.apollo
+      .mutate<{ setPassword: AuthPayload }>({
+        mutation: SET_PASSWORD,
+        variables: { userId, newPassword },
+        fetchPolicy: 'network-only',
+        errorPolicy: 'none',
+      })
+      .pipe(
+        map((res) => {
+          if (!res.data) {
+            throw new Error('No data received');
+          }
+          return res.data.setPassword;
+        }),
+        catchError(this.extractError)
+      );
+  }
   private setCredentials(input: RegisterInput) {
     this.email = input.email;
     this.passKey = input.pass_key;
@@ -95,5 +138,13 @@ export class RegisterService {
 
   getPassKey(): string {
     return this.passKey;
+  }
+  private extractError(err: ApolloError) {
+    const gqlMsg = err.graphQLErrors?.[0]?.message;
+    if (gqlMsg) {
+      return throwError(() => new Error(gqlMsg));
+    }
+    const netMsg = err.networkError?.message;
+    return throwError(() => new Error(netMsg || err.message));
   }
 }

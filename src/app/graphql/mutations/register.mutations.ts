@@ -46,3 +46,40 @@ export const RESEND_EMAIL_OTP = gql`
     }
   }
 `;
+export const GOOGLE_AUTH = gql`
+  mutation GoogleAuth($idToken: String!) {
+    googleAuth(idToken: $idToken) {
+      token
+      userId
+      email
+      requiresPassword
+    }
+  }
+`;
+
+export const SET_PASSWORD = gql`
+  mutation SetPassword($userId: ID!, $newPassword: String!) {
+    setPassword(userId: $userId, newPassword: $newPassword) {
+      token
+      user {
+        id
+        firstname
+        middlename
+        lastname
+        email
+        username
+        role_id
+        email_verified
+        number
+        number_verified
+        birthday
+        gender
+        marital_status
+        language {
+          id
+          name
+        }
+      }
+    }
+  }
+`;

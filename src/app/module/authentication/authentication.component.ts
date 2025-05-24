@@ -1,79 +1,116 @@
-import { HttpClient } from '@angular/common/http';
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { catchError, of } from 'rxjs';
-import { AuthenticationService } from 'src/app/common/services/authentication.service';
 import { ToastService } from 'src/app/common/services/toast.service';
-import { environment } from 'src/environments/environment';
+import { RegisterService } from 'src/app/common/services/register.service';
+import { AuthenticationService } from 'src/app/common/services/authentication.service';
 
 declare const google: any;
+
 @Component({
   selector: 'app-authentication',
   templateUrl: './authentication.component.html',
   styleUrl: './authentication.component.scss',
 })
 export class AuthenticationComponent {
-  api: string = environment.MasterApi;
-  isLoading: boolean = false;
-  errorMessage: string = '';
+  isLoading = false;
+  errorMessage = '';
+
+  showSetPassword = false;
+  googleUserId = '';
+  newPassword = '';
+  confirmPassword = '';
+
   constructor(
     private router: Router,
-
+    private registerService: RegisterService,
     private authService: AuthenticationService,
-    private toast: ToastService,
-    private http: HttpClient
+    private toast: ToastService
   ) {}
-  handleGoogleCredential(response: any): void {
-    const idToken = response.credential; // The idToken received from Google
-    console.log('Google idToken:', idToken); // Debugging
 
-    // Send the idToken to the backend
-    this.http
-      .post(this.api + '/auth/google', { idToken }, { responseType: 'json' })
-      .pipe(
-        catchError((error) => {
+  handleGoogleCredential(response: any): void {
+    try {
+      const idToken = response.credential;
+      this.isLoading = true;
+      this.errorMessage = '';
+
+      this.registerService
+        .googleAuth(idToken)
+        .pipe(
+          catchError(err => {
+            this.isLoading = false;
+            this.toast.show(err.message || 'Google auth failed', {
+              class: 'bg-danger',
+            });
+            return of(null);
+          })
+        )
+        .subscribe(result => {
           this.isLoading = false;
-          this.toast.show(
-            error.error?.message || 'Google authentication failed.',
-            { class: 'bg-danger' }
-          );
+          if (!result) return;
+
+          if (result.requiresPassword) {
+            this.googleUserId = result.userId;
+            this.showSetPassword = true;
+          } else if (result.token) {
+            this.authService.setToken(result.token);
+            this.router.navigate(['/home']);
+          } else {
+            this.toast.show('Unexpected response from Google auth', {
+              class: 'bg-warning',
+            });
+          }
+        });
+    } catch (e) {
+      console.error('handleGoogleCredential error:', e);
+      this.toast.show('Internal error processing Google response', {
+        class: 'bg-danger',
+      });
+      this.isLoading = false;
+    }
+  }
+
+  registerWithGoogle() {
+  this.isLoading = true;
+  google.accounts.id.initialize({
+    client_id: '650577899089-abc77o2gr9jldf1sfi6rcg6gptcdq4p8.apps.googleusercontent.com',
+    callback: resp => this.handleGoogleCredential(resp),
+  });
+
+  // Force FedCM & listen for prompt diagnostics:
+  google.accounts.id.prompt((notif: any) => {
+    console.group('GSI Prompt Notification');
+    console.log('NotDisplayed?', notif.isNotDisplayed(), notif.getNotDisplayedReason());
+    console.log('Skipped?',     notif.isSkippedMoment(), notif.getSkippedReason());
+    console.log('Dismissed?',   notif.isDismissedMoment(), notif.getDismissedReason());
+    console.groupEnd();
+  });
+}
+
+  onSubmitNewPassword(): void {
+    if (this.newPassword !== this.confirmPassword) {
+      this.errorMessage = 'Passwords do not match';
+      return;
+    }
+    this.isLoading = true;
+
+    this.registerService
+      .setPassword(this.googleUserId, this.newPassword)
+      .pipe(
+        catchError(err => {
+          this.isLoading = false;
+          this.toast.show(err.message || 'Could not set password', {
+            class: 'bg-danger',
+          });
           return of(null);
         })
       )
-      .subscribe({
-        next: (response: any) => {
-          this.isLoading = false;
-          if (response && response.token) {
-            this.authService.setToken(response.token);
-            this.router.navigate(['/home']);
-          } else {
-            this.toast.show('Unable to process Google registration.', {
-              class: 'bg-danger',
-            });
-          }
-        },
-        error: (error) => {
-          this.isLoading = false;
-          this.toast.show(error.message || 'Google authentication failed.', {
-            class: 'bg-danger',
-          });
-        },
-        complete: () => {
-          this.isLoading = false;
-        },
+      .subscribe(res => {
+        this.isLoading = false;
+        if (res?.token) {
+          this.authService.setToken(res.token);
+          this.router.navigate(['/home']);
+        }
       });
-  }
-  registerWithGoogle(): void {
-    this.isLoading = true;
-    this.errorMessage = '';
-
-    google.accounts.id.initialize({
-      client_id:
-        '650577899089-eq5q93v869b5qvi6vllcq81o8v06ubsm.apps.googleusercontent.com',
-      callback: (response: any) => this.handleGoogleCredential(response),
-    });
-
-    // Render the Google button inside a div (optional)
-    google.accounts.id.prompt();
   }
 }
