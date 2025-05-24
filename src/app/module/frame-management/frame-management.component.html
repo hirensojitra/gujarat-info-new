@@ -1,10 +1,4 @@
 <div class="position-absolute h-100 w-100 d-flex flex-column">
-    <div class="p-3 bg-dark text-light d-flex align-items-center border-bottom-1 border-light">
-        <!-- <a [routerLink]="'/home'" class="me-2"><img src="assets/images/svg/logo-large.svg" alt="" remSize [hPX]="30"></a> -->
-        <a [routerLink]="'/home'" class="me-2"><img src="assets/images/svg/logo.svg" alt="" remSize [hPX]="40"></a>
-        <h5 class="m-0 me-2">Frame Management</h5>
-        <span class="ms-auto">{{fullName}}</span>
-    </div>
     <div class="container-fluid flex-grow-1 p-0">
         <div class="row h-100 g-0">
             <!-- SVG Column -->
@@ -13,7 +7,8 @@
                     <div class="position-relative d-flex flex-column flex-grow-1">
                         <div class="position-absolute w-100 h-100 d-flex align-items-center justify-content-center p-3">
                             <svg class="svg-content max-w-100-p h-auto max-h-100-p img-fluid mx-auto d-block bg-dark rounded-4 shadow"
-                                viewBox="0 0 300 300" preserveAspectRatio="xMidYMid meet" #mainSVG svgDraw [postDataSet]="postDetailsForm.value">
+                                viewBox="0 0 300 300" preserveAspectRatio="xMidYMid meet" #mainSVG svgDraw
+                                [postDataSet]="postDetailsForm.value">
                             </svg>
                         </div>
                     </div>
@@ -22,6 +17,12 @@
             <!-- Content Column -->
             <div class="col-md-8 col-lg-6 col">
                 <div class="content-wrapper d-flex flex-column h-100">
+                    <div class="d-flex align-items-center justify-content-center p-3 border border-top-1 border-light">
+                        <button class="btn btn-primary mx-2" (click)="false"><i
+                                class="fa fa-save me-2"></i>Save</button>
+                        <button class="btn btn-secondary mx-2" (click)="false"><i
+                                class="fa fa-undo me-2"></i>Reset</button>
+                    </div>
                     <div class="content-header">
                         <!-- <div class="toolbar d-flex border-bottom">
                             <button *ngFor="let item of toolbarItems"
@@ -113,10 +114,6 @@
                 </div>
             </div>
         </div>
-    </div>
-    <div class="d-flex align-items-center justify-content-center p-3 border border-top-1 border-light">
-        <button class="btn btn-primary mx-2" (click)="false"><i class="fa fa-save me-2"></i>Save</button>
-        <button class="btn btn-secondary mx-2" (click)="false"><i class="fa fa-undo me-2"></i>Reset</button>
     </div>
 </div>
 <div class="modal fade" id="dimensionModal" tabindex="-1" aria-labelledby="dimensionModalLabel" aria-hidden="true">

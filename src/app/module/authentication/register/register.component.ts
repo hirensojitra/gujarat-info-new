@@ -46,9 +46,8 @@ export class RegisterComponent implements OnInit {
           this.router.navigate(['/latest']);
         } else {
           if (res.email_otp_token && res.otp_expires_at) {
-            this.authCookie.setOtp(res.email_otp_token,res.otp_expires_at)
+            this.authCookie.setOtpToken(res.email_otp_token,res.otp_expires_at)
           }
-          
           this.router.navigate(['/authentication/verify-email'], { queryParams: { user_id: res.user_id } });
         }
       },

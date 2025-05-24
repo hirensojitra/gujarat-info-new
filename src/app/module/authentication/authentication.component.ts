@@ -45,7 +45,7 @@ export class AuthenticationComponent {
           this.isLoading = false;
           if (response && response.token) {
             this.authService.setToken(response.token);
-            this.router.navigate(['/dashboard']);
+            this.router.navigate(['/home']);
           } else {
             this.toast.show('Unable to process Google registration.', {
               class: 'bg-danger',

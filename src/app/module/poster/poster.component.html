@@ -1,4 +1,25 @@
 <div class="h-100-vh d-flex flex-column">
+    <ng-container *ngIf="isNotFound">
+        <div class="flex-grow-1 overflow-auto align-items-center d-flex flex-column justify-content-center" @fadeIn>
+            <h2 class="mt-3">Sorry, we couldn’t find that poster.</h2>
+            <img class="max-w-100 max-h-100 rounded-4" src="./assets/images/svg/no-post.svg" />
+            <button class="btn btn-danger m-3" [routerLink]="'/latest'">
+                <i class="fa fa-home me-3"></i>Home
+            </button>
+        </div>
+    </ng-container>
+
+    <!-- Unpublished -->
+    <ng-container *ngIf="!isNotFound && isUnpublished">
+        <div class="flex-grow-1 overflow-auto align-items-center d-flex flex-column justify-content-center" @fadeIn>
+            <h2 class="mt-3">This poster isn’t live yet.</h2>
+            <img class="max-w-100 max-h-100 rounded-4 mb-4" src="./assets/images/svg/no-post.svg" />
+            <p>Check back later, or head to the home page.</p>
+            <button class="btn btn-danger m-3" [routerLink]="'/latest'">
+                <i class="fa fa-home me-3"></i>Home
+            </button>
+        </div>
+    </ng-container>
     <div class="d-flex align-items-center justify-content-center shadow-sm bg-dark position-sticky top-0 z-2"
         *ngIf="postDetails?.info_show">
         <a [routerLink]="'/latest'" class="max-w-100 my-3"><img src="assets/images/svg/logo-large.svg" alt="PostNew.in"

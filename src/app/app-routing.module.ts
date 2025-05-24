@@ -161,14 +161,6 @@ const routes: Routes = [
           },
         ],
       },
-    ],
-  },
-  {
-    path: '',
-    component: LayoutComponent,
-    data: { layout: 'empty-layout' },
-    canActivate: [NewAuthGuard],
-    children: [
       {
         path: 'frame-management',
         children: [
@@ -181,6 +173,37 @@ const routes: Routes = [
           },
         ],
       },
+      {
+        path: 'images',
+        children: [
+          {
+            path: '',
+            loadChildren: () =>
+              import('./module/canvas-generator/canvas-generator.module').then(
+                (m) => m.CanvasGeneratorModule
+              ),
+          },
+        ],
+      },
+      {
+        path: 'admin',
+        children: [
+          {
+            path: '',
+            loadChildren: () =>
+              import('./module/admin/admin.module').then((m) => m.AdminModule),
+          },
+        ],
+      }
+    ],
+  },
+  {
+    path: '',
+    component: LayoutComponent,
+    data: { layout: 'empty-layout' },
+    canActivate: [NewAuthGuard],
+    children: [
+
     ],
   },
   {
@@ -197,18 +220,6 @@ const routes: Routes = [
             loadChildren: () =>
               import('./module/dashboard/dashboard.module').then(
                 (m) => m.DashboardModule
-              ),
-          },
-        ],
-      },
-      {
-        path: 'images',
-        children: [
-          {
-            path: '',
-            loadChildren: () =>
-              import('./module/canvas-generator/canvas-generator.module').then(
-                (m) => m.CanvasGeneratorModule
               ),
           },
         ],
@@ -251,16 +262,6 @@ const routes: Routes = [
         ],
       },
       {
-        path: 'admin',
-        children: [
-          {
-            path: '',
-            loadChildren: () =>
-              import('./module/admin/admin.module').then((m) => m.AdminModule),
-          },
-        ],
-      },
-      {
         path: 'user-profile',
         children: [
           {
@@ -284,7 +285,7 @@ const routes: Routes = [
               ),
           },
         ],
-      }
+      },
     ],
   },
   {

@@ -48,7 +48,7 @@ export class AppComponent implements OnInit, AfterViewInit {
 
   ngOnInit(): void {
     this.seoService.initSEO();
-    // this.authService.isLoggedIn() && this.sessionService.startSessionSync();
+    this.authService.isLoggedIn() && this.sessionService.startSessionSync();
   }
 
   ngAfterViewInit(): void {

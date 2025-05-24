@@ -25,14 +25,12 @@ export class AuthGuard implements CanActivate {
     }
     return of(false);
   }
-
   private checkAuth(returnUrl: string): Observable<boolean> {
     return this.authService.isAuthenticated().pipe(
       map(isAuthenticated => {
         if (isAuthenticated) {
           return true;
         }
-        
         this.router.navigate(['/auth/login'], {
           queryParams: { returnUrl },
           queryParamsHandling: 'merge'

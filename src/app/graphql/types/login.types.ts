@@ -46,3 +46,7 @@ export interface LoginPayload {
   token: string;
   user: UserPublicInfo;
 }
+export interface AuthPayload {
+  token: string;
+  user: UserPublicInfo;
+}

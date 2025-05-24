@@ -30,20 +30,10 @@ import {
   PostDetails,
   PostInput,
   PostUpdateInput,
-  Pagination
+  Pagination,
+  MinimalPostListResponse
 } from 'src/app/graphql/types/post-detail.types';
-interface MinimalPost {
-  id:         string;
-  title:      string;
-  info:       string;
-  image:      string | null;
-  updated_at: string | null;
-}
 
-interface MinimalPostListResponse {
-  posts:      MinimalPost[];
-  pagination: Pagination;
-}
 @Injectable({
   providedIn: 'root'
 })

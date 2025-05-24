@@ -24,7 +24,7 @@ export class AuthCookieService {
   }
 
   // ── E-mail OTP (if you use it) ───────────────────────────────────────────────
-  setOtp(otpToken: string, expiresAt: string): void {
+  setOtpToken(otpToken: string, expiresAt: string): void {
     const common = {
       path: '/',
       secure: window.location.protocol === 'https:',

@@ -1,22 +1,32 @@
-<h3 class="card-title text-center mb-4">Verify Your Email</h3>
-<form [formGroup]="verifyForm" (ngSubmit)="verifyOtp()">
-  <div class="form-group mb-3">
-    <label for="otp_code" class="form-label">Enter OTP</label>
-    <input type="text" id="otp_code" class="form-control" formControlName="otp_code" maxlength="6"
-      placeholder="Enter 6-digit OTP"
-      [ngClass]="{'is-invalid': verifyForm.get('otp_code')?.invalid && verifyForm.get('otp_code')?.touched}" />
-    <small class="text-muted mt-1 d-block">
-      This OTP is valid for 15 minutes.
-    </small>
-    <small class="text-danger mt-1 d-block">
+<div class="d-flex flex-column align-items-center justify-content-center">
+  <h2>Email Verification</h2>
+  <form [formGroup]="verifyForm" (ngSubmit)="verifyOtp()" class="w-100 px-3" style="max-width: 400px;">
+    <div class="mb-3">
+      <label for="otp_code" class="form-label">Enter OTP</label>
+      <input id="otp_code" type="text" class="form-control" formControlName="otp_code" maxlength="6" [ngClass]="{
+          'is-invalid': verifyForm.get('otp_code')?.invalid && verifyForm.get('otp_code')?.touched
+        }" />
+      <div *ngIf="verifyForm.get('otp_code')?.invalid && verifyForm.get('otp_code')?.touched" class="invalid-feedback">
+        Please enter a valid 6-digit code.
+      </div>
+    </div>
+
+    <div class="mb-2 text-muted">
       Time left: {{ formatTime(timeLeft) }}
-    </small> <!-- ✅ Added dynamic time left -->
+    </div>
+
+    <div class="mb-3 text-center">
+      <button type="button" class="btn btn-link p-0" (click)="onResend()" [disabled]="resendCooldown > 0">
+        {{ resendCooldown > 0 ? 'Resend OTP (' + resendCooldown + 's)' : 'Resend OTP' }}
+      </button>
+    </div>
+
     <button type="submit" class="btn btn-primary w-100" [disabled]="verifyForm.invalid || loading">
-      Verify OTP
+      {{ loading ? 'Verifying…' : 'Verify OTP' }}
     </button>
 
     <div *ngIf="errorMessage" class="alert alert-danger mt-3">
       {{ errorMessage }}
     </div>
-  </div>
-</form>
+  </form>
+</div>

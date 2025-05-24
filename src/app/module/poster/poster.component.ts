@@ -100,6 +100,8 @@ interface data {
 export class PosterComponent implements OnInit {
   postDetailsDefault: PostDetails | undefined;
   postDetails: PostDetails | undefined;
+  isNotFound = false;
+  isUnpublished = false;
   imgParam: string;
   isDeleted: boolean | undefined;
   dataProccessed: boolean | undefined;
@@ -251,6 +253,7 @@ export class PosterComponent implements OnInit {
 
     // --- 2) BROWSER: reuse TransferState + RxJS load & render pipeline ---
     if (this.isBrowser) {
+      this.isNotFound = this.isUnpublished = false;
       this.detectInAppBrowser();
       await this.seoService.initSEO();
       // hydrate from TransferState if present
@@ -262,45 +265,42 @@ export class PosterComponent implements OnInit {
 
       this.route.paramMap
         .pipe(
-          tap((params) => {
-            this.imgParam = params.get('img')!;
+          tap(() => {
             this.postStatus = 'loading';
+            this.isNotFound = this.isUnpublished = false;
           }),
           switchMap((params) => {
             const id = params.get('img')!;
-            if (
-              this.postDetailsDefault &&
-              !this.postDetailsDefault.deleted &&
-              this.postDetailsDefault.published
-            ) {
-              return of(this.postDetailsDefault);
-            }
-            return this.PS.getPostById(id);
+            return this.PS.getPostById(id).pipe(
+              catchError((err) => {
+                if (err.status === 404) {
+                  this.isNotFound = true;
+                }
+                // swallow so UI can react
+                return of(null);
+              })
+            );
           }),
           tap((post) => {
+            if (!post) return; // keep flags from catchError
             this.postDetailsDefault = post;
-            this.isDeleted = post.deleted;
-            this.postStatus = post.deleted
-              ? 'This image has been deleted'
-              : !post.published
-              ? 'This image is not published'
-              : 'loading';
-
-            if (!post.deleted && post.published) {
+            if (post.deleted) {
+              this.postStatus = post.msg || 'This image has been deleted';
+            } else if (!post.published) {
+              this.isUnpublished = true;
+              this.postStatus = 'This image is not yet published';
+            } else {
+              // normal path
+              this.postStatus = 'loading';
               this.changeMetadataDynamically();
               this.setupThumbnail();
             }
           }),
           switchMap((post) => {
-            if (!this.isInAppBrowser && !post.deleted && post.published) {
-              return this.getPostById();
+            if (this.isNotFound || this.isUnpublished || this.isInAppBrowser) {
+              return of(null);
             }
-            return of(null);
-          }),
-          catchError((err) => {
-            console.error('Error fetching post:', err);
-            this.postStatus = 'Error loading image';
-            return of(null);
+            return this.getPostById(); // your further processing
           })
         )
         .subscribe();

@@ -1,14 +1,44 @@
-import {AfterViewInit,Component,OnInit,Inject,PLATFORM_ID,ElementRef,ViewChild,Renderer2,ChangeDetectorRef} from '@angular/core';
+// src/app/images/image-list/image-list.component.ts
+
+import {
+  Component,
+  OnInit,
+  AfterViewInit,
+  OnDestroy,
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  ElementRef,
+  Inject,
+  PLATFORM_ID,
+  ViewChild,
+  Renderer2,
+} from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import {
   ActivatedRoute,
-  NavigationExtras,
   Router,
   UrlTree,
+  NavigationExtras,
 } from '@angular/router';
-import { PostDetails } from 'src/app/common/interfaces/image-element';
-import { AuthService } from 'src/app/common/services/auth.service';
-import { PostDetailService } from 'src/app/common/services/post-detail.service';
+import { Observable, Subject } from 'rxjs';
+import {
+  map,
+  switchMap,
+  tap,
+  takeUntil,
+  shareReplay,
+  startWith,
+  withLatestFrom,
+} from 'rxjs/operators';
+
+import { AuthenticationService } from 'src/app/common/services/authentication.service';
+import { RoleService } from 'src/app/common/services/role.service';
+import { NewPostDetailService } from 'src/app/common/services/new-post-detail.service';
+import {
+  MinimalPostListResponse,
+  Pagination,
+  PostDetails,
+} from 'src/app/graphql/types/post-detail.types';
 import { environment } from 'src/environments/environment';
 
 declare const Masonry: any;
@@ -17,109 +47,136 @@ declare const Masonry: any;
   selector: 'app-image-list',
   templateUrl: './image-list.component.html',
   styleUrls: ['./image-list.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ImageListComponent implements OnInit, AfterViewInit {
-  posts: PostDetails[] = [];
-  currentPage: number = 1;
-  limit: number = 12;
-  search: string = '';
-  sortBy: string = 'created_at';
-  order: string = 'desc';
-  pagination: any = { totalPosts: 0, currentPage: 1, totalPages: 0 };
-  isBrowser: boolean;
-  private masonryInstance: any;
-  imgUrl = environment.MasterApi + '/thumb-images/';
-  isUserAdmin: boolean = false;
+export class ImageListComponent implements OnInit, AfterViewInit, OnDestroy {
+  @ViewChild('masonryGrid', { static: true }) masonryGridRef!: ElementRef;
 
-  @ViewChild('masonryGrid', { static: false }) masonryGridRef!: ElementRef;
+  public isBrowser: boolean;
+  public search = '';
+  public sortBy: 'created_at' | 'title' = 'created_at';
+  public order: 'asc' | 'desc' = 'desc';
+  public limit = 12;
+  public imgUrl = `${environment.MasterApi}/thumb-images/`;
+
+  // exposed to template
+  posts$!: Observable<Partial<PostDetails>[]>;
+  pagination$!: Observable<Pagination>;
+  loading$!: Observable<boolean>;
+  isAdmin$!: Observable<boolean>;
+
+  private destroy$ = new Subject<void>();
+  private masonryInstance!: any;
+
+  // drive everything from URL
+  public currentPage = 1; // ← new
+  public pageSizes = [12, 24, 48]; // optional preset page-size buttons
+
+  // drive everything from URL
+  private params$ = this.route.queryParams.pipe(
+    map((p) => ({
+      page: +p['page'] || 1,
+      limit: +p['limit'] || this.limit,
+      search: p['search'] || this.search,
+      sortBy: p['sortBy'] || this.sortBy,
+      order: p['order'] || this.order,
+    })),
+    tap((p) => {
+      // keep imperative props in sync so ngModel still works
+      this.currentPage = p.page; // ← set here
+      this.search = p.search;
+      this.sortBy = p.sortBy as any;
+      this.order = p.order as any;
+      this.limit = p.limit;
+    }),
+    takeUntil(this.destroy$)
+  );
 
   constructor(
-    private PS: PostDetailService,
     private route: ActivatedRoute,
     private router: Router,
-    private authService: AuthService,
+    private postSvc: NewPostDetailService,
+    private authSvc: AuthenticationService,
+    private roleSvc: RoleService,
     @Inject(PLATFORM_ID) private platformId: Object,
     private cdr: ChangeDetectorRef,
     private renderer: Renderer2
   ) {
-    this.isBrowser = isPlatformBrowser(this.platformId);
+    this.isBrowser = isPlatformBrowser(platformId);
   }
 
-  async ngOnInit(): Promise<void> {
-    this.isUserAdmin = this.authService.hasRole(['admin', 'master']); 
-    this.route.queryParams.subscribe(async (params) => {
-      this.currentPage = +params['page'] || 1;
-      this.limit = +params['limit'] || this.limit;
-      this.search = params['search'] || this.search;
-      this.sortBy = params['sortBy'] || this.sortBy;
-      this.order = params['order'] || this.order;
-      await this.getAllPosts();
-    });
+  ngOnInit(): void {
+    // 1) Admin flag for “Edit” button
+    this.isAdmin$ = this.authSvc.user$.pipe(
+      switchMap((u) =>
+        u
+          ? this.roleSvc
+              .getRoleById(u.role_id)
+              .pipe(
+                map((r) =>
+                  ['owner', 'administrator'].includes(
+                    r?.code.toLowerCase() ?? ''
+                  )
+                )
+              )
+          : [false]
+      ),
+      takeUntil(this.destroy$)
+    );
+
+    // 2) Fetch posts once per param-change, share result
+    const sharedData$ = this.params$.pipe(
+      switchMap(({ page, limit, search, sortBy, order }) =>
+        this.postSvc.getMinimalPosts({ page, limit, search, sortBy, order })
+      ),
+      tap(() => this.cdr.markForCheck()),
+      shareReplay({ bufferSize: 1, refCount: true })
+    );
+
+    // derive the three observables without re-triggering HTTP
+    this.posts$ = sharedData$.pipe(
+      map((resp: MinimalPostListResponse) => resp.posts.map((p) => ({ ...p })))
+    );
+    this.pagination$ = sharedData$.pipe(map((resp) => resp.pagination));
+    // loading: true on params change, false once sharedData$ emits
+    this.loading$ = this.params$.pipe(
+      switchMap(() =>
+        sharedData$.pipe(
+          map(() => false),
+          startWith(true)
+        )
+      )
+    );
   }
 
   ngAfterViewInit(): void {
     if (this.isBrowser) {
-      this.initializeMasonry();
-      window.addEventListener('resize', () => {
-        if (this.masonryInstance) {
-          this.masonryInstance.layout();
-        }
-      });
+      this.initMasonry();
+      window.addEventListener('resize', this.initMasonry);
     }
   }
 
-  private initializeMasonry(): void {
-    if (this.masonryGridRef && this.isBrowser) {
-      console.log('Initializing Masonry:', this.masonryGridRef.nativeElement);
-      this.masonryInstance = new Masonry(this.masonryGridRef.nativeElement, {
-        itemSelector: '.masonry-box',
-        percentPosition: true,
-      });
-    }
-  }
-
-  private async getAllPosts(): Promise<void> {
-    this.PS.getAllPosts({
-      page: this.currentPage,
-      limit: this.limit,
-      search: this.search,
-      sortBy: this.sortBy,
-      order: this.order,
-      published: undefined,
-      info_show: undefined
-    }).subscribe((response) => {
-      this.posts = response.posts;
-      this.pagination = response.pagination;
-
-      // Trigger DOM updates and Masonry initialization
-      this.cdr.detectChanges();
-      if (this.masonryInstance) {
-        this.masonryInstance.reloadItems();
-        this.masonryInstance.layout();
-      } else {
-        this.initializeMasonry();
-      }
-    });
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+    window.removeEventListener('resize', this.initMasonry);
   }
 
   changePage(page: number): void {
-    if (this.currentPage != page) {
+    if (page !== this.currentPage) {
       this.currentPage = page;
-      this.updateUrlParams();
-      this.getAllPosts();
+      this.updateUrl();
     }
   }
 
-  changePageSize(newLimit: number): void {
-    if (this.limit != newLimit) {
-      this.limit = newLimit;
+  changePageSize(limit: number): void {
+    if (limit !== this.limit) {
+      this.limit = limit;
       this.currentPage = 1;
-      this.updateUrlParams();
-      this.getAllPosts();
+      this.updateUrl();
     }
   }
-
-  updateUrlParams(): void {
+  private updateUrl(): void {
     this.router.navigate([], {
       relativeTo: this.route,
       queryParams: {
@@ -133,28 +190,28 @@ export class ImageListComponent implements OnInit, AfterViewInit {
     });
   }
 
-  onSvgLoad(event: Event): void {
-    const imageElement = event.target as HTMLImageElement;
-    const parentDiv = imageElement.parentElement; // Get the div with opacity-0
+  navigateToEdit(postId: string): void {
+    const extras: NavigationExtras = { queryParams: { img: postId } };
+    const tree: UrlTree = this.router.createUrlTree(
+      ['/images/generate'],
+      extras
+    );
+    window.open(this.router.serializeUrl(tree), '_blank');
+  }
 
-    if (parentDiv) {
-      this.renderer.removeClass(parentDiv, 'opacity-0'); // Remove class
-    }
-
-    if (this.masonryInstance && this.isBrowser) {
-      window.dispatchEvent(new Event('resize'));
+  onSvgLoad(e: Event): void {
+    const parent = (e.target as HTMLElement).parentElement;
+    if (parent) {
+      this.renderer.removeClass(parent, 'opacity-0');
+      this.initMasonry();
+      console.log('SVG loaded');
     }
   }
 
-  navigateToEdit(postId: string): void {
-    const navigationExtras: NavigationExtras = {
-      queryParams: { img: postId },
-    };
-    const urlTree: UrlTree = this.router.createUrlTree(
-      ['/images/generate'],
-      navigationExtras
-    );
-    const url: string = this.router.serializeUrl(urlTree);
-    window.open(url, '_blank');
+  private initMasonry(): void {
+    this.masonryInstance = new Masonry(this.masonryGridRef.nativeElement, {
+      itemSelector: '.masonry-box',
+      percentPosition: true,
+    });
   }
 }

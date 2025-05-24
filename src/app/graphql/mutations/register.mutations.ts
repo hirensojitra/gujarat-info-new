@@ -16,6 +16,33 @@ export const REGISTER_USER = gql`
 
 export const VERIFY_EMAIL_OTP = gql`
   mutation VerifyEmailOtp($token: String!, $otp_code: String!) {
-    verifyEmailOtp(token: $token, otp_code: $otp_code)
+    verifyEmailOtp(token: $token, otp_code: $otp_code) {
+      token
+      user {
+        id
+        firstname
+        middlename
+        lastname
+        email
+        email_verified
+        username
+        role_id
+        birthday
+        gender
+        marital_status
+        language {
+          id
+          name
+        }
+      }
+    }
+  }
+`;
+export const RESEND_EMAIL_OTP = gql`
+  mutation ResendEmailOtp($email: String!) {
+    resendEmailOtp(email: $email) {
+      email_otp_token
+      otp_expires_at
+    }
   }
 `;
