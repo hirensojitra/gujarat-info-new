@@ -29,6 +29,7 @@ export class AuthenticationComponent {
   ) {}
 
   handleGoogleCredential(response: any): void {
+    console.log('Google response:', response);
     try {
       const idToken = response.credential;
       this.isLoading = true;
