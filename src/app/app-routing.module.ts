@@ -67,6 +67,13 @@ const routes: Routes = [
           ),
       },
       {
+        path: 'authentication-action',
+        loadChildren: () =>
+          import('./module/authentication-action/authentication-action.module').then(
+            (m) => m.AuthenticationActionModule
+          ),
+      },
+      {
         path: 'about-us',
         children: [
           {

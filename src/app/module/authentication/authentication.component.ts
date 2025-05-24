@@ -4,6 +4,7 @@ import { catchError, of } from 'rxjs';
 import { ToastService } from 'src/app/common/services/toast.service';
 import { RegisterService } from 'src/app/common/services/register.service';
 import { AuthenticationService } from 'src/app/common/services/authentication.service';
+import { CookieService } from 'ngx-cookie-service';
 
 declare const google: any;
 
@@ -25,7 +26,8 @@ export class AuthenticationComponent {
     private router: Router,
     private registerService: RegisterService,
     private authService: AuthenticationService,
-    private toast: ToastService
+    private toast: ToastService,
+    private cookie: CookieService
   ) {}
 
   handleGoogleCredential(response: any): void {
@@ -38,7 +40,7 @@ export class AuthenticationComponent {
       this.registerService
         .googleAuth(idToken)
         .pipe(
-          catchError(err => {
+          catchError((err) => {
             this.isLoading = false;
             this.toast.show(err.message || 'Google auth failed', {
               class: 'bg-danger',
@@ -46,20 +48,32 @@ export class AuthenticationComponent {
             return of(null);
           })
         )
-        .subscribe(result => {
+        .subscribe((result) => {
           this.isLoading = false;
           if (!result) return;
+          if (result.token) {
+            const common = {
+              path: '/',
+              secure: window.location.protocol === 'https:',
+              sameSite: 'Lax',
+            } as const;
 
-          if (result.requiresPassword) {
-            this.googleUserId = result.userId;
-            this.showSetPassword = true;
-          } else if (result.token) {
             this.authService.setToken(result.token);
-            this.router.navigate(['/home']);
-          } else {
-            this.toast.show('Unexpected response from Google auth', {
-              class: 'bg-warning',
-            });
+
+            // route off to the new component
+            result.requiresPassword
+              ? () => {
+                  this.cookie.set(
+                    'requires_password',
+                    String(result.requiresPassword),
+                    common
+                  );
+                  this.cookie.set('google_user_id', result.userId, common);
+                  this.router.navigate(['/set-password']);
+                }
+              : () => {
+                  this.router.navigate(['/home']);
+                };
           }
         });
     } catch (e) {
@@ -72,21 +86,34 @@ export class AuthenticationComponent {
   }
 
   registerWithGoogle() {
-  this.isLoading = true;
-  google.accounts.id.initialize({
-    client_id: '650577899089-abc77o2gr9jldf1sfi6rcg6gptcdq4p8.apps.googleusercontent.com',
-    callback: resp => this.handleGoogleCredential(resp),
-  });
+    this.isLoading = true;
+    google.accounts.id.initialize({
+      client_id:
+        '650577899089-abc77o2gr9jldf1sfi6rcg6gptcdq4p8.apps.googleusercontent.com',
+      callback: (resp) => this.handleGoogleCredential(resp),
+    });
 
-  // Force FedCM & listen for prompt diagnostics:
-  google.accounts.id.prompt((notif: any) => {
-    console.group('GSI Prompt Notification');
-    console.log('NotDisplayed?', notif.isNotDisplayed(), notif.getNotDisplayedReason());
-    console.log('Skipped?',     notif.isSkippedMoment(), notif.getSkippedReason());
-    console.log('Dismissed?',   notif.isDismissedMoment(), notif.getDismissedReason());
-    console.groupEnd();
-  });
-}
+    // Force FedCM & listen for prompt diagnostics:
+    google.accounts.id.prompt((notif: any) => {
+      console.group('GSI Prompt Notification');
+      console.log(
+        'NotDisplayed?',
+        notif.isNotDisplayed(),
+        notif.getNotDisplayedReason()
+      );
+      console.log(
+        'Skipped?',
+        notif.isSkippedMoment(),
+        notif.getSkippedReason()
+      );
+      console.log(
+        'Dismissed?',
+        notif.isDismissedMoment(),
+        notif.getDismissedReason()
+      );
+      console.groupEnd();
+    });
+  }
 
   onSubmitNewPassword(): void {
     if (this.newPassword !== this.confirmPassword) {
@@ -98,7 +125,7 @@ export class AuthenticationComponent {
     this.registerService
       .setPassword(this.googleUserId, this.newPassword)
       .pipe(
-        catchError(err => {
+        catchError((err) => {
           this.isLoading = false;
           this.toast.show(err.message || 'Could not set password', {
             class: 'bg-danger',
@@ -106,7 +133,7 @@ export class AuthenticationComponent {
           return of(null);
         })
       )
-      .subscribe(res => {
+      .subscribe((res) => {
         this.isLoading = false;
         if (res?.token) {
           this.authService.setToken(res.token);

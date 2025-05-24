@@ -10,6 +10,8 @@
     "/auth/register",
     "/auth/reset-password",
     "/authentication",
+    "/authentication-action",
+    "/authentication-action/set-password",
     "/authentication/forgot-password",
     "/authentication/login",
     "/authentication/register",
