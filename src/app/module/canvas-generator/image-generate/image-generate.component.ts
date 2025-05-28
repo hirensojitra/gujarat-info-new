@@ -2,11 +2,8 @@ import {
   AfterViewInit,
   Component,
   ElementRef,
-  HostListener,
   OnInit,
-  QueryList,
   ViewChild,
-  ViewChildren,
 } from '@angular/core';
 import {
   AbstractControl,
@@ -252,7 +249,6 @@ export class ImageGenerateComponent implements OnInit, AfterViewInit {
       { id: 'control', title: 'Control', icon: 'fa-x-control', active: false },
     ],
   };
-
   fontFamilies: { family: string; variables: string[]; names: string[] }[] = [];
   postDetailsForm: FormGroup | undefined = undefined;
   imgParam: any;
@@ -349,7 +345,6 @@ export class ImageGenerateComponent implements OnInit, AfterViewInit {
     private router: Router,
     private http: HttpClient,
     private toastService: ToastService,
-    private TS: ThumbImagesService,
     private postThumb: PostThumbService
   ) {
     this.route.queryParams.subscribe((params) => {
@@ -576,7 +571,63 @@ export class ImageGenerateComponent implements OnInit, AfterViewInit {
         }
       );
     }
+    this.selectedElement = this.postDetails.data.length;
   }
+  /**
+   * Clone the data item at `index` and insert the duplicate before it.
+   */
+  duplicateData(index: number) {
+    // 1) Get the source group and its plain value
+    const srcGroup = this.dataArray.at(index) as FormGroup;
+    const srcValue = srcGroup.getRawValue() as Data;
+
+    // 2) Deep‐clone so we don't keep object references
+    const clonedValue: Data = JSON.parse(JSON.stringify(srcValue));
+
+    // 3) Build a new FormGroup for the clone, matching its type
+    let newGroup: FormGroup;
+    let newControls: ShapeControl[];
+    if (clonedValue.rect) {
+      newGroup = this.createRectFormGroup(clonedValue);
+      newControls = this.controlValues.rect;
+    } else if (clonedValue.circle) {
+      newGroup = this.createCircleFormGroup(clonedValue);
+      newControls = this.controlValues.circle;
+    } else if (clonedValue.ellipse) {
+      newGroup = this.createEllipseFormGroup(clonedValue);
+      newControls = this.controlValues.ellipse;
+    } else if (clonedValue.line) {
+      newGroup = this.createLineFormGroup(clonedValue);
+      newControls = this.controlValues.line;
+    } else if (clonedValue.text) {
+      newGroup = this.createTextFormGroup(clonedValue);
+      newControls = this.controlValues.text;
+    } else if (clonedValue.image) {
+      newGroup = this.createImageFormGroup(clonedValue);
+      newControls = this.controlValues.image;
+    } else {
+      console.error('duplicateData: unrecognized data type at index', index);
+      return;
+    }
+
+    // 4) Insert both the form‐group and its control‐set before the original
+    this.dataArray.insert(index, newGroup);
+    this.controlSet.splice(index, 0, newControls);
+
+    // 5) Trigger your rebuild logic
+    this.postDetails = this.postDetailsForm!.value;
+    this.positionShuffle = true;
+    this.rebuild(this.postDetails.data);
+    this.positionShuffle = false;
+
+    // 6) Notify the user
+    const title = newGroup.get('title')?.value || 'Item';
+    this.toastService.show(`"${title}" duplicated successfully.`, {
+      class: 'bg-success',
+    });
+    this.selectedElement = this.postDetails.data.length;
+  }
+
   private checkDependency(controlName: string, index: number): string[] {
     const hasDependency: string[] = [];
     this.dataArray.controls.some((control, i) => {
@@ -1552,12 +1603,11 @@ export class ImageGenerateComponent implements OnInit, AfterViewInit {
     return `${environment.MasterApi}/thumb-images/${postId}`;
   }
   private uploadThumbnail(postId: string, blob: Blob): void {
-    const formData = new FormData();
-    formData.append('thumbnail', blob, `${postId}.jpg`);
-    formData.append('postId', postId);
-    console.log('Uploading thumbnail:', formData.get('thumbnail'));
-    console.log('Thumbnail URL:', this.getThumbnailUrl(postId));
-    this.TS.uploadThumbnail(postId, formData).subscribe({
+    const file = new File([blob], `${postId}.jpg`, {
+      type: blob.type || 'image/jpeg',
+    });
+
+    this.postThumb.uploadPostThumbs(postId, [file]).subscribe({
       next: () => {
         this.toastService.show('Thumbnail saved successfully', {
           class: 'bg-success text-light',
@@ -1573,13 +1623,12 @@ export class ImageGenerateComponent implements OnInit, AfterViewInit {
       },
     });
   }
+
   uploadThumbnailsBulk(items: [string, Blob][]): void {
     const calls: Observable<any>[] = items.map(([postId, blob]) => {
-      const file = new File(
-        [blob],
-        `${postId}.jpg`,
-        { type: blob.type || 'image/jpeg' }
-      );
+      const file = new File([blob], `${postId}.jpg`, {
+        type: blob.type || 'image/jpeg',
+      });
       return this.postThumb.uploadPostThumbs(postId, [file]);
     });
 

@@ -1,6 +1,6 @@
 export const environment = {
   production: true,
-  // MasterApi: "http://localhost:5000/api/v1",
+  // MasterApi: 'http://localhost:5000/api/v1',
   MasterApi: 'https://api.postnew.in/api/v1',
   // GraphApi: 'http://localhost:5000',
   GraphApi: "https://api.postnew.in",

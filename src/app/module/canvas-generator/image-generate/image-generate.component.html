@@ -1116,8 +1116,14 @@
                                             <i class="fa fa-arrows"></i>
                                         </div>
                                         <button *ngIf="item.title"
-                                            class="btn btn-flat outline-0 min-h-100-p w-100 p-2 d-flex align-items-center"
+                                            class="btn btn-flat outline-0 min-h-100-p flex-grow-1 p-2 d-flex align-items-center text-truncate"
                                             (click)="selectedElement=i">{{ item.title }}</button>
+                                        <button type="button" class="btn btn-sm border-0 btn-outline-danger mx-1 my-auto"
+                                            (click)="removeData(i)" remSize [wPX]="30" [hPX]="30">
+                                            <i class="fa fa-trash"></i></button>
+                                        <button type="button" class="btn btn-sm border-0 btn-outline-secondary mx-1 my-auto"
+                                            (click)="duplicateData(i)" remSize [wPX]="30" [hPX]="30">
+                                            <i class="fa fa-copy"></i></button>
                                     </div>
                                 </div>
                             </div>

@@ -1,10 +1,17 @@
 // user-layout.component.ts
 
-import { Component, OnInit, OnDestroy } from '@angular/core';
-import { Observable, Subscription } from 'rxjs';
+import {
+  Component,
+  OnInit,
+  OnDestroy,
+  AfterViewInit,
+  ChangeDetectorRef,
+} from '@angular/core';
+import { Observable, of, Subscription } from 'rxjs';
 import { map, switchMap, take } from 'rxjs/operators';
 import { MenuItem } from 'src/app/common/component/admin-header/admin-header.component';
 import { AuthenticationService } from 'src/app/common/services/authentication.service';
+import { LoaderService } from 'src/app/common/services/loader';
 import { RoleService } from 'src/app/common/services/role.service';
 import { UserPublicInfo } from 'src/app/graphql/types/login.types';
 
@@ -13,32 +20,33 @@ import { UserPublicInfo } from 'src/app/graphql/types/login.types';
   templateUrl: './user-layout.component.html',
   styleUrl: './user-layout.component.scss',
 })
-export class UserLayoutComponent implements OnInit, OnDestroy {
+export class UserLayoutComponent implements OnInit, OnDestroy, AfterViewInit {
   filteredMenu$!: Observable<MenuItem[]>;
   menuLoaded = false;
   private sub = new Subscription();
   constructor(
     private authService: AuthenticationService,
-    private roleService: RoleService
+    private roleService: RoleService,
+    private cd: ChangeDetectorRef
   ) {}
 
   ngOnInit() {
     this.filteredMenu$ = this.authService.user$.pipe(
-      switchMap((u: UserPublicInfo | null) => {
-        if (!u) {
-          return [[] as MenuItem[]]; // no user → empty menu
-        }
-        return this.roleService.getRoleById(u.role_id).pipe(
-          map((roleInfo) => {
-            const code = roleInfo?.code?.toLowerCase() || '';
-            return this.filterMenuByRole(code);
-          })
-        );
-      })
+      switchMap((u) =>
+        u
+          ? this.roleService
+              .getRoleById(u.role_id)
+              .pipe(map((r) => this.filterMenuByRole(r.code.toLowerCase())))
+          : of([] as MenuItem[])
+      )
     );
+  }
+  ngAfterViewInit(): void {
     this.sub.add(
       this.filteredMenu$.pipe(take(1)).subscribe(() => {
         this.menuLoaded = true;
+        // force Angular to run another change-detection pass
+        this.cd.detectChanges();
       })
     );
   }
