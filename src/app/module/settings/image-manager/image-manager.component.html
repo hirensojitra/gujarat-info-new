@@ -31,7 +31,6 @@
 
       <input type="text" class="form-control mb-3" placeholder="Search..." [(ngModel)]="search"
         (ngModelChange)="loadFolders()" />
-
       <ul class="list-group">
         <li *ngFor="let folder of folders"
             class="list-group-item list-group-item-action d-flex justify-content-between align-items-center"

@@ -33,7 +33,6 @@ export class ResetPasswordComponent implements OnInit, AfterViewInit {
   }
   async ngAfterViewInit(): Promise<void> {
     if (this.platformService.isBrowser()) {
-      debugger;
       this.token = this.route.snapshot.queryParams['token'];
       this.email = this.route.snapshot.queryParams['email'];
 

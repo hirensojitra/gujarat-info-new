@@ -1,0 +1,228 @@
+<div class="position-absolute inset-0 flex flex-col h-100 w-100 overflow-hidden"
+     (dragover)="onDragOver($event)"
+     (drop)="onDrop($event)">
+  <mat-drawer-container class="flex-1 h-100 p-3 me-0" (backdropClick)="onBackdropClicked()">
+    <!-- SIDE DRAWER (Details Pane) -->
+    <mat-drawer #matDrawer [mode]="drawerMode" position="end" [opened]="false"
+                [disableClose]="false">
+      <div class="flex justify-end p-2">
+        <button mat-icon-button (click)="closeDrawer()">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+      <router-outlet></router-outlet>
+    </mat-drawer>
+
+    <!-- MAIN CONTENT -->
+    <mat-drawer-content class="p-4 overflow-auto d-flex flex-column flex-grow-1">
+      <!-- HEADER: Title + Upload button + (optional) Create Folder -->
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+          <h2 class="text-3xl font-bold text-gray-800">File Manager</h2>
+          <p class="text-sm text-gray-500 mt-1">
+            {{ folders.length }} folders, {{ images.length }} files
+          </p>
+        </div>
+        <div class="d-flex gap-2">
+          <!-- Create Folder (optional) -->
+          <button mat-flat-button color="accent" (click)="createFolder()">
+            <mat-icon class="mr-1">create_new_folder</mat-icon>
+            New Folder
+          </button>
+
+          <!-- Upload File -->
+          <button mat-flat-button color="primary" (click)="onUploadClick()">
+            <mat-icon class="mr-1">upload</mat-icon>
+            Upload file
+          </button>
+          <!-- HIDDEN file input for upload -->
+          <input
+            type="file"
+            #fileInput
+            hidden
+            multiple
+            (change)="onFileSelected($event)"
+          />
+        </div>
+      </div>
+
+      <!-- CONTENT: Folders + Files -->
+      <div class="flex-grow-1 position-relative">
+        <div class="position-absolute h-100 w-100 overflow-y-auto">
+          <!-- --- FOLDER LIST --- -->
+          <div *ngIf="folders.length" class="mb-4">
+            <h3 class="text-lg font-semibold text-gray-700 mb-3">Folders</h3>
+            <div class="container-fluid">
+              <div class="d-flex flex-wrap gap-3" [@fadeInStagger]>
+                <div
+                  *ngFor="let folder of folders; trackBy: trackById"
+                  class="position-relative"
+                  remSize
+                  [wPX]="140"
+                  [minWPX]="140"
+                >
+                  <!-- FOLDER CARD -->
+                  <button
+                    (click)="onFolderSelect(folder); false"
+                    class="btn rounded-4 ratio ratio-1x1 shadow"
+                    [matTooltip]="folder.name"
+                    [ngClass]="{
+                      'btn-dark pe-none': selectedFolder?.id === folder.id,
+                      'btn-outline-secondary': selectedFolder?.id !== folder.id
+                    }"
+                  >
+                    <div class="p-4 d-flex flex-column align-items-center">
+                      <mat-icon class="h1 text-gray-400">folder</mat-icon>
+                      <div
+                        class="mt-4 text-sm font-medium text-gray-800 text-truncate"
+                      >
+                        {{ folder.name }}
+                      </div>
+                    </div>
+                  </button>
+
+                  <!-- DELETE ICON (trash) in top-right corner of the folder card -->
+                  <div
+                    class="position-absolute top-0 end-0 mt-2 me-2"
+                    style="z-index: 5;"
+                  >
+                    <button
+                      mat-icon-button
+                      color="warn"
+                      (click)="deleteFolder(folder, $event)"
+                      matTooltip="Delete Folder"
+                    >
+                      <mat-icon>delete_outline</mat-icon>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- --- FILE (IMAGE) LIST --- -->
+          <div *ngIf="images.length">
+            <h3 class="text-lg font-semibold text-gray-700 mb-3">Files</h3>
+            <div class="container-fluid">
+              <div class="d-flex flex-wrap gap-3" [@fadeInStagger]>
+                <div
+                  *ngFor="let image of images; trackBy: trackById"
+                  remSize
+                  [wPX]="140"
+                  [minWPX]="140"
+                >
+                  <div class="card border shadow-sm position-relative">
+                    <!-- IMAGE THUMBNAIL: clicking it opens details drawer -->
+                    <div
+                      class="ratio ratio-1x1 bg-light bg-opacity-25"
+                      role="img"
+                      [ngStyle]="{
+                        'background-image':
+                          'url(' +
+                          apiUrl +
+                          '/user-img/uploads/' +
+                          image.id +
+                          '?thumb=small)',
+                        'background-size': 'contain',
+                        'background-position': 'center',
+                        'background-repeat': 'no-repeat'
+                      }"
+                      [attr.aria-label]="image.metadata || 'Image'"
+                      (click)="onFileDetails(image)"
+                    ></div>
+
+                    <!-- CARD BODY: filename + dropdown menu -->
+                    <div class="card-body p-2">
+                      <div class="d-flex justify-content-between align-items-center">
+                        <!-- Short truncated filename or URL -->
+                        <small
+                          class="text-truncate"
+                          style="max-width: 75%;"
+                          [matTooltip]="image.image_url"
+                          >{{ image.image_url || 'Unnamed' }}</small
+                        >
+
+                        <!-- ACTION DROPDOWN -->
+                        <div class="dropdown">
+                          <button
+                            class="btn btn-sm"
+                            type="button"
+                            data-bs-toggle="dropdown"
+                          >
+                            <i class="fa fa-ellipsis-v"></i>
+                          </button>
+                          <ul class="dropdown-menu dropdown-menu-end">
+                            <!-- Copy URL -->
+                            <li>
+                              <button
+                                class="dropdown-item"
+                                (click)="copyHrefToClipboard($event, image)"
+                              >
+                                <i class="fa fa-copy me-2"></i>Copy URL
+                              </button>
+                            </li>
+
+                            <!-- Refresh / Replace File -->
+                            <li>
+                              <button
+                                class="dropdown-item"
+                                (click)="refreshFile(image)"
+                              >
+                                <i class="fa fa-refresh me-2"></i>Refresh
+                              </button>
+                            </li>
+
+                            <!-- Delete File -->
+                            <li>
+                              <button
+                                class="dropdown-item text-danger"
+                                (click)="deleteFile(image)"
+                              >
+                                <i class="fa fa-trash me-2"></i>Delete
+                              </button>
+                            </li>
+
+                            <!-- Open in New Tab -->
+                            <li>
+                              <a
+                                class="dropdown-item"
+                                [href]="apiUrl + '/user-img/uploads/' + image.id"
+                                target="_blank"
+                              >
+                                <i class="fa fa-eye me-2"></i>Open
+                              </a>
+                            </li>
+
+                            <!-- Download -->
+                            <li>
+                              <a
+                                class="dropdown-item"
+                                [href]="apiUrl + '/user-img/uploads/' + image.id"
+                                download
+                              >
+                                <i class="fa fa-download me-2"></i>Download
+                              </a>
+                            </li>
+                          </ul>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- --- NO CONTENT FALLBACK --- -->
+          <div
+            *ngIf="!folders.length && !images.length"
+            class="flex flex-col items-center justify-center mt-20 text-gray-500"
+          >
+            <mat-icon class="text-6xl">folder_open</mat-icon>
+            <p class="mt-2 text-lg">No folders or files available.</p>
+          </div>
+        </div>
+      </div>
+    </mat-drawer-content>
+  </mat-drawer-container>
+</div>

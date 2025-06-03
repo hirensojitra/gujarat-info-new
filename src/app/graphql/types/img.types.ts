@@ -12,6 +12,9 @@ export interface Image {
   folder_id: string;
   image_url: string;
   metadata?: string | null;
+  description?: string;
+  size?: string;
+  created_at?: string;
 }
 
 // ─── GraphQL Response Types ──────────────────────────

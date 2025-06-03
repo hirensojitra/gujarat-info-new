@@ -26,6 +26,18 @@ const routes: Routes = [
         ],
       },
       {
+        path: 'shape-manager',
+        children: [
+          {
+            path: '',
+            loadChildren: () =>
+              import('./module/shape-manager/shape-manager.module').then(
+                (m) => m.ShapeManagerModule
+              ),
+          },
+        ],
+      },
+      {
         path: 'broken-pages',
         children: [
           {
@@ -69,9 +81,9 @@ const routes: Routes = [
       {
         path: 'authentication-action',
         loadChildren: () =>
-          import('./module/authentication-action/authentication-action.module').then(
-            (m) => m.AuthenticationActionModule
-          ),
+          import(
+            './module/authentication-action/authentication-action.module'
+          ).then((m) => m.AuthenticationActionModule),
       },
       {
         path: 'about-us',
@@ -124,8 +136,8 @@ const routes: Routes = [
       {
         path: 'img-upload',
         component: LayoutComponent,
-        data: { roles: ['master'] },
-        canActivate: [AuthGuard, RolesGuard],
+        data: { roles: ['administrator', 'owner'] },
+        canActivate: [NewAuthGuard, RoleGuard],
         children: [
           {
             path: '',
@@ -170,6 +182,8 @@ const routes: Routes = [
       },
       {
         path: 'frame-management',
+        canActivate: [NewAuthGuard, RoleGuard],
+        data: { roles: ['owner','administrator'] },
         children: [
           {
             path: '',
@@ -201,7 +215,34 @@ const routes: Routes = [
               import('./module/admin/admin.module').then((m) => m.AdminModule),
           },
         ],
-      }
+      },
+      {
+        path: 'post-management',
+        canActivate: [NewAuthGuard, RoleGuard],
+        data: { roles: ['owner'] },
+        children: [
+          {
+            path: '',
+            loadChildren: () =>
+              import('./module/post-management/post-management.module').then(
+                (m) => m.PostManagementModule
+              ),
+          },
+        ],
+      },
+      {
+        path: 'file-manager',
+        canActivate: [NewAuthGuard],
+        children: [
+          {
+            path: '',
+            loadChildren: () =>
+              import('./module/file-manager/file-manager.module').then(
+                (m) => m.FileManagerModule
+              ),
+          },
+        ],
+      },
     ],
   },
   {
@@ -209,9 +250,7 @@ const routes: Routes = [
     component: LayoutComponent,
     data: { layout: 'empty-layout' },
     canActivate: [NewAuthGuard],
-    children: [
-
-    ],
+    children: [],
   },
   {
     path: '',
@@ -276,19 +315,6 @@ const routes: Routes = [
             loadChildren: () =>
               import('./module/user-profile/user-profile.module').then(
                 (m) => m.UserProfileModule
-              ),
-          },
-        ],
-      },
-      {
-        path: 'post-management',
-        canActivate: [NewAuthGuard],
-        children: [
-          {
-            path: '',
-            loadChildren: () =>
-              import('./module/post-management/post-management.module').then(
-                (m) => m.PostManagementModule
               ),
           },
         ],

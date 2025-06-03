@@ -30,8 +30,7 @@ export class AuthComponent implements AfterViewInit {
     }
   }
   handleGoogleCredential(response: any): void {
-    const idToken = response.credential; // The idToken received from Google
-    console.log('Google idToken:', idToken); // Debugging
+    const idToken = response.credential;
 
     // Send the idToken to the backend
     this.http

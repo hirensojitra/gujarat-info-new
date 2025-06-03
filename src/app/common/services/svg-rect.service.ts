@@ -52,7 +52,6 @@ export class SvgRectService {
         if (strokeAlignment !== undefined) {
             this.renderer.setAttribute(rect, 'stroke-alignment', strokeAlignment);
         }
-
         this.renderer.setAttribute(rect, 'data-type', 'rect');
         return rect;
     }

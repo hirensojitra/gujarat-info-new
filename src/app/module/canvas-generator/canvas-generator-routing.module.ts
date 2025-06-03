@@ -16,6 +16,7 @@ const routes: Routes = [{
     { path: '', pathMatch: 'full', redirectTo: 'list' },
     { path: 'list', loadChildren: () => import('./image-list/image-list.module').then(m => m.ImageListModule) },
     { path: 'generate', data: { roles: ['owner', 'administrator'] }, canActivate: [NewAuthGuard, RoleGuard], loadChildren: () => import('./image-generate/image-generate.module').then(m => m.ImageGenerateModule) },
+    { path: 'post-generate', data: { roles: ['owner', 'administrator'] }, canActivate: [NewAuthGuard, RoleGuard], loadChildren: () => import('./post-generate/post-generate.module').then(m => m.PostGenerateModule) },
     { path: 'deleted', data: { roles: ['owner', 'administrator'] }, canActivate: [NewAuthGuard, RoleGuard], loadChildren: () => import('./image-deleted/image-deleted.module').then(m => m.ImageDeletedModule) },
     { path: 'uploaded-images', data: { roles: ['owner', 'administrator'] }, canActivate: [NewAuthGuard, RoleGuard], loadChildren: () => import('./image-data/image-data.module').then(m => m.ImageDataModule) },
   ]

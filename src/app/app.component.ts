@@ -52,16 +52,32 @@ export class AppComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit(): void {
-    this.router.events.subscribe((event) => {
-      if (event instanceof NavigationStart) {
+  this.router.events.subscribe((event) => {
+    if (event instanceof NavigationStart) {
+      const url = event.url;
+      const isFileManagerSubRoute = url.startsWith('/file-manager/folders/') || url.startsWith('/file-manager/details/');
+
+      if (!isFileManagerSubRoute) {
         this.loaderService.show(0);
-      } else if (
-        event instanceof NavigationEnd ||
-        event instanceof NavigationError
-      ) {
+      }
+    } else if (
+      event instanceof NavigationEnd ||
+      event instanceof NavigationError
+    ) {
+      let url: string | undefined;
+      if (event instanceof NavigationEnd) {
+        url = event.urlAfterRedirects;
+      } else if (event instanceof NavigationError) {
+        url = (event as any).url;
+      }
+      const isFileManagerSubRoute = url?.startsWith('/file-manager/folders/') || url?.startsWith('/file-manager/details/');
+
+      if (!isFileManagerSubRoute) {
         this.loaderService.hide();
       }
-      this.cdr.detectChanges();
-    });
-  }
+    }
+    this.cdr.detectChanges();
+  });
+}
+
 }

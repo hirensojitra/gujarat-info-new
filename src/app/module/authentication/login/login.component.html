@@ -5,27 +5,14 @@
 <form [formGroup]="loginForm" (ngSubmit)="login()">
   <div class="form-group mb-3">
     <label for="login_id" class="form-label">Email / Username</label>
-    <input
-      type="text"
-      id="login_id"
-      class="form-control"
-      formControlName="login_id"
-      placeholder="Enter your email or username"
-      [ngClass]="{ 'is-invalid': loginForm.get('login_id')?.invalid && loginForm.get('login_id')?.touched }"
-    />
+    <input type="text" id="login_id" class="form-control" formControlName="login_id"
+      placeholder="Enter your email or username" />
   </div>
-
   <div class="form-group mb-3">
     <label for="pass_key" class="form-label">Password</label>
-    <input
-      type="password"
-      id="pass_key"
-      class="form-control"
-      formControlName="pass_key"
-      placeholder="Enter your password"
-    />
+    <input type="password" id="pass_key" class="form-control" formControlName="pass_key"
+      placeholder="Enter your password" />
   </div>
-
   <button type="submit" class="btn btn-dark w-100 mb-3" [disabled]="loginForm.invalid || loading">
     {{ loading ? 'Signing in...' : 'Sign In' }}
   </button>

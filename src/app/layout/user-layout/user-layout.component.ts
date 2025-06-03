@@ -72,47 +72,6 @@ export class UserLayoutComponent implements OnInit, OnDestroy, AfterViewInit {
       ],
     },
     {
-      label: 'Dashboard',
-      icon: 'fa-tachometer',
-      link: '/dashboard',
-      role: ['owner'],
-    },
-    {
-      label: 'SVG',
-      icon: 'fa-users',
-      link: '/img-upload',
-      role: ['master'],
-    },
-    {
-      label: 'Admin',
-      icon: 'fa-users',
-      link: '/admin',
-      role: ['administrator'],
-      subItems: [
-        {
-          label: 'Users',
-          link: '/admin/users',
-        },
-      ],
-    },
-    {
-      label: 'User Profile',
-      icon: 'fa-user',
-      link: '/user-profile',
-    },
-    {
-      label: 'Images',
-      icon: 'fa-image',
-      link: '/img',
-      role: ['admin'],
-    },
-    {
-      label: 'User Images',
-      icon: 'fa-image',
-      link: '/user-img',
-      role: ['master'],
-    },
-    {
       label: 'Canvas Generator',
       icon: 'fa-image',
       link: '/images',
@@ -127,9 +86,34 @@ export class UserLayoutComponent implements OnInit, OnDestroy, AfterViewInit {
           role: ['owner', 'administrator'],
         },
         {
+          label: 'Post Generate',
+          link: '/images/post-generate',
+          role: ['owner', 'administrator'],
+        },
+        {
           label: 'Image Deleted',
           link: '/images/deleted',
           role: ['owner', 'administrator'],
+        },
+      ],
+    },
+    {
+      label: 'Post Management',
+      icon: 'fa-file',
+      link: '/post-management',
+      role: ['administrator', 'owner'],
+      subItems: [
+        {
+          label: 'Post Category',
+          link: '/post-management/post-category',
+          role: ['administrator', 'owner'],
+          icon: 'fa-folder',
+        },
+        {
+          label: 'Post Subcategory',
+          link: '/post-management/post-subcategory',
+          role: ['administrator', 'owner'],
+          icon: 'fa-folder-open',
         },
       ],
     },

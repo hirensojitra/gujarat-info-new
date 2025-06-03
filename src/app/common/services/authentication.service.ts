@@ -4,11 +4,13 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { Router } from '@angular/router';
 import { CookieService } from 'ngx-cookie-service';
 import { UserPublicInfo } from 'src/app/graphql/types/login.types';
+import { environment } from 'src/environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class AuthenticationService {
   private userSubject = new BehaviorSubject<UserPublicInfo | null>(this.loadUser());
   public user$ = this.userSubject.asObservable();
+  private apiUrl = environment.MasterApi + '/auth/avatar/';
   constructor(private cookie: CookieService, private router: Router) {}
   private loadUser(): UserPublicInfo | null {
     const json = this.cookie.get('user');
@@ -21,6 +23,8 @@ export class AuthenticationService {
 
   /** Get the current user value */
   public getUser(): UserPublicInfo | null {
+    const u = this.userSubject.value;
+    if (u) u.image = u.image || `${this.apiUrl}${u.id}`;
     return this.userSubject.value;
   }
 

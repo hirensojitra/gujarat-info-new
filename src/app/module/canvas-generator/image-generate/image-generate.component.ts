@@ -447,7 +447,6 @@ export class ImageGenerateComponent implements OnInit, AfterViewInit {
   getSelected(d: { index: number }) {
     this.selectedElement = d.index;
   }
-
   getPostById(postId: any): void {
     this.PS.getPostById(postId).subscribe(
       (post) => {
@@ -1152,6 +1151,7 @@ export class ImageGenerateComponent implements OnInit, AfterViewInit {
     });
   }
   getActiveControl(rectIndex: number, controlId: string): boolean {
+    console.log("setupDependency:");
     const controls = this.controlSet[rectIndex];
     const activeControl = controls.find(
       (control) => control.id === controlId && control.active

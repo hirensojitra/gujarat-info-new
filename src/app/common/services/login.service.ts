@@ -26,7 +26,7 @@ export class LoginService {
       .mutate({
         mutation: LOGIN_USER,
         variables: { input },
-        fetchPolicy: 'no-cache', // Always fresh login request
+        fetchPolicy: 'network-only' // Always fresh login request
       })
       .pipe(
         map((result: any) => result.data.login),

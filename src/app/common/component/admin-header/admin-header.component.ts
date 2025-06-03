@@ -4,7 +4,6 @@ import { environment } from 'src/environments/environment';
 import { BreadcrumbService } from '../../services/breadcrumb';
 import { ABSService } from 'projects/angular-bootstrap-sidebar/src/public-api';
 import { AuthenticationService } from '../../services/authentication.service';
-import { RoleService } from '../../services/role.service';
 import { UserPublicInfo } from 'src/app/graphql/types/login.types';
 export interface MenuItem {
   label: string;
@@ -54,10 +53,11 @@ export class AdminHeaderComponent implements OnInit, OnDestroy {
     // Track current user for display
     this.subscriptions.add(
       this.authService.user$.subscribe((u) => {
+        console.log('Current User:', u);
         this.user = u;
         this.userFullName = u ? `${u.firstname} ${u.lastname}` : 'User Name';
         this.imageUrl = u.image
-          ? u.image
+          ? u.image+'?thumb=true'
           : u.firstname && u.lastname
           ? `https://dummyimage.com/300x300/F4F4F4/000000&text=${
               this.userFullName || 'USER'

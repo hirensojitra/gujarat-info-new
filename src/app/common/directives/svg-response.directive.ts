@@ -5,6 +5,7 @@ import { SvgRectService } from '../services/svg-rect.service';
 import { SvgCircleService } from '../services/svg-circle.service';
 import { SvgEllipseService } from '../services/svg-ellipse.service';
 import { PlatformService } from '../services/platform.service';
+import { SvgLineService } from '../services/svg-line.service';
 
 interface Data {
   title: string;
@@ -53,6 +54,7 @@ export class SvgResponseDirective implements OnChanges, AfterViewInit {
     private Rect: SvgRectService,
     private Circle: SvgCircleService,
     private Ellipse: SvgEllipseService,
+    private Line: SvgLineService,
     private platformService: PlatformService
   ) {
     this.apiData = {};
@@ -330,19 +332,9 @@ export class SvgResponseDirective implements OnChanges, AfterViewInit {
   createLine(d: Data, i: number) {
     if (this.el.nativeElement && d.line) {
       const svg = this.el.nativeElement;
-      const line = this.renderer.createElement('line', 'http://www.w3.org/2000/svg');
-      const { x1, y1, x2, y2, stroke, strokeWidth, opacity, rotate } = d.line; // Extract line properties
-      this.renderer.setAttribute(line, 'x1', String(x1));
-      this.renderer.setAttribute(line, 'y1', String(y1));
-      this.renderer.setAttribute(line, 'x2', String(x2));
-      this.renderer.setAttribute(line, 'y2', String(y2));
-      this.renderer.setAttribute(line, 'stroke', stroke);
-      this.renderer.setAttribute(line, 'stroke-width', String(strokeWidth));
-      this.renderer.setAttribute(line, 'opacity', String(opacity));
-      this.renderer.setAttribute(line, 'transform', `rotate(${rotate} ${x1} ${y1})`); // Apply rotate
-      this.renderer.setAttribute(line, 'data-type', 'line');
-      this.renderer.appendChild(svg, line);
-      return line;
+      const l = this.Line.createLine(d.line)
+      this.renderer.appendChild(svg, l);
+      return l;
     }
     return null;
   }

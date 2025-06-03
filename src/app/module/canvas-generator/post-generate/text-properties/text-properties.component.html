@@ -1,0 +1,387 @@
+<div [formGroup]="formData">
+
+    <div class="form-group col-12" [class.d-none]="!getActiveControl(index,'edit')">
+        <label for="text" class="form-label">Type</label>
+        <select id="type" class="form-select" formControlName="type">
+            <option value="select">Select</option>
+            <option value="text">Text</option>
+            <option value="date">Date</option>
+        </select>
+    </div>
+    <div class="form-group col-12" [class.d-none]="!getActiveControl(index,'edit')" *ngIf="formGroupData.get('api')">
+        <label for="text" class="form-label">API</label>
+        <div class="input-group mb-3">
+            <input type="text" class="form-control" formControlName="api">
+            <span class="input-group-text btn btn-success" (click)="syncData(formGroupData)"><i
+                    class="fa fa-refresh me-2"></i>Fetch</span>
+        </div>
+    </div>
+    <div class="form-group col-12" [class.d-none]="!getActiveControl(index,'edit')" *ngIf="formGroupData.get('lang')">
+        <label for="text" class="form-label">Language</label>
+        <select class="form-select" formControlName="lang">
+            <option value="en">English</option>
+            <option value="gu">Gujarati</option>
+        </select>
+    </div>
+    <div class="form-group col-12" [class.d-none]="!getActiveControl(index,'edit')"
+        *ngIf="formGroupData.get('dependency')">
+        <label for="text" class="form-label">Dependency</label>
+        <select class="form-select" formControlName="dependency">
+            <option value="none" selected>None</option>
+            <!-- <option *ngFor="let option of dependencyList(formGroupData.get('controlName')?.value)" [value]="option.value">{{ option.title }}</option> -->
+            <option *ngFor="let option of (selectData | dependencyList:formGroupData.get('controlName')?.value)"
+                [value]="option.value">{{ option.title }}</option>
+        </select>
+    </div>
+    <div [ngSwitch]="formGroupData.get('type')?.value">
+        <div *ngSwitchCase="'select'" class="form-group col-12" [class.d-none]="!getActiveControl(index,'edit')">
+            <label for="text" class="form-label">Input Text</label>
+            <select id="type" class="form-select" formControlName="text" *ngIf="formGroupData.get('controlName')">
+                <option [value]="formGroupData.get('title')?.value" disabled selected>
+                    {{formGroupData.get('title')?.value}}</option>
+                <option *ngFor="let option of apiData[formGroupData.get('controlName')?.value]" [value]="option.id">
+                    {{
+                    formGroupData.get('lang')?.value=='en'?option.name:option.gu_name
+                    }}</option>
+            </select>
+        </div>
+        <div *ngSwitchCase="'text'" class="form-group col-12" [class.d-none]="!getActiveControl(index,'edit')">
+            <label for="text" class="form-label">Input Text</label>
+            <textarea id="text" class="form-control" formControlName="text"></textarea>
+        </div>
+        <div *ngSwitchCase="'date'" class="form-group col-12" [class.d-none]="!getActiveControl(index,'edit')">
+            <label for="text" class="form-label">Date</label>
+            <input type="date" id="text" class="form-control" formControlName="text">
+        </div>
+        <div *ngSwitchDefault class="form-group col-12" [class.d-none]="!getActiveControl(index,'edit')">
+            <label for="text" class="form-label">Input Text</label>
+            <textarea id="text" class="form-control" formControlName="text"></textarea>
+        </div>
+    </div>
+    <input type="hidden" formControlName="x">
+    <input type="hidden" formControlName="controlName" *ngIf="formGroupData.get('controlName')">
+    <input type="hidden" formControlName="y">
+    <div class="row g-3">
+        <ng-container *ngIf="formGroupData.get('fontFamily') as FF">
+            <div class="form-group col-12 col-md-6" [class.d-none]="!getActiveControl(index,'typography')">
+                <select class="form-select" id="fontFamilySelect" [value]="formGroupData.get('fontFamily')?.value"
+                    (change)="updateFontWeights(FF)" formControlName="fontFamily">
+                    <option value="">Select a font family</option>
+                    <option *ngFor="let font of fontFamilies" [value]="font.family">{{ font.family }}
+                    </option>
+                </select>
+            </div>
+            <div class="form-group col-12 col-md-6"
+                [class.d-none]="!getActiveControl(index,'typography')" *ngIf="getWeight(FF).length">
+                <div class="btn-group w-100" role="group" data-toggle="buttons" *ngIf="getWeight(FF).length">
+                    <ng-container *ngFor="let weight of getWeight(FF)">
+                        <input type="radio" class="btn-check" [id]="'fw-' + weight + index" formControlName="fw"
+                            [value]="weight" autocomplete="off">
+                        <label class="btn btn-outline-dark" [for]="'fw-' + weight + index">
+                            <span [style]="'font-weight:'+weight">A</span>
+                        </label>
+                    </ng-container>
+                </div>
+            </div>
+            <input type="hidden" formControlName="fw" [value]="400" *ngIf="!getWeight(FF).length">
+        </ng-container>
+        <div class="form-group col-12" [class.d-none]="!getActiveControl(index, 'typography')">
+            <!-- Label for clarity -->
+            <!-- Flex container: number input on the left, slider on the right -->
+            <div class="d-flex align-items-center">
+                <label class="form-label text-nowrap me-3" remSize [wPX]="120"> Font Size</label>
+                <!-- Range slider, bound to the same control -->
+                <input type="range" class="form-range flex-grow-1" formControlName="fs" [min]="formGroupData.root.get('w')?.value / 90| number:
+                        '1.2-2'" [max]="formGroupData.root.get('w')?.value / 2| number:
+                        '1.2-2'" step="0.5" />
+                <!-- Numeric input, bound to the same control as the range -->
+                <input type="number" class="form-control ms-3" style="width: 75px;"
+                    [min]="formGroupData.root.get('w')?.value / 90" [max]="formGroupData.root.get('w')?.value / 2| number:
+                        '1.2-2'" step="0.5" [value]="formGroupData.get('fs')?.value" (input)="
+            formGroupData.get('fs')?.setValue($any($event.target).valueAsNumber)
+          " />
+            </div>
+        </div>
+        <!-- LETTER SPACING: number + range, synced to formControlName="letterSpacing" -->
+        <div class="form-group col-12" [class.d-none]="!getActiveControl(index, 'typography')">
+            <div class="d-flex align-items-center">
+                <label class="form-label text-nowrap me-3" remSize [wPX]="120">Letter Spacing</label>
+                <!-- Range slider -->
+                <input type="range" class="form-range flex-grow-1" [min]="-10" [max]="10" step="0.1"
+                    [value]="formGroupData.get('letterSpacing')?.value"
+                    (input)="formGroupData.get('letterSpacing')?.setValue($any($event.target).valueAsNumber)" />
+                <!-- Numeric input -->
+                <input type="number" class="form-control ms-3" style="width: 75px;" [min]="0" [max]="10" step="0.1"
+                    [value]="formGroupData.get('letterSpacing')?.value"
+                    (input)="formGroupData.get('letterSpacing')?.setValue($any($event.target).valueAsNumber)" />
+            </div>
+        </div>
+
+        <!-- LINE HEIGHT: number + range, synced to formControlName="lineHeight" -->
+        <div class="form-group col-12" [class.d-none]="!getActiveControl(index, 'typography')">
+            <div class="d-flex align-items-center">
+                <label class="form-label text-nowrap me-3" remSize [wPX]="120">Line Height</label>
+                <!-- Range slider -->
+                <input type="range" class="form-range flex-grow-1" [min]="-5" [max]="5" step="0.1"
+                    [value]="formGroupData.get('lineHeight')?.value"
+                    (input)="formGroupData.get('lineHeight')?.setValue($any($event.target).valueAsNumber)" />
+                <!-- Numeric input -->
+                <input type="number" class="form-control ms-3" style="width: 75px;" [min]="0" [max]="5" step="0.1"
+                    [value]="formGroupData.get('lineHeight')?.value"
+                    (input)="formGroupData.get('lineHeight')?.setValue($any($event.target).valueAsNumber)" />
+            </div>
+        </div>
+
+        <div formGroupName="fontStyle" class="form-group col-3" [class.d-none]="!getActiveControl(index,'typography')">
+            <div class="btn-group btn-group-toggle w-100" data-toggle="buttons">
+                <label class="btn btn-outline-dark"
+                    [class.active]="formGroupData.get('fontStyle')?.get('italic')?.value">
+                    <input type="checkbox" autocomplete="off" formControlName="italic" class="d-none"><i
+                        class="fa fa-italic"></i>
+                </label>
+                <label class="btn btn-outline-dark"
+                    [class.active]="formGroupData.get('fontStyle')?.get('underline')?.value">
+                    <input type="checkbox" autocomplete="off" formControlName="underline" class="d-none"><i
+                        class="fa fa-underline"></i>
+                </label>
+            </div>
+        </div>
+        <div class="col-9">
+            <div class="row g-3">
+                <div class="form-group col-6" [class.d-none]="!getActiveControl(index,'typography')">
+                    <div class="btn-group w-100" role="group" data-toggle="buttons">
+                        <input type="radio" class="btn-check" [id]="'radioLeft'+index" formControlName="textAnchor"
+                            [value]="'start'" autocomplete="off">
+                        <label class="btn btn-outline-dark" [for]="'radioLeft'+index">
+                            <i class="fa fa-align-left"></i>
+                        </label>
+                        <input type="radio" class="btn-check" [id]="'radioCenter'+index" formControlName="textAnchor"
+                            [value]="'middle'" autocomplete="off">
+                        <label class="btn btn-outline-dark" [for]="'radioCenter'+index">
+                            <i class="fa fa-align-center"></i>
+                        </label>
+                        <input type="radio" class="btn-check" [id]="'radioRight'+index" formControlName="textAnchor"
+                            [value]="'end'" autocomplete="off">
+                        <label class="btn btn-outline-dark" [for]="'radioRight'+index">
+                            <i class="fa fa-align-right"></i>
+                        </label>
+                    </div>
+                </div>
+                <div class="form-group col-6" [class.d-none]="!getActiveControl(index,'typography')">
+                    <div class="btn-group w-100" role="group" data-toggle="buttons">
+                        <input type="radio" class="btn-check" [id]="'alignmentBaselineSrart'+index"
+                            formControlName="alignmentBaseline" [value]="'hanging'" autocomplete="off">
+                        <label class="btn btn-outline-dark" [for]="'alignmentBaselineSrart'+index">
+                            <i class="fa fa-arrow-up"></i>
+                        </label>
+                        <input type="radio" class="btn-check" [id]="'alignmentBaselineMiddle'+index"
+                            formControlName="alignmentBaseline" [value]="'middle'" autocomplete="off">
+                        <label class="btn btn-outline-dark" [for]="'alignmentBaselineMiddle'+index">
+                            <i class="fa fa-arrows-v"></i>
+                        </label>
+                        <input type="radio" class="btn-check" [id]="'alignmentBaselineEnd'+index"
+                            formControlName="alignmentBaseline" [value]="'baseline'" autocomplete="off">
+                        <label class="btn btn-outline-dark" [for]="'alignmentBaselineEnd'+index">
+                            <i class="fa fa-arrow-down"></i>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12" [class.d-none]="!getActiveControl(index,'typography')">
+            <div class="form-group mb-3">
+                <color-picker [colorSet]="colorSet" [getActiveControl]="getActiveControl"
+                    formControlName="color"></color-picker>
+            </div>
+        </div>
+    </div>
+
+    <div class="form-group col-6" [class.d-none]="!getActiveControl(index,'rotate')">
+        <label for="rotate" class="form-label">Rotate</label>
+        <input type="text" id="rotate" class="form-control" formControlName="rotate">
+    </div>
+
+    <ng-container formGroupName="textShadow">
+        <div [class.d-none]="!getActiveControl(index,'textShadow')">
+            <div class="col-12">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" value="" formControlName="enable"
+                        [id]="'text-shadow-'+index">
+                    <label class="form-check-label h6 m-0" [for]="'text-shadow-'+index">Text Shadow</label>
+                </div>
+            </div>
+            <ng-container *ngIf="formGroupData.get('textShadow')?.get('enable')?.value">
+                <div class="form-group col-12 col-sm-6">
+                    <label for="shadowColor" class="form-label">Shadow
+                        Color</label>
+                    <div class="btn-group rounded-0 d-block" role="group" data-toggle="buttons">
+                        <ng-container *ngFor="let color of colorSet">
+                            <input type="radio" class="btn-check" [id]="'shadow-color-' + color+index"
+                                formControlName="color" [value]="color" autocomplete="off">
+                            <label class="btn btn-outline-white p-3 rounded-0 w-50-px h-50-px border-2 rounded-3"
+                                [for]="'shadow-color-' + color+index"
+                                [class.border-secondary]="formGroupData.get('textShadow')?.get('color')?.value == color">
+                                <!-- Display a color sample -->
+                                <span [style]="'background-color: '+color+'; display: block;'"
+                                    class="position-absolute w-75 h-75 top-50 start-50 rounded-3 translate-middle"
+                                    [class]="getColorClass(formGroupData.get('textShadow')?.get('color')?.value == color)"></span>
+                            </label>
+                        </ng-container>
+                        <div class="spinner-border" role="status" *ngIf="!colorSet.length">
+                            <span class="sr-only">Loading...</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-sm-6 d-flex align-items-end">
+                    <input type="text" class="form-control"
+                        [value]="formGroupData.get('textShadow')?.get('color')?.value"
+                        (input)="updateColor($event, formGroupData.get('textShadow')?.get('color'))">
+                </div>
+                <div class="form-group col-12">
+                    <label for="shadowBlur" class="form-label">Shadow
+                        Blur</label>
+                    <input type="range" class="form-range" [attr.min]="0" [attr.max]="formGroupData.get('fs')?.value"
+                        step="0.1" formControlName="blur">
+
+                </div>
+                <div class="form-group col-12">
+                    <label for="shadowOffsetX" class="form-label">Shadow
+                        Offset X</label>
+                    <input type="range" class="form-range" [attr.min]="-formGroupData.get('fs')?.value"
+                        [attr.max]="formGroupData.get('fs')?.value" step="0.1" formControlName="offsetX">
+                </div>
+                <div class="form-group col-12">
+                    <label for="shadowOffsetY" class="form-label">Shadow
+                        Offset Y</label>
+                    <input type="range" class="form-range" [attr.min]="-formGroupData.get('fs')?.value"
+                        [attr.max]="formGroupData.get('fs')?.value" step="0.1" formControlName="offsetY">
+                </div>
+            </ng-container>
+        </div>
+    </ng-container>
+    <div class="form-group col-12" [class.d-none]="!getActiveControl(index,'textBackground')">
+        <label for="backgroundColor" class="form-label">Background
+            Color</label>
+        <div class="btn-group rounded-0 d-block" role="group" data-toggle="buttons">
+            <ng-container *ngFor="let borderColorOption of colorSet">
+                <input type="radio" class="btn-check" [id]="'backgroundColor-group-' + borderColorOption + index"
+                    formControlName="backgroundColor" [value]="borderColorOption" autocomplete="off">
+                <label class="btn btn-outline-white p-3 rounded-0 w-50-px h-50-px border-2 rounded-3"
+                    [for]="'backgroundColor-group-' + borderColorOption + index"
+                    [class.border-secondary]="formGroupData.get('backgroundColor')?.value == borderColorOption">
+                    <span [style]="'background-color: '+borderColorOption+'; display: block;'"
+                        class="position-absolute w-75 h-75 top-50 start-50 rounded-3 translate-middle"
+                        [class]="getColorClass(formGroupData.get('backgroundColor')?.value == borderColorOption)"></span>
+                </label>
+            </ng-container>
+            <div class="spinner-border" role="status" *ngIf="!colorSet.length">
+                <span class="sr-only">Loading...</span>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 d-flex align-items-end" [class.d-none]="!getActiveControl(index,'textBackground')">
+        <input type="text" class="form-control" [value]="formGroupData.get('backgroundColor')?.value"
+            (input)="updateColor($event, formGroupData.get('backgroundColor'))">
+    </div>
+    <ng-container formGroupName="textEffects">
+        <div class="col-12">
+            <div class="form-check" [class.d-none]="!getActiveControl(index,'textEffects')">
+                <input class="form-check-input" type="checkbox" value="" formControlName="enable"
+                    [id]="'text-effect-'+index">
+                <label class="form-check-label h5 m-0" [for]="'text-effect-'+index">Text
+                    Effects</label>
+                {{formGroupData.get('textEffects')?.get('enable')?.value}}
+            </div>
+            <ng-container *ngIf="formGroupData.get('textEffects')?.get('enable')?.value">
+                <div class="p-2" [class.d-none]="!getActiveControl(index,'textEffects')">
+                    <ng-container formGroupName="gradient">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="" formControlName="enable"
+                                [id]="'text-gradient-'+index">
+                            <label class="form-check-label h5 m-0" [for]="'text-gradient-'+index">Gradient</label>
+                        </div>
+                        <div class="p-2"
+                            *ngIf="formGroupData.get('textEffects')?.get('gradient')?.get('enable')?.value">
+
+                            <div class="row">
+                                <div class="form-group col-6">
+                                    <label for="gradientStartColor" class="form-label">Gradient
+                                        Start
+                                        Color</label>
+                                    <input type="text" id="gradientStartColor" class="form-control"
+                                        formControlName="startColor">
+                                </div>
+                                <div class="form-group col-6">
+                                    <label for="gradientEndColor" class="form-label">Gradient
+                                        End
+                                        Color</label>
+                                    <input type="text" id="gradientEndColor" class="form-control"
+                                        formControlName="endColor">
+                                </div>
+                                <div class="form-group col-6">
+                                    <label for="gradientDirection" class="form-label">Gradient
+                                        Direction</label>
+                                    <input type="text" id="gradientDirection" class="form-control"
+                                        formControlName="direction">
+                                </div>
+                            </div>
+                        </div>
+                    </ng-container>
+                    <ng-container formGroupName="outline">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="" formControlName="enable"
+                                [id]="'text-outline-'+index">
+                            <label class="form-check-label h5 m-0" [for]="'text-outline-'+index">Outline</label>
+                        </div>
+                        <div class="p-2" *ngIf="formGroupData.get('textEffects')?.get('outline')?.get('enable')?.value">
+                            <div class="row">
+                                <div class="form-group col-6">
+                                    <label for="outlineColor" class="form-label">Outline
+                                        Color</label>
+                                    <input type="text" id="outlineColor" class="form-control" formControlName="color">
+                                </div>
+                                <div class="form-group col-6">
+                                    <label for="outlineWidth" class="form-label">Outline
+                                        Width</label>
+                                    <input type="text" id="outlineWidth" class="form-control" formControlName="width">
+                                </div>
+                            </div>
+                        </div>
+                    </ng-container>
+                    <ng-container formGroupName="glow">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="" formControlName="enable"
+                                [id]="'text-glow-'+index">
+                            <label class="form-check-label h5 m-0" [for]="'text-glow-'+index">Glow</label>
+                        </div>
+                        <div class="p-2" *ngIf="formGroupData.get('textEffects')?.get('glow')?.get('enable')?.value">
+                            <div class="row">
+                                <div class="form-group col-6">
+                                    <label for="glowColor" class="form-label">Glow
+                                        Color</label>
+                                    <input type="text" id="glowColor" class="form-control" formControlName="color">
+                                </div>
+                                <div class="form-group col-6">
+                                    <label for="glowBlur" class="form-label">Glow
+                                        Blur</label>
+                                    <input type="number" id="glowBlur" class="form-control" formControlName="blur">
+                                </div>
+                            </div>
+                        </div>
+                    </ng-container>
+                </div>
+            </ng-container>
+        </div>
+    </ng-container>
+    <div class="form-group col-6" [class.d-none]="!getActiveControl(index,'textTransformation')">
+        <label for="textTransformation" class="form-label">Text
+            Transformation</label>
+        <input type="text" id="textTransformation" class="form-control" formControlName="textTransformation">
+    </div>
+    <div class="form-group col-6" [class.d-none]="!getActiveControl(index,'opacity')">
+        <label [for]="'opacity'+index" class="form-label">Opacity</label>
+        <input type="range" [id]="'opacity'+index" class="form-range" min="0" max="1" step="0.01"
+            formControlName="opacity">
+    </div>
+
+</div>

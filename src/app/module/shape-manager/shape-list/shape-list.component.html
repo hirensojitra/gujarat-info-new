@@ -1,0 +1,36 @@
+<!-- src/app/shape-manager/shape-list/shape-list.component.html -->
+
+<div class="shape-list-container p-4">
+  <h2>Shape List</h2>
+
+  <div *ngIf="loading" class="text-center my-4">
+    Loading shapes…
+  </div>
+
+  <div *ngIf="error" class="alert alert-danger">
+    {{ error }}
+  </div>
+
+  <div class="shape-grid row row-cols-2 row-cols-md-4 g-3">
+    <div
+      class="col"
+      *ngFor="let shape of shapes$ | async"
+      (click)="toggleSelect(shape)"
+    >
+      <div class="shape-item border rounded position-relative">
+        <svg
+          [attr.viewBox]="shape.viewBox"
+          class="w-100 h-auto d-block"
+          [innerHTML]="shape.rawSvg"
+        ></svg>
+
+        <input
+          type="checkbox"
+          class="position-absolute top-0 end-0 m-2"
+          [checked]="shape.selected"
+          (click)="$event.stopPropagation(); toggleSelect(shape)"
+        />
+      </div>
+    </div>
+  </div>
+</div>

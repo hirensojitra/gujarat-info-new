@@ -15,6 +15,7 @@ export interface RectProperties {
   strokeOpacity?: number;
   strokeWidth?: number;
   strokeAlignment?: 'inside' | 'outside' | 'center';
+  editable?: boolean;
 }
 
 export interface CircleProperties {
@@ -143,6 +144,7 @@ export interface ImageElement {
   placeholder: string;
   svgProperties: SvgProperties;
   rotate: number;
+  editable?: boolean;
 }
 
 export interface PostDetails {
