@@ -466,7 +466,6 @@
                                                     </div>
                                                 </ng-container>
                                                 <ng-container  *ngIf="item.get('text') as textGroup">
-                                                    <pre>{{item.value | json}}</pre>
                                                     <app-text-properties formGroupName="text"
                                                         [formGroupData]="textGroup" [index]="i"
                                                         [controlSet]="controlSet" [colorSet]="colorSet"

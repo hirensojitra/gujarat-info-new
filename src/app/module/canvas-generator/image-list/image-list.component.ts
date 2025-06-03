@@ -193,7 +193,7 @@ export class ImageListComponent implements OnInit, AfterViewInit, OnDestroy {
   navigateToEdit(postId: string): void {
     const extras: NavigationExtras = { queryParams: { img: postId } };
     const tree: UrlTree = this.router.createUrlTree(
-      ['/images/generate'],
+      ['/images/post-generate'],
       extras
     );
     window.open(this.router.serializeUrl(tree), '_blank');
