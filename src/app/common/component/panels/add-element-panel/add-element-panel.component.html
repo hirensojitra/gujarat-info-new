@@ -1,0 +1,100 @@
+<div class="add-element-panel bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg w-80">
+      <div class="panel-header flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Add Elements</h3>
+        <button mat-icon-button (click)="close()">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+
+      <div class="panel-content p-4">
+        <mat-tab-group>
+          <!-- Text Tab -->
+          <mat-tab label="Text">
+            <div class="text-content py-4 space-y-3">
+              <button 
+                *ngFor="let textType of textTypes"
+                mat-button
+                (click)="addText(textType.type)"
+                class="text-button w-full justify-start">
+                <mat-icon class="mr-2">{{ textType.icon }}</mat-icon>
+                <div class="text-left">
+                  <div class="text-sm font-medium">{{ textType.name }}</div>
+                  <div class="text-xs text-gray-500">{{ textType.description }}</div>
+                </div>
+              </button>
+            </div>
+          </mat-tab>
+
+          <!-- Shapes Tab -->
+          <mat-tab label="Shapes">
+            <div class="shapes-content py-4">
+              <div class="shapes-grid grid grid-cols-3 gap-3">
+                <button 
+                  *ngFor="let shape of shapes"
+                  mat-button
+                  (click)="addShape(shape.type)"
+                  class="shape-button aspect-square flex flex-col items-center justify-center p-3 border border-gray-200 dark:border-gray-600 rounded-lg">
+                  <mat-icon class="text-2xl mb-1">{{ shape.icon }}</mat-icon>
+                  <span class="text-xs">{{ shape.name }}</span>
+                </button>
+              </div>
+            </div>
+          </mat-tab>
+
+          <!-- Images Tab -->
+          <mat-tab label="Images">
+            <div class="images-content py-4 space-y-4">
+              <!-- Upload Section -->
+              <div class="upload-section">
+                <div 
+                  class="upload-zone border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-6 text-center cursor-pointer hover:border-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
+                  (click)="triggerFileUpload()"
+                  (dragover)="onDragOver($event)"
+                  (dragleave)="onDragLeave($event)"
+                  (drop)="onDrop($event)">
+                  <input 
+                    #fileInput 
+                    type="file" 
+                    accept="image/*" 
+                    multiple
+                    (change)="onFileSelect($event)"
+                    class="hidden">
+                  
+                  <mat-icon class="text-gray-400 text-4xl mb-2">cloud_upload</mat-icon>
+                  <p class="text-sm text-gray-600 dark:text-gray-300 mb-1">Drop images here or click to browse</p>
+                  <p class="text-xs text-gray-500">PNG, JPG, GIF up to 10MB</p>
+                </div>
+              </div>
+
+              <!-- Stock Images -->
+              <div class="stock-images">
+                <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Stock Images</h4>
+                <div class="stock-grid grid grid-cols-2 gap-2">
+                  <button 
+                    *ngFor="let image of stockImages"
+                    (click)="addStockImage(image.url)"
+                    class="stock-image-button aspect-square bg-gray-100 dark:bg-gray-700 rounded-lg overflow-hidden hover:opacity-80 transition-opacity">
+                    <img [src]="image.url" [alt]="image.name" class="w-full h-full object-cover">
+                  </button>
+                </div>
+              </div>
+            </div>
+          </mat-tab>
+
+          <!-- Icons Tab -->
+          <mat-tab label="Icons">
+            <div class="icons-content py-4">
+              <div class="icons-grid grid grid-cols-4 gap-3">
+                <button 
+                  *ngFor="let icon of icons"
+                  mat-button
+                  (click)="addIcon(icon.name)"
+                  class="icon-button aspect-square flex flex-col items-center justify-center p-2 border border-gray-200 dark:border-gray-600 rounded-lg">
+                  <mat-icon class="text-xl">{{ icon.name }}</mat-icon>
+                </button>
+              </div>
+            </div>
+          </mat-tab>
+        </mat-tab-group>
+      </div>
+    </div>

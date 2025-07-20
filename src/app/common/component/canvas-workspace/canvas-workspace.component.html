@@ -1,0 +1,99 @@
+<div class="canvas-workspace flex-1 flex flex-col bg-gray-50 dark:bg-gray-900">
+    <!-- Canvas Controls -->
+    <div
+        class="canvas-controls flex items-center justify-between p-4 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+        <div class="flex items-center space-x-2">
+            <button mat-icon-button (click)="zoomOut()" matTooltip="Zoom Out" class="zoom-button">
+                <mat-icon>zoom_out</mat-icon>
+            </button>
+
+            <span class="zoom-level text-sm font-medium text-gray-600 dark:text-gray-300 px-2">
+                {{ zoomLevel }}%
+            </span>
+
+            <button mat-icon-button (click)="zoomIn()" matTooltip="Zoom In" class="zoom-button">
+                <mat-icon>zoom_in</mat-icon>
+            </button>
+
+            <button mat-icon-button (click)="resetZoom()" matTooltip="Reset Zoom" class="zoom-button">
+                <mat-icon>center_focus_weak</mat-icon>
+            </button>
+        </div>
+
+        <div class="flex items-center space-x-2">
+            <button mat-icon-button (click)="toggleGrid()" matTooltip="Toggle Grid" [class.active]="showGrid"
+                class="grid-button">
+                <mat-icon>grid_on</mat-icon>
+            </button>
+
+            <button mat-icon-button (click)="toggleRulers()" matTooltip="Toggle Rulers" [class.active]="showRulers"
+                class="rulers-button">
+                <mat-icon>straighten</mat-icon>
+            </button>
+        </div>
+    </div>
+
+    <!-- Canvas Container -->
+    <div class="canvas-container flex-1 flex items-center justify-center p-6 overflow-hidden">
+        <div class="canvas-wrapper relative shadow-lg">
+            <!-- Drop Zone Overlay -->
+            <div class="drop-zone absolute inset-0 bg-blue-500 bg-opacity-20 border-2 border-dashed border-blue-500 rounded-lg flex items-center justify-center z-10"
+                [class.hidden]="!isDragOver" (dragover)="onDragOver($event)" (dragleave)="onDragLeave($event)"
+                (drop)="onDrop($event)">
+                <div class="text-center">
+                    <mat-icon class="text-blue-500 text-4xl mb-2">cloud_upload</mat-icon>
+                    <p class="text-blue-600 font-medium">Drop images here</p>
+                </div>
+                <button mat-button (click)="fileInput.click()" matTooltip="Select Images">
+                    <mat-icon>upload_file</mat-icon>
+                    Select Images
+                </button>
+
+                <!-- Hidden file input -->
+                <input #fileInput type="file" accept="image/*" multiple hidden (change)="onFileSelected($event)" />
+            </div>
+
+            <!-- Canvas Element -->
+            <canvas #canvasElement
+                class="canvas-element border border-gray-300 dark:border-gray-600 rounded-lg bg-white"
+                (dragover)="onDragOver($event)" (dragleave)="onDragLeave($event)" (drop)="onDrop($event)">
+            </canvas>
+
+            <!-- Canvas Overlay for Grid/Rulers -->
+            <div class="canvas-overlay absolute inset-0 pointer-events-none">
+                <!-- Grid -->
+                <div class="grid-overlay absolute inset-0" [class.hidden]="!showGrid"
+                    [style.background-image]="gridPattern">
+                </div>
+
+                <!-- Rulers -->
+                <div class="rulers" [class.hidden]="!showRulers">
+                    <!-- Horizontal Ruler -->
+                    <div
+                        class="ruler-horizontal absolute top-0 left-0 right-0 h-6 bg-gray-200 dark:bg-gray-700 border-b border-gray-300 dark:border-gray-600">
+                        <div class="ruler-marks flex"></div>
+                    </div>
+
+                    <!-- Vertical Ruler -->
+                    <div
+                        class="ruler-vertical absolute top-0 left-0 bottom-0 w-6 bg-gray-200 dark:bg-gray-700 border-r border-gray-300 dark:border-gray-600">
+                        <div class="ruler-marks"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Canvas Status Bar -->
+    <div
+        class="status-bar flex items-center justify-between p-2 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 text-sm text-gray-600 dark:text-gray-300">
+        <div class="flex items-center space-x-4">
+            <span>{{ canvasWidth }} × {{ canvasHeight }}px</span>
+            <span>{{ selectedObjectsCount }} selected</span>
+        </div>
+        <div class="flex items-center space-x-4">
+            <span>{{ layerCount }} layers</span>
+            <span>{{ zoomLevel }}%</span>
+        </div>
+    </div>
+</div>

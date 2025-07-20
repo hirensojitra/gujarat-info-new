@@ -1,0 +1,93 @@
+<div
+  class="resize-panel bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg max-w-md w-full">
+  <div class="panel-header flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
+    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Resize Canvas</h3>
+    <button mat-icon-button (click)="close()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <div class="panel-content p-4 space-y-6">
+    <!-- Preset Selection -->
+    <div class="preset-section">
+      <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Quick Presets</h4>
+      <div class="grid grid-cols-2 gap-2">
+        <button *ngFor="let preset of presets" mat-button [class.mat-primary]="selectedPreset?.name === preset.name"
+          (click)="selectPreset(preset)" class="preset-button text-left">
+          <div class="preset-info">
+            <div class="preset-name text-sm font-medium">{{ preset.name }}</div>
+            <div class="preset-size text-xs text-gray-500">{{ preset.width }}×{{ preset.height }}{{ preset.unit }}</div>
+          </div>
+        </button>
+      </div>
+    </div>
+
+    <!-- Custom Dimensions -->
+    <div class="dimensions-section">
+      <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Custom Dimensions</h4>
+      <div class="flex items-center space-x-4">
+        <mat-form-field appearance="outline" class="flex-1">
+          <mat-label>Width</mat-label>
+          <input matInput type="number" [(ngModel)]="customWidth" (ngModelChange)="onCustomDimensionChange()" min="1">
+        </mat-form-field>
+
+        <mat-icon class="text-gray-400">close</mat-icon>
+
+        <mat-form-field appearance="outline" class="flex-1">
+          <mat-label>Height</mat-label>
+          <input matInput type="number" [(ngModel)]="customHeight" (ngModelChange)="onCustomDimensionChange()" min="1">
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="w-20">
+          <mat-label>Unit</mat-label>
+          <mat-select [(ngModel)]="customUnit" (ngModelChange)="onCustomDimensionChange()">
+            <mat-option value="px">px</mat-option>
+            <mat-option value="mm">mm</mat-option>
+            <mat-option value="in">in</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+    </div>
+
+    <!-- Aspect Ratio -->
+    <div class="aspect-ratio-section">
+      <div class="flex items-center justify-between mb-3">
+        <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300">Aspect Ratio</h4>
+        <button mat-icon-button (click)="toggleLockAspectRatio()" [class.text-blue-500]="lockAspectRatio"
+          matTooltip="Lock Aspect Ratio">
+          <mat-icon>{{ lockAspectRatio ? 'lock' : 'lock_open' }}</mat-icon>
+        </button>
+      </div>
+      <div class="aspect-ratio-chips">
+        <mat-chip-listbox>
+          <mat-chip-option *ngFor="let ratio of aspectRatios" [selected]="currentAspectRatio === ratio.value"
+            (click)="applyAspectRatio(ratio.value)">
+            {{ ratio.label }}
+          </mat-chip-option>
+        </mat-chip-listbox>
+
+      </div>
+    </div>
+
+    <!-- Preview -->
+    <div class="preview-section">
+      <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Preview</h4>
+      <div class="preview-container bg-gray-50 dark:bg-gray-900 p-4 rounded-lg">
+        <div class="preview-canvas mx-auto border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800"
+          [style.width.px]="previewWidth" [style.height.px]="previewHeight">
+          <div class="preview-content h-full flex items-center justify-center text-gray-400 dark:text-gray-500">
+            <mat-icon>article</mat-icon>
+          </div>
+        </div>
+        <div class="preview-info text-center mt-2 text-sm text-gray-600 dark:text-gray-300">
+          {{ currentWidth }}×{{ currentHeight }}{{ currentUnit }}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel-footer flex items-center justify-end space-x-3 p-4 border-t border-gray-200 dark:border-gray-700">
+    <button mat-button (click)="close()">Cancel</button>
+    <button mat-flat-button color="primary" (click)="applyResize()">Apply</button>
+  </div>
+</div>

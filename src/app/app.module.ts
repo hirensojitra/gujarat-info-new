@@ -29,6 +29,7 @@ import { ApolloLink, InMemoryCache } from '@apollo/client/core';
 import { environment } from '../environments/environment';
 import { CookieService } from 'ngx-cookie-service';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
+
 @NgModule({
   declarations: [AppComponent, EmailVerificationComponent],
   imports: [

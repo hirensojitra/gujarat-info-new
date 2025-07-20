@@ -36,7 +36,7 @@ import { SEOService } from 'src/app/common/services/seo.service';
 import { isPlatformBrowser, isPlatformServer } from '@angular/common';
 import { environment } from 'src/environments/environment';
 import { catchError, firstValueFrom, lastValueFrom, of, switchMap, tap } from 'rxjs';
-import { trackService } from 'src/app/common/services/track.service';
+import { TrackService } from 'src/app/common/services/track.service';
 import {
   trigger,
   style,
@@ -177,7 +177,7 @@ export class PosterComponent implements OnInit {
     private seoService: SEOService,
     @Inject(PLATFORM_ID) private platformId: Object,
     private transferState: TransferState,
-    private trackService: trackService,
+    private trackService: TrackService,
     private colorService: ColorService
   ) {
     this.inputTextForm = this.fb.group({

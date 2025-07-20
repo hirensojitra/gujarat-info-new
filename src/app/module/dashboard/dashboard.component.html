@@ -1,1 +1,112 @@
-<button class="btn btn-primay" (click)="resendVerification()" *ngIf="user&&!user.emailverified">Verify Email</button>
+
+    <div class="app-container h-screen flex flex-col" [class.dark]="isDarkTheme">
+      <!-- Header -->
+      <mat-toolbar class="app-header bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 w-100">
+        <div class="flex items-center justify-between w-full">
+          <div class="flex items-center space-x-4">
+            <mat-icon class="text-blue-500">design_services</mat-icon>
+            <span class="text-xl font-semibold text-gray-900 dark:text-white">Poster Generator</span>
+          </div>
+
+          <div class="flex items-center space-x-2">
+            <button 
+              mat-icon-button 
+              (click)="toggleTheme()"
+              matTooltip="Toggle Dark Mode">
+              <mat-icon>{{ isDarkTheme ? 'light_mode' : 'dark_mode' }}</mat-icon>
+            </button>
+
+            <button 
+              mat-button 
+              (click)="exportProject()"
+              matTooltip="Export Project">
+              <mat-icon>download</mat-icon>
+              Export
+            </button>
+
+            <button 
+              mat-button 
+              (click)="saveProject()"
+              matTooltip="Save Project">
+              <mat-icon>save</mat-icon>
+              Save
+            </button>
+          </div>
+        </div>
+      </mat-toolbar>
+
+      <!-- Main Content -->
+      <div class="main-content flex-1 flex min-h-0">
+        <!-- Canvas Workspace -->
+        <app-canvas-workspace class="flex-1"></app-canvas-workspace>
+
+        <!-- Page Sidebar -->
+        <app-page-sidebar></app-page-sidebar>
+      </div>
+
+      <!-- Floating Action Bar -->
+      <app-floating-action-bar
+        (addClick)="showAddElementPanel = true"
+        (resizeClick)="showResizePanel = true"
+        (themeClick)="showThemePanel = true"
+        (backgroundColorClick)="showColorPickerPanel = true"
+        (animateClick)="showAnimationPanel = true"
+        (layersClick)="showLayersPanel = true"
+        (quickReplaceClick)="onQuickReplace()">
+      </app-floating-action-bar>
+
+      <!-- Overlay for panels -->
+      <div 
+        class="panel-overlay fixed inset-0 bg-black bg-opacity-50 z-40"
+        *ngIf="hasAnyPanelOpen"
+        (click)="closeAllPanels()">
+      </div>
+
+      <!-- Panels -->
+      <app-add-element-panel
+        *ngIf="showAddElementPanel"
+        [isOpen]="showAddElementPanel"
+        (closePanel)="showAddElementPanel = false"
+        (elementAdded)="onElementAdded($event)">
+      </app-add-element-panel>
+
+      <app-resize-panel
+        *ngIf="showResizePanel"
+        [isOpen]="showResizePanel"
+        (closePanel)="showResizePanel = false"
+        (resizeCanvas)="onResizeCanvas($event)">
+      </app-resize-panel>
+
+      <app-color-picker-panel
+        *ngIf="showColorPickerPanel"
+        [isOpen]="showColorPickerPanel"
+        (closePanel)="showColorPickerPanel = false"
+        (colorSelected)="onColorSelected($event)">
+      </app-color-picker-panel>
+
+      <app-theme-panel
+        *ngIf="showThemePanel"
+        [isOpen]="showThemePanel"
+        (closePanel)="showThemePanel = false"
+        (themeSelected)="onThemeSelected($event)">
+      </app-theme-panel>
+
+      <app-animation-panel
+        *ngIf="showAnimationPanel"
+        [isOpen]="showAnimationPanel"
+        (closePanel)="showAnimationPanel = false"
+        (animationSelected)="onAnimationSelected($event)">
+      </app-animation-panel>
+
+      <app-layers-panel
+        *ngIf="showLayersPanel"
+        [isOpen]="showLayersPanel"
+        (closePanel)="showLayersPanel = false"
+        (layerSelected)="onLayerSelected($event)"
+        (layerVisibilityChanged)="onLayerVisibilityChanged($event)"
+        (layerLockChanged)="onLayerLockChanged($event)"
+        (layerOpacityChanged)="onLayerOpacityChanged($event)"
+        (layerOrderChanged)="onLayerOrderChanged($event)">
+      </app-layers-panel>
+    </div>
+  

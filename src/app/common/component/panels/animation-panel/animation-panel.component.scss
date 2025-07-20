@@ -1,0 +1,78 @@
+.animation-panel {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1000;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.animation-preview {
+    transition: all 0.2s ease;
+}
+
+.animation-preview:hover {
+    transform: scale(1.05);
+}
+
+.animation-preview.selected {
+    border-color: #2196f3 !important;
+    background-color: rgba(33, 150, 243, 0.1);
+}
+
+.preview-element {
+    transition: all 0.2s ease;
+}
+
+.presets-scroll {
+    scrollbar-width: thin;
+    scrollbar-color: #ccc transparent;
+}
+
+.presets-scroll::-webkit-scrollbar {
+    height: 6px;
+}
+
+.presets-scroll::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+.presets-scroll::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 3px;
+}
+
+.presets-scroll::-webkit-scrollbar-thumb:hover {
+    background: #aaa;
+}
+
+.easing-button {
+    justify-content: flex-start;
+    padding: 8px 12px;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    font-size: 12px;
+}
+
+.dark .easing-button {
+    border-color: #4a5568;
+}
+
+.control-group mat-slider {
+    width: 100%;
+}
+
+@media (max-width: 768px) {
+    .animation-panel {
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        transform: none;
+        width: 100%;
+        max-height: none;
+        border-radius: 0;
+    }
+}

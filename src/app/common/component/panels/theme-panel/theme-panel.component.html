@@ -1,0 +1,111 @@
+<div
+    class="theme-panel bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg w-96">
+    <div class="panel-header flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Themes</h3>
+        <button mat-icon-button (click)="close()">
+            <mat-icon>close</mat-icon>
+        </button>
+    </div>
+
+    <div class="panel-content p-4">
+        <mat-tab-group>
+            <!-- Bold Themes -->
+            <mat-tab label="Bold">
+                <div class="themes-content py-4">
+                    <div class="themes-grid space-y-4">
+                        <div *ngFor="let theme of boldThemes"
+                            class="theme-card border border-gray-200 dark:border-gray-600 rounded-lg p-4 cursor-pointer transition-all hover:shadow-md"
+                            [class.selected]="selectedTheme?.name === theme.name" (click)="selectTheme(theme)">
+
+                            <div class="theme-header flex items-center justify-between mb-3">
+                                <h4 class="text-sm font-medium text-gray-900 dark:text-white">{{ theme.name }}</h4>
+                                <mat-icon *ngIf="selectedTheme?.name === theme.name"
+                                    class="text-blue-500 text-sm">check_circle</mat-icon>
+                            </div>
+
+                            <div class="theme-preview">
+                                <div class="color-swatches flex space-x-2 mb-2">
+                                    <div *ngFor="let color of theme.colors.slice(0, 5)"
+                                        class="color-swatch w-6 h-6 rounded-full border border-gray-300 dark:border-gray-600"
+                                        [style.backgroundColor]="color">
+                                    </div>
+                                </div>
+
+                                <div class="font-preview text-xs text-gray-600 dark:text-gray-300">
+                                    Fonts: {{ theme.fonts.join(', ') }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </mat-tab>
+
+            <!-- Classic Themes -->
+            <mat-tab label="Classic">
+                <div class="themes-content py-4">
+                    <div class="themes-grid space-y-4">
+                        <div *ngFor="let theme of classicThemes"
+                            class="theme-card border border-gray-200 dark:border-gray-600 rounded-lg p-4 cursor-pointer transition-all hover:shadow-md"
+                            [class.selected]="selectedTheme?.name === theme.name" (click)="selectTheme(theme)">
+
+                            <div class="theme-header flex items-center justify-between mb-3">
+                                <h4 class="text-sm font-medium text-gray-900 dark:text-white">{{ theme.name }}</h4>
+                                <mat-icon *ngIf="selectedTheme?.name === theme.name"
+                                    class="text-blue-500 text-sm">check_circle</mat-icon>
+                            </div>
+
+                            <div class="theme-preview">
+                                <div class="color-swatches flex space-x-2 mb-2">
+                                    <div *ngFor="let color of theme.colors.slice(0, 5)"
+                                        class="color-swatch w-6 h-6 rounded-full border border-gray-300 dark:border-gray-600"
+                                        [style.backgroundColor]="color">
+                                    </div>
+                                </div>
+
+                                <div class="font-preview text-xs text-gray-600 dark:text-gray-300">
+                                    Fonts: {{ theme.fonts.join(', ') }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </mat-tab>
+
+            <!-- Professional Themes -->
+            <mat-tab label="Professional">
+                <div class="themes-content py-4">
+                    <div class="themes-grid space-y-4">
+                        <div *ngFor="let theme of professionalThemes"
+                            class="theme-card border border-gray-200 dark:border-gray-600 rounded-lg p-4 cursor-pointer transition-all hover:shadow-md"
+                            [class.selected]="selectedTheme?.name === theme.name" (click)="selectTheme(theme)">
+
+                            <div class="theme-header flex items-center justify-between mb-3">
+                                <h4 class="text-sm font-medium text-gray-900 dark:text-white">{{ theme.name }}</h4>
+                                <mat-icon *ngIf="selectedTheme?.name === theme.name"
+                                    class="text-blue-500 text-sm">check_circle</mat-icon>
+                            </div>
+
+                            <div class="theme-preview">
+                                <div class="color-swatches flex space-x-2 mb-2">
+                                    <div *ngFor="let color of theme.colors.slice(0, 5)"
+                                        class="color-swatch w-6 h-6 rounded-full border border-gray-300 dark:border-gray-600"
+                                        [style.backgroundColor]="color">
+                                    </div>
+                                </div>
+
+                                <div class="font-preview text-xs text-gray-600 dark:text-gray-300">
+                                    Fonts: {{ theme.fonts.join(', ') }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </mat-tab>
+        </mat-tab-group>
+    </div>
+
+    <div class="panel-footer flex items-center justify-end space-x-3 p-4 border-t border-gray-200 dark:border-gray-700">
+        <button mat-button (click)="close()">Cancel</button>
+        <button mat-flat-button color="primary" (click)="applyTheme()" [disabled]="!selectedTheme">Apply</button>
+    </div>
+</div>

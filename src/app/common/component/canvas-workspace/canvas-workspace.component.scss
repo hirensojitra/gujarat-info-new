@@ -1,0 +1,41 @@
+.canvas-workspace {
+    min-height: 0;
+}
+
+.canvas-wrapper {
+    position: relative;
+    display: inline-block;
+}
+
+.canvas-element {
+    display: block;
+    cursor: crosshair;
+}
+
+.zoom-button.active,
+.grid-button.active,
+.rulers-button.active {
+    background-color: #e3f2fd;
+    color: #1976d2;
+}
+
+.dark .zoom-button.active,
+.dark .grid-button.active,
+.dark .rulers-button.active {
+    background-color: #1e3a8a;
+    color: #60a5fa;
+}
+
+.drop-zone {
+    transition: all 0.2s ease;
+}
+
+.ruler-horizontal,
+.ruler-vertical {
+    font-size: 10px;
+    line-height: 1;
+}
+
+.grid-overlay {
+    opacity: 0.3;
+}

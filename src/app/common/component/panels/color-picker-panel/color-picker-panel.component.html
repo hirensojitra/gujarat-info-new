@@ -1,0 +1,141 @@
+
+    <div class="color-picker-panel bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg w-80">
+      <div class="panel-header flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Background Color</h3>
+        <button mat-icon-button (click)="close()">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+
+      <div class="panel-content p-4">
+        <mat-tab-group>
+          <!-- Color Palettes -->
+          <mat-tab label="Palettes">
+            <div class="palettes-content py-4">
+              <div *ngFor="let palette of colorPalettes" class="palette-group mb-6">
+                <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ palette.name }}</h4>
+                <div class="color-grid grid grid-cols-6 gap-2">
+                  <button 
+                    *ngFor="let color of palette.colors"
+                    class="color-swatch"
+                    [style.backgroundColor]="color"
+                    [class.selected]="selectedColor === color"
+                    (click)="selectColor(color)"
+                    [title]="color">
+                  </button>
+                </div>
+              </div>
+            </div>
+          </mat-tab>
+
+          <!-- Custom Color -->
+          <mat-tab label="Custom">
+            <div class="custom-color-content py-4 space-y-4">
+              <!-- Color Input -->
+              <div class="color-input-section">
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Color Code</label>
+                <div class="flex items-center space-x-2">
+                  <input 
+                    type="color" 
+                    [(ngModel)]="customColor"
+                    (ngModelChange)="onCustomColorChange()"
+                    class="color-input w-12 h-12 border-2 border-gray-300 rounded-lg cursor-pointer">
+                  <input 
+                    type="text" 
+                    [(ngModel)]="customColor"
+                    (ngModelChange)="onCustomColorChange()"
+                    placeholder="#000000"
+                    class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                </div>
+              </div>
+
+              <!-- Color Sliders -->
+              <div class="color-sliders space-y-3">
+                <div class="slider-group">
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Hue</label>
+                  <input 
+                    type="range" 
+                    min="0" 
+                    max="360" 
+                    [(ngModel)]="hue"
+                    (ngModelChange)="updateColorFromHSL()"
+                    class="w-full h-2 bg-gradient-to-r from-red-500 via-yellow-500 via-green-500 via-cyan-500 via-blue-500 via-purple-500 to-red-500 rounded-lg appearance-none cursor-pointer">
+                </div>
+                
+                <div class="slider-group">
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Saturation</label>
+                  <input 
+                    type="range" 
+                    min="0" 
+                    max="100" 
+                    [(ngModel)]="saturation"
+                    (ngModelChange)="updateColorFromHSL()"
+                    class="w-full h-2 bg-gradient-to-r from-gray-500 to-current rounded-lg appearance-none cursor-pointer">
+                </div>
+                
+                <div class="slider-group">
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Lightness</label>
+                  <input 
+                    type="range" 
+                    min="0" 
+                    max="100" 
+                    [(ngModel)]="lightness"
+                    (ngModelChange)="updateColorFromHSL()"
+                    class="w-full h-2 bg-gradient-to-r from-black via-current to-white rounded-lg appearance-none cursor-pointer">
+                </div>
+              </div>
+
+              <!-- Color Preview -->
+              <div class="color-preview">
+                <div class="preview-container bg-gray-50 dark:bg-gray-900 p-4 rounded-lg">
+                  <div 
+                    class="preview-color w-full h-16 rounded-lg border-2 border-gray-300 dark:border-gray-600"
+                    [style.backgroundColor]="customColor">
+                  </div>
+                  <div class="preview-info text-center mt-2 text-sm text-gray-600 dark:text-gray-300">
+                    {{ customColor }}
+                  </div>
+                </div>
+              </div>
+
+              <!-- Recent Colors -->
+              <div class="recent-colors" *ngIf="recentColors.length > 0">
+                <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Recent Colors</h4>
+                <div class="color-grid grid grid-cols-8 gap-2">
+                  <button 
+                    *ngFor="let color of recentColors"
+                    class="color-swatch"
+                    [style.backgroundColor]="color"
+                    [class.selected]="selectedColor === color"
+                    (click)="selectColor(color)"
+                    [title]="color">
+                  </button>
+                </div>
+              </div>
+            </div>
+          </mat-tab>
+
+          <!-- Gradients -->
+          <mat-tab label="Gradients">
+            <div class="gradients-content py-4">
+              <div class="gradient-presets grid grid-cols-2 gap-3">
+                <button 
+                  *ngFor="let gradient of gradientPresets"
+                  class="gradient-preset h-16 rounded-lg border-2 border-gray-300 dark:border-gray-600 cursor-pointer transition-all hover:scale-105"
+                  [style.background]="gradient.css"
+                  [class.selected]="selectedGradient === gradient.name"
+                  (click)="selectGradient(gradient)"
+                  [title]="gradient.name">
+                </button>
+              </div>
+            </div>
+          </mat-tab>
+        </mat-tab-group>
+      </div>
+
+      <div class="panel-footer flex items-center justify-end space-x-3 p-4 border-t border-gray-200 dark:border-gray-700">
+        <button mat-button (click)="close()">Cancel</button>
+        <button mat-flat-button color="primary" (click)="applyColor()">Apply</button>
+      </div>
+    </div>
+  

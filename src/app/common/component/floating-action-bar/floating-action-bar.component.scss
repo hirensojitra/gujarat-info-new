@@ -1,0 +1,74 @@
+
+    .floating-action-bar {
+      backdrop-filter: blur(10px);
+      background: rgba(255, 255, 255, 0.95);
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      transition: all 0.3s ease;
+    }
+
+    .floating-action-bar:hover {
+      transform: translateX(50%) translateY(-2px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    }
+
+    .dark .floating-action-bar {
+      background: rgba(33, 33, 33, 0.95);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .fab-button {
+      width: 48px !important;
+      height: 48px !important;
+      transition: all 0.2s ease;
+    }
+
+    .fab-button:hover {
+      transform: scale(1.1);
+    }
+
+    .action-button {
+      width: 40px !important;
+      height: 40px !important;
+      color: #666;
+      transition: all 0.2s ease;
+    }
+
+    .action-button:hover {
+      color: #2196F3;
+      background-color: rgba(33, 150, 243, 0.1);
+      transform: scale(1.1);
+    }
+
+    .dark .action-button {
+      color: #9ca3af;
+    }
+
+    .dark .action-button:hover {
+      color: #60a5fa;
+      background-color: rgba(96, 165, 250, 0.1);
+    }
+
+    @media (max-width: 768px) {
+      .floating-action-bar {
+        bottom: 1rem;
+        left: 1rem;
+        right: 1rem;
+        transform: none;
+        border-radius: 12px;
+      }
+
+      .floating-action-bar:hover {
+        transform: translateY(-2px);
+      }
+
+      .fab-button {
+        width: 44px !important;
+        height: 44px !important;
+      }
+
+      .action-button {
+        width: 36px !important;
+        height: 36px !important;
+      }
+    }
+  

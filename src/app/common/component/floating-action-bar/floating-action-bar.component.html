@@ -1,0 +1,66 @@
+
+    <div class="floating-action-bar fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50 px-4 py-3 rounded-full shadow-lg">
+      <div class="flex items-center space-x-2">
+        <button 
+          mat-fab 
+          color="primary" 
+          (click)="onAddClick()"
+          matTooltip="Add Element"
+          class="fab-button">
+          <mat-icon>add</mat-icon>
+        </button>
+
+        <div class="w-px h-8 bg-gray-300 dark:bg-gray-600"></div>
+
+        <button 
+          mat-icon-button 
+          (click)="onResizeClick()"
+          matTooltip="Resize Canvas"
+          class="action-button">
+          <mat-icon>aspect_ratio</mat-icon>
+        </button>
+
+        <button 
+          mat-icon-button 
+          (click)="onThemeClick()"
+          matTooltip="Themes"
+          class="action-button">
+          <mat-icon>palette</mat-icon>
+        </button>
+
+        <button 
+          mat-icon-button 
+          (click)="onBackgroundColorClick()"
+          matTooltip="Background Color"
+          class="action-button">
+          <mat-icon>format_color_fill</mat-icon>
+        </button>
+
+        <button 
+          mat-icon-button 
+          (click)="onAnimateClick()"
+          matTooltip="Animations"
+          class="action-button">
+          <mat-icon>animation</mat-icon>
+        </button>
+
+        <button 
+          mat-icon-button 
+          (click)="onLayersClick()"
+          matTooltip="Layers"
+          class="action-button">
+          <mat-icon>layers</mat-icon>
+        </button>
+
+        <div class="w-px h-8 bg-gray-300 dark:bg-gray-600"></div>
+
+        <button 
+          mat-icon-button 
+          (click)="onQuickReplaceClick()"
+          matTooltip="Quick Replace"
+          class="action-button">
+          <mat-icon>swap_horiz</mat-icon>
+        </button>
+      </div>
+    </div>
+  

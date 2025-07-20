@@ -1,0 +1,25 @@
+.app-container {
+    background-color: #fafafa;
+}
+
+.dark .app-container {
+    background-color: #121212;
+}
+
+.main-content {
+    position: relative;
+}
+
+.panel-overlay {
+    backdrop-filter: blur(2px);
+}
+
+@media (max-width: 768px) {
+    .app-header {
+        padding: 0 16px;
+    }
+
+    .app-header .mat-toolbar-row {
+        padding: 0;
+    }
+}

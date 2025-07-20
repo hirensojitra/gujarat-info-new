@@ -1,0 +1,117 @@
+
+    .color-picker-panel {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 1000;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .color-swatch {
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      border: 2px solid transparent;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .color-swatch:hover {
+      transform: scale(1.1);
+      border-color: #2196F3;
+    }
+
+    .color-swatch.selected {
+      border-color: #2196F3;
+      box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.3);
+    }
+
+    .color-input {
+      border: none;
+      padding: 0;
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+    }
+
+    .color-input::-webkit-color-swatch {
+      border: none;
+      border-radius: 6px;
+    }
+
+    .color-input::-moz-color-swatch {
+      border: none;
+      border-radius: 6px;
+    }
+
+    .gradient-preset {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .gradient-preset.selected {
+      border-color: #2196F3;
+      box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.3);
+    }
+
+    .gradient-preset:hover {
+      transform: scale(1.05);
+    }
+
+    /* Custom slider styles */
+    input[type="range"] {
+      -webkit-appearance: none;
+      appearance: none;
+      background: transparent;
+      cursor: pointer;
+    }
+
+    input[type="range"]::-webkit-slider-track {
+      background: linear-gradient(to right, transparent, transparent);
+      height: 8px;
+      border-radius: 4px;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      background: #2196F3;
+      height: 20px;
+      width: 20px;
+      border-radius: 50%;
+      border: 2px solid white;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+
+    input[type="range"]::-moz-range-track {
+      background: linear-gradient(to right, transparent, transparent);
+      height: 8px;
+      border-radius: 4px;
+      border: none;
+    }
+
+    input[type="range"]::-moz-range-thumb {
+      background: #2196F3;
+      height: 20px;
+      width: 20px;
+      border-radius: 50%;
+      border: 2px solid white;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+      cursor: pointer;
+    }
+
+    @media (max-width: 768px) {
+      .color-picker-panel {
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        transform: none;
+        width: 100%;
+        max-height: none;
+        border-radius: 0;
+      }
+    }
+  

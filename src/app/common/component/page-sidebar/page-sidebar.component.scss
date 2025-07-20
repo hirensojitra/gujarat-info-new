@@ -1,0 +1,48 @@
+
+    .page-sidebar {
+      min-width: 80px;
+      max-width: 80px;
+    }
+
+    .page-thumbnail.active .thumbnail-container {
+      border-color: #2196F3;
+      box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.3);
+    }
+
+    .thumbnail-container {
+      aspect-ratio: 7/10;
+    }
+
+    .thumbnail-preview {
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+    }
+
+    .page-name {
+      max-width: 60px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .page-actions button {
+      font-size: 12px;
+    }
+
+    @media (max-width: 768px) {
+      .page-sidebar {
+        position: fixed;
+        right: 0;
+        top: 0;
+        bottom: 0;
+        z-index: 40;
+        transform: translateX(100%);
+        transition: transform 0.3s ease;
+      }
+
+      .page-sidebar.open {
+        transform: translateX(0);
+      }
+    }
+  

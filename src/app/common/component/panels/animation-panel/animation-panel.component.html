@@ -1,0 +1,105 @@
+
+    <div class="animation-panel bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg w-96">
+      <div class="panel-header flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Animations</h3>
+        <button mat-icon-button (click)="close()">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+
+      <div class="panel-content p-4">
+        <!-- Animation Presets -->
+        <div class="animation-presets">
+          <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Choose Animation</h4>
+          <div class="presets-scroll flex space-x-4 overflow-x-auto pb-4">
+            <div 
+              *ngFor="let animation of animationPresets"
+              class="animation-preview flex-shrink-0 w-20 h-20 bg-gray-100 dark:bg-gray-700 rounded-lg border-2 cursor-pointer transition-all"
+              [class.selected]="selectedAnimation?.name === animation.name"
+              [class.border-blue-500]="selectedAnimation?.name === animation.name"
+              [class.border-gray-300]="selectedAnimation?.name !== animation.name"
+              (click)="selectAnimation(animation)">
+              
+              <div class="preview-content w-full h-full flex items-center justify-center">
+                <div 
+                  class="preview-element w-8 h-8 bg-blue-500 rounded-full"
+                  [class.animate-bloom]="animation.type === 'bloom' && isPreviewActive === animation.name"
+                  [class.animate-glide]="animation.type === 'glide' && isPreviewActive === animation.name"
+                  [class.animate-popping]="animation.type === 'popping' && isPreviewActive === animation.name">
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="preset-labels flex space-x-4 overflow-x-auto">
+            <div 
+              *ngFor="let animation of animationPresets"
+              class="preset-label flex-shrink-0 w-20 text-center">
+              <span class="text-xs text-gray-600 dark:text-gray-300">{{ animation.name }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Animation Controls -->
+        <div class="animation-controls mt-6 space-y-6" *ngIf="selectedAnimation">
+          <div class="control-group">
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Duration: {{ selectedAnimation.duration }}ms
+            </label>
+            <mat-slider
+  [min]="100"
+  [max]="2000"
+  [step]="100"
+  [(ngModel)]="selectedAnimation.duration"
+  (input)="onDurationChange($event)"
+  class="w-full">
+</mat-slider>
+
+          </div>
+
+          <div class="control-group">
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Easing</label>
+            <div class="easing-options grid grid-cols-2 gap-2">
+              <button 
+                *ngFor="let easing of easingOptions"
+                mat-button
+                [class.mat-primary]="selectedAnimation.easing === easing.value"
+                (click)="selectEasing(easing.value)"
+                class="easing-button text-left">
+                {{ easing.label }}
+              </button>
+            </div>
+          </div>
+
+          <!-- Preview Button -->
+          <div class="preview-section">
+            <button 
+              mat-flat-button 
+              color="primary" 
+              (click)="playPreview()"
+              class="w-full">
+              <mat-icon>play_arrow</mat-icon>
+              Preview Animation
+            </button>
+          </div>
+        </div>
+
+        <!-- No Animation Option -->
+        <div class="no-animation mt-6">
+          <button 
+            mat-button
+            [class.mat-primary]="selectedAnimation === null"
+            (click)="selectAnimation(null)"
+            class="w-full">
+            <mat-icon>block</mat-icon>
+            No Animation
+          </button>
+        </div>
+      </div>
+
+      <div class="panel-footer flex items-center justify-end space-x-3 p-4 border-t border-gray-200 dark:border-gray-700">
+        <button mat-button (click)="close()">Cancel</button>
+        <button mat-flat-button color="primary" (click)="applyAnimation()">Apply</button>
+      </div>
+    </div>
+  

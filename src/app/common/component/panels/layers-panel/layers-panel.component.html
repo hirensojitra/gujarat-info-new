@@ -1,0 +1,99 @@
+<div
+    class="layers-panel bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg w-80">
+    <div class="panel-header flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Layers</h3>
+        <button mat-icon-button (click)="close()">
+            <mat-icon>close</mat-icon>
+        </button>
+    </div>
+
+    <div class="panel-content p-4">
+        <!-- Layer Controls -->
+        <div class="layer-controls flex items-center justify-between mb-4">
+            <div class="control-buttons flex space-x-2">
+                <button mat-icon-button (click)="addLayer()" matTooltip="Add Layer" class="control-button">
+                    <mat-icon>add</mat-icon>
+                </button>
+                <button mat-icon-button (click)="duplicateLayer()" matTooltip="Duplicate Layer"
+                    [disabled]="!selectedLayer" class="control-button">
+                    <mat-icon>content_copy</mat-icon>
+                </button>
+                <button mat-icon-button (click)="deleteLayer()" matTooltip="Delete Layer"
+                    [disabled]="!selectedLayer || layers.length <= 1" class="control-button">
+                    <mat-icon>delete</mat-icon>
+                </button>
+            </div>
+
+            <div class="layer-count text-sm text-gray-600 dark:text-gray-300">
+                {{ layers.length }} layers
+            </div>
+        </div>
+
+        <!-- Layers List -->
+        <div class="layers-list" cdkDropList (cdkDropListDropped)="onLayerDrop($event)">
+            <div *ngFor="let layer of layers; let i = index"
+                class="layer-item flex items-center p-3 border border-gray-200 dark:border-gray-600 rounded-lg mb-2 cursor-move"
+                [class.selected]="selectedLayer?.id === layer.id" [class.bg-blue-50]="selectedLayer?.id === layer.id"
+                [class.dark:bg-blue-900]="selectedLayer?.id === layer.id" (click)="selectLayer(layer)" cdkDrag>
+
+                <!-- Drag Handle -->
+                <div class="drag-handle mr-3 text-gray-400 dark:text-gray-500" cdkDragHandle>
+                    <mat-icon class="text-sm">drag_indicator</mat-icon>
+                </div>
+
+                <!-- Layer Icon -->
+                <div class="layer-icon mr-3 text-gray-600 dark:text-gray-300">
+                    <mat-icon class="text-lg">{{ getLayerIcon(layer.type) }}</mat-icon>
+                </div>
+
+                <!-- Layer Info -->
+                <div class="layer-info flex-1">
+                    <div class="layer-name text-sm font-medium text-gray-900 dark:text-white">
+                        {{ layer.name }}
+                    </div>
+                    <div class="layer-type text-xs text-gray-500 dark:text-gray-400">
+                        {{ layer.type | titlecase }}
+                    </div>
+                </div>
+
+                <!-- Layer Controls -->
+                <div class="layer-controls flex items-center space-x-2">
+                    <!-- Visibility Toggle -->
+                    <button mat-icon-button (click)="toggleVisibility(layer, $event)" class="visibility-button w-6 h-6"
+                        [class.text-gray-400]="!layer.visible" [class.text-blue-500]="layer.visible">
+                        <mat-icon class="text-sm">{{ layer.visible ? 'visibility' : 'visibility_off' }}</mat-icon>
+                    </button>
+
+                    <!-- Lock Toggle -->
+                    <button mat-icon-button (click)="toggleLock(layer, $event)" class="lock-button w-6 h-6"
+                        [class.text-gray-400]="!layer.locked" [class.text-red-500]="layer.locked">
+                        <mat-icon class="text-sm">{{ layer.locked ? 'lock' : 'lock_open' }}</mat-icon>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Empty State -->
+        <div *ngIf="layers.length === 0" class="empty-state text-center py-8">
+            <mat-icon class="text-gray-400 text-4xl mb-2">layers</mat-icon>
+            <p class="text-gray-500 dark:text-gray-400">No layers yet</p>
+            <button mat-flat-button color="primary" (click)="addLayer()" class="mt-2">
+                Add First Layer
+            </button>
+        </div>
+    </div>
+
+    <!-- Layer Actions -->
+    <div class="panel-footer p-4 border-t border-gray-200 dark:border-gray-700">
+        <div class="layer-actions flex items-center justify-between">
+            <div class="opacity-control flex items-center space-x-2" *ngIf="selectedLayer">
+                <mat-icon class="text-sm text-gray-600 dark:text-gray-300">opacity</mat-icon>
+                <input type="range" min="0" max="100" [value]="selectedLayer.data?.opacity || 100"
+                    (input)="onOpacityChange($event)" class="opacity-slider flex-1">
+                <span class="text-sm text-gray-600 dark:text-gray-300">{{ selectedLayer.data?.opacity || 100 }}%</span>
+            </div>
+
+            <button mat-button (click)="close()">Close</button>
+        </div>
+    </div>
+</div>

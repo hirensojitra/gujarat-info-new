@@ -101,7 +101,7 @@ export class VerifyEmailComponent implements OnInit, OnDestroy {
     });
     this.authCookie.removeOtpToken();
     this.cookieService.delete('otp_expires_at', '/');
-    this.router.navigate(['/authentication/login']);
+    this._navigateToLogin(this.router.url);
   }
 
   private stopTimer(): void {
@@ -136,7 +136,7 @@ export class VerifyEmailComponent implements OnInit, OnDestroy {
         this.clearSession();
 
         // Now that we’re logged in, redirect to dashboard/home
-        this.router.navigate(['/home']);
+        this._navigateToHome();
       });
   }
 
@@ -147,7 +147,7 @@ export class VerifyEmailComponent implements OnInit, OnDestroy {
       this.toast.show('Session expired. Please login again.', {
         class: 'bg-danger',
       });
-      this.router.navigate(['/authentication/login']);
+      this._navigateToLogin(this.router.url);
       return;
     }
 
@@ -196,20 +196,20 @@ export class VerifyEmailComponent implements OnInit, OnDestroy {
       this.toast.show('Session expired. Please login again.', {
         class: 'bg-danger',
       });
-      this.router.navigate(['/authentication/login']);
+      this._navigateToLogin(this.router.url);
       return;
     }
     this.loginService.login({ login_id: email, pass_key: pass }).subscribe({
       next: (res) => {
         this.authCookie.setToken(res.token);
         this.toast.show('Logged in successfully!', { class: 'bg-success' });
-        this.router.navigate(['/home']);
+        this._navigateToHome();
       },
       error: () => {
         this.toast.show('Login failed. Please try again.', {
           class: 'bg-danger',
         });
-        this.router.navigate(['/authentication/login']);
+        this._navigateToLogin(this.router.url);
       },
     });
   }
@@ -223,5 +223,16 @@ export class VerifyEmailComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.clearSession();
+  }
+
+  private _navigateToLogin(returnUrl?: string): void {
+    this.router.navigate(['/authentication/login'], {
+      queryParams: { returnUrl },
+      queryParamsHandling: 'merge',
+    });
+  }
+
+  private _navigateToHome(): void {
+    this.router.navigate(['/home']);
   }
 }

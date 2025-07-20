@@ -15,6 +15,13 @@ const routes: Routes = [
     data: { layout: 'empty-layout' },
     children: [
       {
+        path: 'fabric-canvas',
+        loadChildren: () =>
+          import('./module/fabric-canvas/fabric-canvas.module').then(
+            (m) => m.FabricCanvasModule
+          ),
+      },
+      {
         path: 'home',
         canActivate: [NewAuthGuard],
         children: [
@@ -169,6 +176,18 @@ const routes: Routes = [
     canActivate: [NewAuthGuard],
     children: [
       {
+        path: 'dashboard',
+        children: [
+          {
+            path: '',
+            loadChildren: () =>
+              import('./module/dashboard/dashboard.module').then(
+                (m) => m.DashboardModule
+              ),
+          },
+        ],
+      },
+      {
         path: 'settings',
         children: [
           {
@@ -183,7 +202,7 @@ const routes: Routes = [
       {
         path: 'frame-management',
         canActivate: [NewAuthGuard, RoleGuard],
-        data: { roles: ['owner','administrator'] },
+        data: { roles: ['owner', 'administrator'] },
         children: [
           {
             path: '',
@@ -243,6 +262,18 @@ const routes: Routes = [
           },
         ],
       },
+      {
+        path: 'view',
+        children: [
+          {
+            path: '',
+            loadChildren: () =>
+              import('./module/view/view.module').then((m) => m.ViewModule),
+            canActivate: [NewAuthGuard, RoleGuard],
+            data: { roles: ['owner'] },
+          },
+        ],
+      },
     ],
   },
   {
@@ -259,18 +290,6 @@ const routes: Routes = [
     canActivate: [AuthGuard],
     children: [
       {
-        path: 'dashboard',
-        children: [
-          {
-            path: '',
-            loadChildren: () =>
-              import('./module/dashboard/dashboard.module').then(
-                (m) => m.DashboardModule
-              ),
-          },
-        ],
-      },
-      {
         path: 'img',
         component: LayoutComponent,
         data: { layout: 'dashboard-layout', roles: ['admin'] },
@@ -280,18 +299,6 @@ const routes: Routes = [
             path: '',
             loadChildren: () =>
               import('./module/img/img.module').then((m) => m.ImgModule),
-          },
-        ],
-      },
-      {
-        path: 'view',
-        children: [
-          {
-            path: '',
-            loadChildren: () =>
-              import('./module/view/view.module').then((m) => m.ViewModule),
-            canActivate: [RolesGuard],
-            data: { roles: ['master'] },
           },
         ],
       },
