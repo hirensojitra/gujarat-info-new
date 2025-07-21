@@ -4,6 +4,7 @@ import {
   AfterViewInit,
   ChangeDetectorRef,
   OnInit,
+  OnDestroy
 } from '@angular/core';
 import { SEOService } from './common/services/seo.service';
 import { LoaderService } from './common/services/loader';
@@ -22,6 +23,8 @@ import {
 } from '@angular/animations';
 import { SessionService } from './common/services/session.service';
 import { AuthenticationService } from './common/services/authentication.service';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 
 @Component({
   selector: 'app-root',
@@ -36,7 +39,9 @@ import { AuthenticationService } from './common/services/authentication.service'
     ]),
   ],
 })
-export class AppComponent implements OnInit, AfterViewInit {
+export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
+  private destroy$ = new Subject<void>();
+
   constructor(
     private seoService: SEOService,
     public loaderService: LoaderService,
@@ -52,32 +57,37 @@ export class AppComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit(): void {
-  this.router.events.subscribe((event) => {
-    if (event instanceof NavigationStart) {
-      const url = event.url;
-      const isFileManagerSubRoute = url.startsWith('/file-manager/folders/') || url.startsWith('/file-manager/details/');
+    this.router.events.pipe(takeUntil(this.destroy$)).subscribe((event) => {
+      if (event instanceof NavigationStart) {
+        const url = event.url;
+        const isFileManagerSubRoute = url.startsWith('/file-manager/folders/') || url.startsWith('/file-manager/details/');
 
-      if (!isFileManagerSubRoute) {
-        this.loaderService.show(0);
-      }
-    } else if (
-      event instanceof NavigationEnd ||
-      event instanceof NavigationError
-    ) {
-      let url: string | undefined;
-      if (event instanceof NavigationEnd) {
-        url = event.urlAfterRedirects;
-      } else if (event instanceof NavigationError) {
-        url = (event as any).url;
-      }
-      const isFileManagerSubRoute = url?.startsWith('/file-manager/folders/') || url?.startsWith('/file-manager/details/');
+        if (!isFileManagerSubRoute) {
+          this.loaderService.show(0);
+        }
+      } else if (
+        event instanceof NavigationEnd ||
+        event instanceof NavigationError
+      ) {
+        let url: string | undefined;
+        if (event instanceof NavigationEnd) {
+          url = event.urlAfterRedirects;
+        } else if (event instanceof NavigationError) {
+          url = (event as any).url;
+        }
+        const isFileManagerSubRoute = url?.startsWith('/file-manager/folders/') || url?.startsWith('/file-manager/details/');
 
-      if (!isFileManagerSubRoute) {
-        this.loaderService.hide();
+        if (!isFileManagerSubRoute) {
+          this.loaderService.hide();
+        }
       }
-    }
-    this.cdr.detectChanges();
-  });
+      this.cdr.detectChanges();
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
 }
 
-}

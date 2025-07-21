@@ -1,6 +1,7 @@
-import { EventEmitter, Output, Renderer2, ElementRef, OnInit, AfterViewInit, Input, Directive } from '@angular/core';
+import { EventEmitter, Output, Renderer2, ElementRef, OnInit, AfterViewInit, Input, Directive, OnDestroy } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
 import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 export interface MenuItem {
   label: string;
   icon?: string;
@@ -11,9 +12,10 @@ export interface MenuItem {
 @Directive({
   selector: '[sidebarMenu]'
 })
-export class SidebarMenuDirective implements OnInit, AfterViewInit{
+export class SidebarMenuDirective implements OnInit, AfterViewInit, OnDestroy{
   private isMenuActive: boolean = false;
   private isMenuHover: boolean = false;
+  private destroy$ = new Subject<void>();
   private menuDataSubject = new Subject<MenuItem[]>();
   private menuActiveSubject = new Subject<boolean>();
   private menuHoverSubject = new Subject<boolean>();

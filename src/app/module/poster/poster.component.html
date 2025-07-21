@@ -43,24 +43,9 @@
             <button (click)="openInBrowser()" class="btn btn-success btn-lg mt-3 mx-auto d-block">
                 <i class="fa fa-download me-2"></i> DOWNLOAD POSTER
             </button>
-            <div class="alert alert-secondary text-center p-4 my-4">
-                <h3 class="text-danger"><i class="bi bi-exclamation-triangle"></i> You're using an in-app browser!
-                </h3>
-                <p class="mt-2">For the best experience, please open this page in your default browser.</p>
-
-                <h5 class="mt-3">📌 How to Open in Browser:</h5>
-                <ul class="list-group list-group-flush text-start mx-auto w-75">
-                    <li class="list-group-item"><strong>Facebook:</strong> Tap <b>••• (three dots)</b> in the
-                        top-right
-                        & select <b>"Open in Browser"</b>.</li>
-                    <li class="list-group-item"><strong>Instagram:</strong> Tap <b>••• (three dots)</b> in the
-                        top-right
-                        & select <b>"Open in Browser"</b>.</li>
-                    <li class="list-group-item"><strong>Twitter:</strong> Tap the <b>share icon</b> & choose
-                        <b>"Open in
-                            Browser"</b>.
-                    </li>
-                </ul>
+            <div class="alert alert-warning alert-dismissible fade show text-center" role="alert">
+                <strong><i class="bi bi-exclamation-triangle"></i> You're using an in-app browser!</strong> For the best experience, please open this page in your default browser.
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
         </div>
         <div class="flex-grow-1 container-fluid" *ngIf="!isInAppBrowser&&postDetails">
@@ -93,9 +78,11 @@
                                     [ngClass]="{'d-none':showThumbnail}" @fadeIn></svg>
                                 <img src="assets/images/svg/loader.svg" alt="loader" *ngIf="!colors.length" @fadeIn
                                     remSize [wPX]="70">
+                                <p *ngIf="!colors.length" class="text-center text-muted mt-2">Generating Poster...</p>
                             </div>
                         </div>
                         <ng-container *ngIf="canDownload">
+                            <h4 class="text-center text-success mt-3" @fadeIn>Your Poster is Ready!</h4>
                             <div class="d-flex flex-column gap-2 p-3 bg-light bg-opacity-10" @fadeIn>
                                 <button class="btn btn-lg btn-primary text-white" (click)="checkDownload('download')"><i
                                         class="fa fa-download me-2"></i>Download
@@ -109,8 +96,8 @@
                                     type="button">
                                     <i class="fa fa-whatsapp me-2"></i><span class="d-none-sm">WhatsApp</span>
                                 </button>
-                                <button class="btn btn-primary btn-md text-nowrap" (click)="checkDownload('facebook')"
-                                    type="button">
+                                <button class="btn btn-primary btn-md text-nowrap" (click)="facebookPhoto()"
+                                    type="button" *ngIf="facebookAccessToken">
                                     <i class="fa fa-facebook me-2"></i>Facebook
                                 </button>
                             </div>
@@ -120,8 +107,8 @@
                 <div class="col-lg-6 col-md-5 d-flex flex-column justify-content-center"
                     *ngIf="!isInAppBrowser&&colors.length">
                     <div *ngIf="postDetails"
-                        class="p-3 m-4 border border-light rounded-4 shadow-sm bg-white d-flex flex-column gap-3 align-items-center justify-content-center flex-grow-1"
-                        [ngClass]="{'d-none d-md-block':canDownload}" @fadeIn>
+                            class="p-3 m-4 border border-light rounded-4 shadow-sm bg-white d-flex flex-column gap-3 align-items-center justify-content-center flex-grow-1"
+                            [ngClass]="{'d-md-block':canDownload}" @fadeIn>
                         <h1 class="d-none d-md-block text-center fw-b h5" *ngIf="postDetails.title" @fadeIn>
                             {{postDetails.title}}</h1>
                         <h2 class="d-none d-md-block text-center lh-base h6" *ngIf="postDetails.info" @fadeIn>
@@ -131,7 +118,7 @@
                         </h5>
                         <form [formGroup]="formData" (ngSubmit)="onSubmitFormData()"
                             *ngIf="!canDownload && dataset.length" class="row g-3" [@fadeInList]>
-                            <div *ngFor="let field of dataset;let i=index"
+                            <div *ngFor="let field of dataset;let i=index; trackBy: trackByFn"
                                 class="form-group col-12 col-md-6 offset-0 offset-md-3 position-relative" @fadeIn>
                                 <ng-container *ngIf="field.type === 'text'">
                                     <label class="form-label" for="{{field.id}}">{{field.title}}</label>
@@ -203,7 +190,7 @@
                         </form>
                     </div>
                     <ng-container *ngIf="!postStatus" @fadeIn>
-                        <h5 class="text-center my-2 text-danger"><b>No any post available for this link.</b></h5>
+                        <h5 class="text-center my-2 text-danger"><b>No poster found for this link.</b></h5>
                     </ng-container>
                 </div>
             </div>
@@ -269,6 +256,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
+                <p class="text-muted mb-3">Drag the image to move it within the crop area. Use the corners to resize the crop area.</p>
                 <img id="imageToCropped" alt="Crop" class="w-100" [src]="">
             </div>
             <div class="modal-footer">

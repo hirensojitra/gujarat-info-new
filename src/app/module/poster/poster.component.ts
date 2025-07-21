@@ -35,7 +35,7 @@ import { BaseUrlService } from '../../common/services/baseuri.service';
 import { SEOService } from 'src/app/common/services/seo.service';
 import { isPlatformBrowser, isPlatformServer } from '@angular/common';
 import { environment } from 'src/environments/environment';
-import { catchError, firstValueFrom, lastValueFrom, of, switchMap, tap } from 'rxjs';
+import { BehaviorSubject, catchError, firstValueFrom, lastValueFrom, of, switchMap, tap } from 'rxjs';
 import { TrackService } from 'src/app/common/services/track.service';
 import {
   trigger,
@@ -156,6 +156,7 @@ export class PosterComponent implements OnInit {
   thumbnailUrl: string | null = null;
   public showThumbnail = false;
   colors: string[] = [];
+  private facebookSDKLoaded = new BehaviorSubject<boolean>(false);
   constructor(
     private route: ActivatedRoute,
     private titleService: Title,
@@ -1494,18 +1495,22 @@ export class PosterComponent implements OnInit {
     };
   }
   loginWithFacebook(): void {
-    FB.login(
-      (response: any) => {
-        if (response.authResponse) {
-          this.facebookAccessToken = response.authResponse.accessToken;
-          console.log('Facebook Access Token:', this.facebookAccessToken);
-          // Now you can use this.facebookAccessToken in your facebookPhoto() method.
-        } else {
-          console.error('User cancelled login or did not fully authorize.');
-        }
-      },
-      { scope: 'public_profile,email' }
-    ); // Adjust scopes as needed
+    this.facebookSDKLoaded.subscribe(loaded => {
+      if (loaded) {
+        FB.login(
+          (response: any) => {
+            if (response.authResponse) {
+              this.facebookAccessToken = response.authResponse.accessToken;
+              console.log('Facebook Access Token:', this.facebookAccessToken);
+              // Now you can use this.facebookAccessToken in your facebookPhoto() method.
+            } else {
+              console.error('User cancelled login or did not fully authorize.');
+            }
+          },
+          { scope: 'public_profile,email' }
+        ); // Adjust scopes as needed
+      }
+    });
   }
   private dataURLtoBlob(dataURL: string): Blob {
     const [header, base64Data] = dataURL.split(',');
@@ -1939,5 +1944,9 @@ export class PosterComponent implements OnInit {
     await this.initialize();
     this.showThumbnail = false;
     this.colors = ['#000000', '#FFFFFF', '#FFFFFF'];
+  }
+
+  trackByFn(index: number, item: any): string {
+    return item.id; // Assuming 'id' is a unique identifier for each item in the dataset
   }
 }

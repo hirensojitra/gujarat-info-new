@@ -1,17 +1,19 @@
-import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { Injectable, OnDestroy } from '@angular/core';
+import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import { ActivatedRoute, ActivatedRouteSnapshot } from '@angular/router';
 import { Router, NavigationEnd } from '@angular/router';
+import { takeUntil } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
 })
-export class BreadcrumbService {
+export class BreadcrumbService implements OnDestroy {
   private breadcrumbsSubject = new BehaviorSubject<{ label: string, link: string }[]>([]);
   breadcrumbs$: Observable<{ label: string, link: string }[]> = this.breadcrumbsSubject.asObservable();
+  private destroy$ = new Subject<void>();
 
   constructor(private activatedRoute: ActivatedRoute, private router: Router) {
-    this.router.events.subscribe((event) => {
+    this.router.events.pipe(takeUntil(this.destroy$)).subscribe((event) => {
       if (event instanceof NavigationEnd) {
         this.createBreadcrumbs(activatedRoute.snapshot.root);
       }
@@ -37,5 +39,8 @@ export class BreadcrumbService {
     this.breadcrumbsSubject.next(breadcrumbs); // Update the breadcrumbs subject with the created breadcrumbs
     return breadcrumbs; // Add a return statement with void or undefined
   }
-  
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
 }
