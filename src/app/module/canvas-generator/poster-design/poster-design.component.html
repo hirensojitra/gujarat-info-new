@@ -1,0 +1,188 @@
+<div class="poster-design-container">
+  <!-- Top Menu Bar -->
+  <nav class="top-menu-bar">
+    <div class="d-flex align-items-center">
+      <a href="#" class="logo">
+        <i class="fa fa-picture-o"></i>
+      </a>
+      <div class="design-info">
+        <span class="design-name">Untitled Design</span>
+        <span class="save-status">All changes saved</span>
+      </div>
+    </div>
+    <div class="actions">
+      <button class="btn btn-icon" title="Undo"><i class="fa fa-undo"></i></button>
+      <button class="btn btn-icon" title="Redo"><i class="fa fa-repeat"></i></button>
+      <button class="btn btn-primary share-btn"><i class="fa fa-share-alt me-2"></i>Share</button>
+      <button class="btn btn-secondary download-btn"><i class="fa fa-download me-2"></i>Download</button>
+      <div class="user-profile">
+        <i class="fa fa-user-circle"></i>
+      </div>
+    </div>
+  </nav>
+
+  <div class="main-content">
+    <!-- Side Panel -->
+    <aside class="side-panel">
+      <ul class="nav nav-tabs" id="sidePanelTabs" role="tablist">
+        <li class="nav-item" role="presentation" *ngFor="let tab of tabs; let i = index">
+          <button class="nav-link" [class.active]="i === 0" [id]="tab.id + '-tab'" data-bs-toggle="tab" [attr.data-bs-target]="'#' + tab.id" type="button" role="tab" [attr.aria-controls]="tab.id" [attr.aria-selected]="i === 0">
+            <i [class]="'fa ' + tab.icon"></i>
+            <span>{{ tab.name }}</span>
+          </button>
+        </li>
+      </ul>
+      <div class="tab-content">
+        <div class="tab-pane fade show active" id="design" role="tabpanel" aria-labelledby="design-tab">
+          <div class="search-bar">
+            <input type="text" class="form-control" placeholder="Search templates...">
+          </div>
+          <div class="scrollable-content">
+            <!-- Placeholder for templates -->
+            <div class="placeholder-item">Template 1</div>
+            <div class="placeholder-item">Template 2</div>
+            <div class="placeholder-item">Template 3</div>
+            <div class="placeholder-item">Template 4</div>
+            <div class="placeholder-item">Template 5</div>
+            <div class="placeholder-item">Template 6</div>
+          </div>
+        </div>
+        <div class="tab-pane fade" id="elements" role="tabpanel" aria-labelledby="elements-tab">
+          <div class="search-bar">
+            <input type="text" class="form-control" placeholder="Search elements...">
+          </div>
+          <div class="scrollable-content">
+            <!-- Placeholder for elements -->
+            <div class="placeholder-item">Shape</div>
+            <div class="placeholder-item">Icon</div>
+            <div class="placeholder-item">Line</div>
+          </div>
+        </div>
+        <div class="tab-pane fade" id="text" role="tabpanel" aria-labelledby="text-tab">
+          <div class="search-bar">
+            <input type="text" class="form-control" placeholder="Search text styles...">
+          </div>
+          <div class="scrollable-content">
+            <!-- Placeholder for text options -->
+            <div class="placeholder-item">Heading</div>
+            <div class="placeholder-item">Subheading</div>
+            <div class="placeholder-item">Body Text</div>
+          </div>
+        </div>
+        <div class="tab-pane fade" id="brand" role="tabpanel" aria-labelledby="brand-tab">
+          <div class="scrollable-content">
+            <!-- Placeholder for brand kit -->
+            <div class="placeholder-item">Brand Colors</div>
+            <div class="placeholder-item">Brand Fonts</div>
+            <div class="placeholder-item">Brand Logos</div>
+          </div>
+        </div>
+        <div class="tab-pane fade" id="uploads" role="tabpanel" aria-labelledby="uploads-tab">
+          <div class="scrollable-content">
+            <!-- Placeholder for uploads -->
+            <div class="placeholder-item">Upload Image</div>
+            <div class="placeholder-item">Uploaded Image 1</div>
+          </div>
+        </div>
+        <div class="tab-pane fade" id="projects" role="tabpanel" aria-labelledby="projects-tab">
+          <div class="scrollable-content">
+            <!-- Placeholder for projects -->
+            <div class="placeholder-item">My Project 1</div>
+            <div class="placeholder-item">My Project 2</div>
+          </div>
+        </div>
+        <div class="tab-pane fade" id="draw" role="tabpanel" aria-labelledby="draw-tab">
+          <div class="scrollable-content">
+            <!-- Placeholder for draw tools -->
+            <div class="placeholder-item">Pencil</div>
+            <div class="placeholder-item">Brush</div>
+          </div>
+        </div>
+        <div class="tab-pane fade" id="photos" role="tabpanel" aria-labelledby="photos-tab">
+          <div class="search-bar">
+            <input type="text" class="form-control" placeholder="Search photos...">
+          </div>
+          <div class="scrollable-content">
+            <!-- Placeholder for photos -->
+            <div class="placeholder-item">Photo 1</div>
+            <div class="placeholder-item">Photo 2</div>
+          </div>
+        </div>
+        <div class="tab-pane fade" id="background" role="tabpanel" aria-labelledby="background-tab">
+          <div class="search-bar">
+            <input type="text" class="form-control" placeholder="Search backgrounds...">
+          </div>
+          <div class="scrollable-content">
+            <!-- Placeholder for backgrounds -->
+            <div class="placeholder-item">Solid Color</div>
+            <div class="placeholder-item">Pattern</div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Canvas and Toolbar -->
+    <main class="canvas-area">
+      <!-- Contextual Toolbar -->
+      <div class="contextual-toolbar">
+        <!-- Text Editing Options -->
+        <div class="toolbar-section" *ngIf="selectedElementType === 'text'">
+          <select class="form-select font-select">
+            <option>Arial</option>
+            <option>Roboto</option>
+            <option>Times New Roman</option>
+          </select>
+          <input type="number" class="form-control size-input" value="12" title="Font Size">
+          <button class="btn btn-light" title="Bold"><i class="fa fa-bold"></i></button>
+          <button class="btn btn-light" title="Italic"><i class="fa fa-italic"></i></button>
+          <button class="btn btn-light" title="Underline"><i class="fa fa-underline"></i></button>
+          <input type="color" class="form-control form-control-color" value="#000000" title="Text Color">
+          <button class="btn btn-light" title="Align Left"><i class="fa fa-align-left"></i></button>
+          <button class="btn btn-light" title="Align Center"><i class="fa fa-align-center"></i></button>
+          <button class="btn btn-light" title="Align Right"><i class="fa fa-align-right"></i></button>
+        </div>
+
+        <!-- Image/Graphic Editing Options -->
+        <div class="toolbar-section" *ngIf="selectedElementType === 'image' || selectedElementType === 'graphic'">
+          <button class="btn btn-light" title="Crop"><i class="fa fa-crop"></i></button>
+          <button class="btn btn-light" title="Flip Horizontal"><i class="fa fa-arrows-h"></i></button>
+          <button class="btn btn-light" title="Flip Vertical"><i class="fa fa-arrows-v"></i></button>
+          <input type="range" class="form-range" min="0" max="1" step="0.01" value="1" title="Transparency">
+          <button class="btn btn-light" title="Bring Forward"><i class="fa fa-arrow-up"></i></button>
+          <button class="btn btn-light" title="Send Backward"><i class="fa fa-arrow-down"></i></button>
+        </div>
+
+        <!-- Shape Editing Options -->
+        <div class="toolbar-section" *ngIf="selectedElementType === 'shape'">
+          <input type="color" class="form-control form-control-color" value="#007bff" title="Fill Color">
+          <input type="color" class="form-control form-control-color" value="#000000" title="Border Color">
+          <input type="number" class="form-control size-input" value="1" title="Border Width">
+        </div>
+
+        <!-- Default/No Selection Options -->
+        <div class="toolbar-section" *ngIf="!selectedElementType">
+          <span class="text-muted">Select an element to see editing options.</span>
+        </div>
+      </div>
+
+      <!-- Design Canvas -->
+      <div class="design-canvas-wrapper">
+        <div class="design-canvas">
+          <!-- Canvas content goes here -->
+          <div class="canvas-element text-element" style="left: 50px; top: 50px;" (click)="selectElement('text')">
+            Your Text Here
+          </div>
+          <div class="canvas-element image-element" style="left: 200px; top: 100px;" (click)="selectElement('image')">
+            <img src="https://via.placeholder.com/150" alt="Placeholder Image">
+          </div>
+          <div class="canvas-element shape-element" style="left: 100px; top: 250px;" (click)="selectElement('shape')">
+            <div style="width: 100px; height: 100px; background-color: red;"></div>
+          </div>
+          <!-- Alignment guides, snap lines, rulers would be implemented visually here -->
+          <div class="alignment-guide horizontal"></div>
+          <div class="alignment-guide vertical"></div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>

@@ -3,8 +3,8 @@ import { CommonModule } from '@angular/common';
 
 import { VillageRoutingModule } from './village-routing.module';
 import { VillageComponent } from './village.component';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { SharedModule } from 'src/app/common/shared/shared.module';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 
 @NgModule({
@@ -12,12 +12,11 @@ import { SharedModule } from 'src/app/common/shared/shared.module';
     VillageComponent
   ],
   imports: [
-    CommonModule,
-    VillageRoutingModule,
-    SharedModule,
-
-    ReactiveFormsModule,
-    FormsModule
-  ]
+      CommonModule,
+      VillageRoutingModule,
+      SharedModule,
+      ReactiveFormsModule,
+      FormsModule
+    ]
 })
 export class VillageModule { }

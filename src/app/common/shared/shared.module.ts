@@ -6,7 +6,6 @@ import { TogglePasswordDirective } from '../directives/toggle-password.directive
 import { AccordionActiveDirective } from '../directives/accordion-active.directive';
 import { SelectDropdownDirective } from '../directives/select-dropdown.directive';
 import { AsteriskDirective } from '../directives/asterisk.directive';
-import { LocalitySelectorComponent } from '../controllers/locality-selector/locality-selector.component';
 import { DraggableDirective } from '../directives/draggable.directive';  // Add this line
 import { KeysPipe } from '../pipes/keys.pipe';
 import { SvgProcessorDirective } from '../directives/svg-processor.directive';
@@ -35,7 +34,6 @@ import { SquareSizeDirective } from '../directives/square-size.directive';
     SelectDropdownDirective,
     AsteriskDirective,
     DecimalDirective,
-    LocalitySelectorComponent,
     DraggableDirective,
     KeysPipe,
     DependencyListPipe,
@@ -56,7 +54,6 @@ import { SquareSizeDirective } from '../directives/square-size.directive';
     SelectDropdownDirective,
     AsteriskDirective,
     DecimalDirective,
-    LocalitySelectorComponent,
     DraggableDirective,
     KeysPipe,
     DependencyListPipe,

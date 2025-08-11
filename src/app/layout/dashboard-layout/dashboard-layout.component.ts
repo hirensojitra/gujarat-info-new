@@ -3,7 +3,6 @@ import { Component, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { AuthService } from '../../common/services/auth.service';
 import { Router } from '@angular/router';
-import { UserService } from '../../common/services/user.service';
 
 @Component({
   selector: 'app-dashboard-layout',
@@ -14,8 +13,7 @@ export class DashboardLayoutComponent implements OnInit {
 
   constructor(
     private authService: AuthService,
-    private router: Router,
-    private userService: UserService
+    private router: Router
   ) { }
 
   ngOnInit() {

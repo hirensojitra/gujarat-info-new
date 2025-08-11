@@ -133,4 +133,9 @@ export class AuthService {
       { token, email }
     ).pipe(catchError(this.handleError));
   }
+
+  changePassword(currentPassword: string, newPassword: string): Observable<any> {
+    return this.http.post(`${this.apiUrl}/change-password`, { currentPassword, newPassword })
+      .pipe(catchError(this.handleError));
+  }
 }

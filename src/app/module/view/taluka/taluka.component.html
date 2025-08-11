@@ -1,154 +1,221 @@
-<div class="h-100 overflow-only-y d-flex flex-column">
-    <div class="container pt-3">
-        <form action="" [formGroup]="filterTaluka" class="row g-2 align-items-center">
-            <div class="col-lg-4 col-6">
-                <div class="form-group row g-2 align-items-center" *ngIf="filterTaluka.get('district')">
-                    <div class="col-4 text-end">
-                        <label for="district" class="form-label mb-0">District</label>
-                    </div>
-                    <div class="col-8">
-                        <select class="form-select" id="district" formControlName="district" selectDropdown [options]="districts">
-                            <option value="" disabled selected>Select a district</option>
-                            <option *ngFor="let d of districts" [value]="d.id">{{ d.name }}</option>
-                        </select>
+<div class="h-100 overflow-only-y d-flex flex-column position-absolute w-100">
+    <ul class="nav nav-pills p-3 pb-0" role="tablist">
+        <li class="nav-item me-2" role="presentation">
+            <select class="form-select" [(ngModel)]="selectedDistrictId" (change)="onDistrictChange()">
+                <option [ngValue]="null" disabled>Select District</option>
+                <option *ngFor="let district of districts" [ngValue]="district.id">
+                    {{ district.name }} ({{ district.gu_name }})
+                </option>
+            </select>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="tab-taluka-active" data-bs-toggle="pill" data-bs-target="#taluka-active"
+                type="button" role="tab">
+                Active Talukas
+                <span class="badge bg-success ms-1">{{ totalActiveTalukas }}</span>
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="tab-taluka-deleted" data-bs-toggle="pill" data-bs-target="#taluka-deleted"
+                type="button" role="tab">
+                Deleted Talukas
+                <span class="badge bg-danger ms-1">{{ totalDeletedTalukas }}</span>
+            </button>
+        </li>
+    </ul>
+    <div class="tab-content flex-grow-1 p-3 bg-white">
+        <!-- Active Talukas -->
+        <div class="tab-pane fade show active position-relative h-100" id="taluka-active" role="tabpanel">
+            <div class="position-absolute h-100 w-100 d-flex flex-column">
+                <div class="row g-2 align-items-center">
+                    <div class="col-12 ms-auto d-flex">
+                        <button class="btn btn-danger me-2 flex-grow-1" *ngIf="selectedActiveTalukas.length > 0"
+                            (click)="deleteSelectedTalukas()">
+                            <i class="fa fa-trash me-2"></i> Delete Selected
+                        </button>
+                        <button class="btn btn-secondary me-2 flex-grow-1"
+                        *ngIf="selectedActiveTalukas.length > 0" (click)="editSelectedTalukas()">
+                            <i class="fa fa-edit me-2"></i> Edit Selected
+                        </button>
+                        <button class="btn btn-success text-white flex-grow-1" (click)="openTalukaModal()">
+                            <i class="fa fa-plus me-2"></i> Add Taluka
+                        </button>
                     </div>
                 </div>
+
+                <div class="flex-grow-1 position-relative">
+                    <div class="position-absolute overflow-y-auto h-100 w-100">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Select</th>
+                                    <th>#</th>
+                                    <th>ID</th>
+                                    <th>Name</th>
+                                    <th>Gujarati Name</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr *ngFor="let taluka of talukas; let i = index" class="align-middle"
+                                    [ngClass]="{'table-secondary': taluka.selected}">
+                                    <td><input type="checkbox" [(ngModel)]="taluka.selected"
+                                            (change)="updateSelectedActiveTalukas()" />
+                                    </td>
+                                    <td>{{ i + activeTalukaPagination.limit * (activeTalukaPagination.page - 1) + 1 }}
+                                    </td>
+                                    <td>{{ taluka.id }}</td>
+                                    <td>{{ taluka.name }}</td>
+                                    <td>{{ taluka.gu_name }}</td>
+                                    <td>
+                                        <button class="btn btn-dark btn-md me-2" (click)="editTaluka(taluka)">
+                                            <i class="fa fa-edit"></i>
+                                        </button>
+                                        <button class="btn btn-danger btn-md" (click)="deleteTaluka(taluka.id)">
+                                            <i class="fa fa-trash"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div pagination [currentPage]="activeTalukaPagination.page" [totalItems]="totalActiveTalukas"
+                    [pageSize]="activeTalukaPagination.limit" [pageSizes]="[10, 20, 30]"
+                    (currentPageChange)="changeActivePage($event)" (pageSizeChange)="changeActivePageSize($event)"
+                    class="mt-0 mb-0 px-3">
+                </div>
             </div>
-            <div class="col-auto ms-auto">
-                <button class="btn btn-success me-2" (click)="addTaluka()"><i class="fa fa-plus me-2"></i>Add
-                    Taluka</button>
-                <button class="btn btn-primary" (click)="openDeletedModal()" *ngIf="deletedTalukaCount > 0"><i class="fa fa-refresh me-2"></i>Restore</button>
-            </div>
-        </form>
-    </div>
-    <div class="flex-grow-1 p-3 m-3 bg-white">
-        <div class="h-100 container position-relative overflow-y-auto p-0">
-            <div class="position-absolute h-100 w-100 table-responsive">
-                <table class="table w-100 m-0 max-h-100-p max-w-100-p bg-white text-nowrap">
-                    <thead class="sticky-top bg-light">
-                        <tr>
-                            <th [width]="50" class="text-center"></th>
-                            <th>No.</th>
-                            <th>Code</th>
-                            <th>Name</th>
-                            <th>Gujarati Name</th>
-                            <th [width]="100" class="text-center">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr *ngFor="let taluka of talukas; let i = index" class="align-middle">
-                            <td><button class="btn btn-success btn-sm text-white" [routerLink]="'/view/village/'+paramDist+'/'+taluka.id"><i class="fa fa-plus"></i></button></td>
-                            <td>{{ i + 1 }}</td>
-                            <td>{{ taluka.id }}</td>
-                            <td>{{ taluka.name }}</td>
-                            <td>{{ taluka.gu_name }}</td>
-                            <td class="text-center">
-                                <button class="btn btn-flat btn-md me-2" (click)="editTaluka(taluka)"><i class="fa fa-edit"></i></button>
-                                <button class="btn btn-flat btn-md" (click)="deleteTaluka(taluka.id)"><i class="fa fa-trash"></i></button>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+        </div>
+
+        <!-- Deleted Talukas -->
+        <div class="tab-pane fade position-relative h-100" id="taluka-deleted" role="tabpanel">
+            <div class="position-absolute h-100 w-100 d-flex flex-column">
+                <div class="row g-2 align-items-center">
+                    <div class="col-auto ms-auto d-flex">
+                        <button class="btn btn-primary flex-grow-1" *ngIf="selectedDeletedTalukas.length > 0"
+                            (click)="restoreSelectedTalukas()">
+                            <i class="fa fa-refresh me-2"></i> Restore Selected
+                        </button>
+                    </div>
+                </div>
+
+                <div class="flex-grow-1 position-relative">
+                    <div class="position-absolute overflow-y-auto h-100 w-100">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Select</th>
+                                    <th>#</th>
+                                    <th>ID</th>
+                                    <th>Name</th>
+                                    <th>Gujarati Name</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr *ngFor="let taluka of deletedTalukas; let i = index" class="align-middle"
+                                    [ngClass]="{'table-secondary': taluka.selected}">
+                                    <td><input type="checkbox" [(ngModel)]="taluka.selected"
+                                            (change)="updateSelectedDeletedTalukas()" />
+                                    </td>
+                                    <td>{{ i + deletedTalukaPagination.limit * (deletedTalukaPagination.page - 1) + 1 }}
+                                    </td>
+                                    <td>{{ taluka.id }}</td>
+                                    <td>{{ taluka.name }}</td>
+                                    <td>{{ taluka.gu_name }}</td>
+                                    <td>
+                                        <button class="btn btn-success btn-md" (click)="restoreTaluka(taluka.id)">
+                                            <i class="fa fa-refresh"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div pagination [currentPage]="deletedTalukaPagination.page" [totalItems]="totalDeletedTalukas"
+                    [pageSize]="deletedTalukaPagination.limit" [pageSizes]="[10, 20, 30]"
+                    (currentPageChange)="changeDeletedPage($event)" (pageSizeChange)="changeDeletedPageSize($event)"
+                    class="mt-0 mb-0 px-3">
+                </div>
             </div>
         </div>
     </div>
+    <div *ngIf="loading" class="text-center py-3 position-absolute h-100 w-100 start-0 top-0 bg-dark bg-opacity-25">
+        <div class="spinner-border text-success" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
 </div>
-
 <div class="modal fade" id="talukaModal" tabindex="-1" aria-labelledby="talukaModalLabel">
     <div class="modal-dialog modal-dialog-scrollable p-0 my-0 modal-dialog-centered position-relative h-100">
         <div class="modal-content">
             <div class="modal-header bg-success py-2">
-                <h5 class="modal-title text-white" id="talukaModalLabel">{{talukaModalTitle}}</h5>
-                <button type="button" class="btn" data-bs-dismiss="modal" aria-label="Close" (click)="talukaModal.hide()">
+                <h5 class="modal-title text-white" id="talukaModalLabel">
+                    {{ talukaModalTitle }}
+                </h5>
+                <button type="button" class="btn ms-auto" data-bs-dismiss="modal" aria-label="Close"
+                    (click)="talukaModal.hide()">
                     <i class="fa fa-close btn-flat text-white"></i>
                 </button>
             </div>
+
             <div class="modal-body h-100 overflow-auto py-0 my-3 d-flex flex-column">
                 <form [formGroup]="currentForm" class="mt-3">
-                    <input type="hidden" placeholder="" formControlName="is_deleted" *ngIf="currentForm.get('is_deleted') !== null;">
-                    <div class="form-group row g-2 align-items-center mb-3" *ngIf="currentForm.get('id') !== null && needUpdate">
-                        <div class="col-4 text-end">
-                            <label for="taluka-id" class="form-label mb-0">Taluka ID</label>
-                        </div>
-                        <div class="col-8">
-                            <div class="form-control bg-light">
-                                {{currentForm.get('id')?.value}}
-                                <input type="hidden" placeholder="" formControlName="id">
+                    <div formArrayName="talukas">
+                        <div *ngFor="let taluka of talukasFormArray.controls; let i = index"
+                            class="d-flex align-items-stretch border border-light rounded px-2 position-relative"
+                            [ngClass]="{'mb-3': i < talukasFormArray.controls.length - 1}">
+
+                            <div [formGroupName]="i" class="py-3 flex-grow-1">
+                                <div class="form-group p-2">
+                                    <label for="taluka-name" class="form-label mb-2">Name</label>
+                                    <input class="form-control" type="text" placeholder="" formControlName="name"
+                                        id="taluka-name" />
+                                </div>
+
+                                <div class="form-group p-2">
+                                    <label for="taluka-gu-name" class="form-label mb-2">Gujarati Name</label>
+                                    <input class="form-control" type="text" placeholder="" formControlName="gu_name"
+                                        id="taluka-gu-name" />
+                                </div>
+
+                                <div class="form-group p-2">
+                                    <label for="taluka-district" class="form-label mb-2">District</label>
+                                    <select class="form-select" formControlName="district_id" id="taluka-district">
+                                        <option *ngFor="let district of districts" [value]="district.id">
+                                            {{ district.name }} ({{ district.gu_name }})
+                                        </option>
+                                    </select>
+                                </div>
                             </div>
-                        </div>
-                    </div>
-                    <div class="form-group row g-2 align-items-center mb-3" *ngIf="currentForm.get('district_id')">
-                        <div class="col-4 text-end">
-                            <label for="district_id" class="form-label mb-0">District</label>
-                        </div>
-                        <div class="col-8">
-                            <select *ngIf="needUpdate" class="form-select" id="district_id" formControlName="district_id">
-                                <option value="" disabled selected>Select a district</option>
-                                <option *ngFor="let d of districts" [value]="d.id">{{ d.name }}</option>
-                            </select>
-                            <div class="div" *ngIf="!needUpdate">
-                                <div class="form-control">{{selectedDistrict?.name}}</div>
-                                <input type="hidden" placeholder="" formControlName="district_id">
-                            </div>
-                        </div>
-                    </div>
-                    <div class="form-group row g-2 align-items-center mb-3" *ngIf="currentForm.get('name') !== null;">
-                        <div class="col-4 text-end">
-                            <label for="taluka-name" class="form-label mb-0">Taluka Name</label>
-                        </div>
-                        <div class="col-8">
-                            <input class="form-control" type="text" placeholder="" formControlName="name" id="taluka-name">
-                        </div>
-                    </div>
-                    <div class="form-group row g-2 align-items-center mb-3" *ngIf="currentForm.get('gu_name') !== null;">
-                        <div class="col-4 text-end">
-                            <label for="gu_name" class="form-label mb-0">Gujarati Name</label>
-                        </div>
-                        <div class="col-8">
-                            <input class="form-control" type="text" placeholder="" formControlName="gu_name" id="gu_name">
+
+                            <ng-container *ngIf="talukasFormArray.length > 1">
+                                <button type="button"
+                                    class="btn btn-outline-danger btn-sm my-3 position-absolute top-0 end-0 me-3"
+                                    (click)="removeTaluka(i)">
+                                    <i class="fa fa-trash me-2"></i>Remove
+                                </button>
+                            </ng-container>
                         </div>
                     </div>
                 </form>
             </div>
+
             <div class="modal-footer">
-                <button class="btn btn-md btn-success ms-2" (click)="saveTaluka()">Save</button>
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" (click)="talukaModal.hide(false)">Close</button>
-            </div>
-        </div>
-    </div>
-</div>
-<div class="modal fade" id="talukaDeletedModal" tabindex="-1" aria-labelledby="talukaDeletedModalLabel">
-    <div class="modal-dialog modal-dialog-scrollable modal-xl p-0 my-0 modal-dialog-centered position-relative h-100">
-        <div class="modal-content">
-            <div class="modal-header bg-success py-2">
-                <h5 class="modal-title text-white" id="talukaDeletedModalLabel">{{talukaDeletedModalTitle}}</h5>
-                <button type="button" class="btn" data-bs-dismiss="modal" aria-label="Close" (click)="talukaDeletedModal.hide()">
-                    <i class="fa fa-close btn-flat text-white"></i>
+                <button type="button" class="btn btn-primary text-white" (click)="addTaluka()" *ngIf="!needUpdate">
+                    <i class="fa fa-plus me-2"></i>Add More
                 </button>
-            </div>
-            <div class="modal-body h-100 overflow-auto py-0 my-3 d-flex flex-column">
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th scope="col">No.</th>
-                            <th scope="col">ID</th>
-                            <th scope="col">Name</th>
-                            <th scope="col">Gujarati Name</th>
-                            <th scope="col" class="w-80-px text-center">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr *ngFor="let taluka of deletedTalukaList; let i = index">
-                            <th scope="row">{{ i + 1 }}</th>
-                            <td>{{ taluka.id }}</td>
-                            <td>{{ taluka.name }}</td>
-                            <td>{{ taluka.gu_name }}</td>
-                            <td class="text-center">
-                                <button class="btn btn-success btn-sm" (click)="toggleTalukaActive(taluka.id)">Restore</button>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+                <button class="btn btn-md btn-success ms-2" (click)="saveTaluka()">
+                    Save
+                </button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
+                    (click)="talukaModal.hide(false)">
+                    Close
+                </button>
             </div>
         </div>
     </div>

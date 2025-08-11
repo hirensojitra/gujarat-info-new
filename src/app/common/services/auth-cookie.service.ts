@@ -1,78 +1,90 @@
 import { Injectable } from '@angular/core';
 import { jwtDecode } from 'jwt-decode';
 import { CookieService } from 'ngx-cookie-service';
+import { environment } from 'src/environments/environment';
+import { UserPublicInfo } from 'src/app/graphql/types/login.types';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthCookieService {
+  private cookieOptions = {
+    path: '/',
+    secure: environment.production, // Use secure cookies in production
+    sameSite: 'Strict' as const,
+    httpOnly: false, // Set to true if using SameSite=None
+  };
+
   constructor(private cookie: CookieService) {}
-  setToken(token: string): void {
+
+  setToken(token: string, rememberMe: boolean = false): void {
+    const expires = rememberMe ? this.getFutureDate(30) : undefined;
     this.cookie.set('token', token, {
-      path: '/',
-      secure: window.location.protocol === 'https:',
-      sameSite: 'Lax',
+      ...this.cookieOptions,
+      expires: expires,
     });
   }
 
-  getToken(): string {
-    return this.cookie.get('token');
+  getToken(): string | null {
+    return this.cookie.get('token') || null;
   }
 
-  clearToken(): void {
-    this.cookie.delete('token', '/');
+  removeToken(): void {
+    this.cookie.delete('token', this.cookieOptions.path);
   }
 
-  // ── E-mail OTP (if you use it) ───────────────────────────────────────────────
-  setOtpToken(otpToken: string, expiresAt: string): void {
-    const common = {
-      path: '/',
-      secure: window.location.protocol === 'https:',
-      sameSite: 'Lax',
-    } as const;
-
-    this.cookie.set('email_otp_token', otpToken, common);
-    this.cookie.set('otp_expires_at',  expiresAt, common);
+  setUser(user: UserPublicInfo, rememberMe: boolean = false): void {
+    console.log('Setting user in cookie:', JSON.stringify(user)); // Add this line for debugging
+    const expires = rememberMe ? this.getFutureDate(30) : undefined;
+    this.cookie.set('user', JSON.stringify(user), {
+      ...this.cookieOptions,
+      expires: expires,
+    });
   }
+
+  getUser(): UserPublicInfo | null {
+    const userJson = this.cookie.get('user');
+    console.log('Raw user JSON from cookie:', userJson); // Add this line
+    return userJson ? JSON.parse(userJson) : null;
+  }
+
+  removeUser(): void {
+    this.cookie.delete('user', this.cookieOptions.path);
+  }
+
+  setOtpToken(token: string, expiresAt: string): void {
+    const expiryDate = new Date(expiresAt);
+    this.cookie.set('otp_token', token, {
+      ...this.cookieOptions,
+      expires: expiryDate,
+    });
+    this.cookie.set('otp_expires_at', expiresAt, {
+      ...this.cookieOptions,
+      expires: expiryDate,
+    });
+  }
+
+  getOtpToken(): string | null {
+    return this.cookie.get('otp_token') || null;
+  }
+
   removeOtpToken(): void {
-    this.cookie.delete('email_otp_token', '/');
-  }
-  getOtpToken(): string {
-    return this.cookie.get('email_otp_token');
+    this.cookie.delete('otp_token', this.cookieOptions.path);
+    this.cookie.delete('otp_expires_at', this.cookieOptions.path);
   }
 
-  clearOtp(): void {
-    this.cookie.delete('email_otp_token', '/');
-    this.cookie.delete('otp_expires_at',  '/');
+  isLoggedIn(): boolean {
+    return !!this.getToken() && !!this.getUser();
   }
-  async isLoggedIn(): Promise<boolean> {
-    const token = this.getToken();
-    if (!token) {
-      return false;
-    }
-    try {
-      const decoded: any = jwtDecode(token);
-      const now = Date.now() / 1000;
-      if (decoded.exp && decoded.exp < now) {
-        this.clearToken();
-        return false;
-      }
-      return true;
-    } catch {
-      this.clearToken();
-      return false;
-    }
+
+  isEmailVerified(): boolean {
+    const user = this.getUser();
+    return user ? user.email_verified : false;
   }
-  async isEmailVerified(): Promise<boolean> {
-    const token = this.getToken();
-    if (!token) {
-      return false;
-    }
-    try {
-      const decoded: any = jwtDecode(token);
-      return decoded.is_email_verified === true;
-    } catch {
-      return false;
-    }
+
+  private getFutureDate(days: number): Date {
+    const date = new Date();
+    date.setDate(date.getDate() + days);
+    return date;
   }
 }

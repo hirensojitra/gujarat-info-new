@@ -2,13 +2,6 @@
   "routes": [
     "/",
     "/about-us",
-    "/admin",
-    "/admin/users",
-    "/auth",
-    "/auth/forgot-password",
-    "/auth/login",
-    "/auth/register",
-    "/auth/reset-password",
     "/authentication",
     "/authentication-action",
     "/authentication-action/set-password",
@@ -30,6 +23,7 @@
     "/images/generate",
     "/images/list",
     "/images/post-generate",
+    "/images/poster-design",
     "/images/uploaded-images",
     "/img",
     "/img-upload",
@@ -41,6 +35,7 @@
     "/settings",
     "/settings/account",
     "/settings/billing",
+    "/settings/change-password",
     "/settings/help-support",
     "/settings/image-manager",
     "/settings/logout",
@@ -51,14 +46,10 @@
     "/shape-manager",
     "/shape-manager/upload",
     "/user-img",
-    "/user-profile",
-    "/user-profile/edit",
-    "/user-profile/view",
     "/verify-email",
     "/view",
     "/view/district",
-    "/view/district-new",
-    "/view/taluka-new",
-    "/view/village-new"
+    "/view/taluka",
+    "/view/village"
   ]
 }

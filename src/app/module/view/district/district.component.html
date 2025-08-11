@@ -1,126 +1,207 @@
-<div class="h-100 overflow-only-y d-flex flex-column">
-    <div class="container pt-3">
+<div class="h-100 overflow-only-y d-flex flex-column position-absolute w-100">
+  <nav class="navbar navbar-expand-lg navbar-light bg-light px-3">
+    <a class="navbar-brand" href="#">Districts</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#districtNav"
+      aria-controls="districtNav" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="districtNav">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0 nav nav-pills" id="pills-tab" role="tablist">
+        <li class="nav-item" role="presentation">
+          <button class="nav-link active" id="tab1a" data-bs-toggle="pill" data-bs-target="#1a" type="button" role="tab"
+            aria-controls="1a" aria-selected="true">
+            Active Districts
+          </button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" id="tab2a" data-bs-toggle="pill" data-bs-target="#2a" type="button" role="tab"
+            aria-controls="2a" aria-selected="false">
+            Deleted Districts
+          </button>
+        </li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- TAB CONTENT -->
+  <div class="tab-content flex-grow-1 p-3 bg-white">
+    <div class="tab-pane fade show active position-relative h-100" id="1a" role="tabpanel" aria-labelledby="tab1a">
+
+      <div class="position-absolute h-100 w-100 d-flex flex-column">
         <div class="row g-2 align-items-center">
-            <div class="col-auto ms-auto">
-                <button class="btn btn-success me-2" (click)="addDistrict()"><i class="fa fa-plus me-2"></i> Add
-                    District</button>
-                <button class="btn btn-primary" (click)="openDeletedModal()" *ngIf="deletedDistrictCount > 0"><i class="fa fa-refresh me-2"></i>Restore</button>
-            </div>
+          <div class="col-12 ms-auto d-flex">
+            <button class="btn btn-success text-white flex-grow-1" (click)="openDistrictModal()">
+              <i class="fa fa-plus me-2"></i> Add District
+            </button>
+            <button class="btn btn-danger ms-2 flex-grow-1" *ngIf="selectedActiveDistricts.length > 0"
+              (click)="deleteSelectedDistricts()">
+              <i class="fa fa-trash me-2"></i>Delete Selected
+            </button>
+            <button class="btn btn-secondary ms-2 flex-grow-1" *ngIf="selectedActiveDistricts.length > 0"
+              (click)="editSelectedDistricts()">
+              <i class="fa fa-edit me-2"></i>Edit Selected
+            </button>
+          </div>
         </div>
-    </div>
-    <div class="flex-grow-1 p-3 m-3 bg-white">
-        <div class="h-100 container position-relative overflow-y-auto p-0">
-            <div class="position-absolute h-100 w-100 table-responsive">
-                <table class="table w-100 m-0 max-h-100-p max-w-100-p bg-white text-nowrap">
-                    <thead class="sticky-top bg-light">
-                        <tr>
-                            <th [width]="50" class="text-center"></th>
-                            <th>No.</th>
-                            <th>Code</th>
-                            <th>Name</th>
-                            <th>Gujarati Name</th>
-                            <th [width]="100" class="text-center">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr *ngFor="let district of districts; let i = index" class="align-middle">
-                            <td><button class="btn btn-success btn-sm text-white" [routerLink]="'/view/taluka/'+district.id"><i class="fa fa-plus"></i></button></td>
-                            <td>{{ i + 1 }}</td>
-                            <td>{{ district.id }}</td>
-                            <td>{{ district.name }}</td>
-                            <td>{{ district.gu_name }}</td>
-                            <td class="text-center">
-                                <button class="btn btn-flat btn-md me-2" (click)="editDistrict(district)"><i class="fa fa-edit"></i></button>
-                                <button class="btn btn-flat btn-md" (click)="deleteDistrict(district.id)"><i class="fa fa-trash"></i></button>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+        <div class="flex-grow-1 position-relative">
+          <div class="position-absolute overflow-y-auto h-100 w-100">
+            <table class="table table-responsive">
+              <thead>
+                <tr>
+                  <th></th>
+                  <th>SR.</th>
+                  <th>ID</th>
+                  <th>Name</th>
+                  <th>Gujarati Name</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let district of districts; let i = index" class="align-middle"
+                  [ngClass]="{'table-secondary':district.selected}">
+                  <td [width]="50">
+                    <input type="checkbox" [(ngModel)]="district.selected" (change)="updateSelectedActiveDistricts()" />
+                  </td>
+                  <td [width]="80">{{i + activeDistrictPagination.limit * (activeDistrictPagination.page - 1) + 1 }}
+                  </td>
+                  <td [width]="80">{{ district.id }}</td>
+                  <td>{{ district.name }}</td>
+                  <td>{{ district.gu_name }}</td>
+                  <td [width]="100">
+                    <button class="btn btn-dark btn-md me-2" (click)="editDistrict(district)">
+                      <i class="fa fa-edit"></i>
+                    </button>
+                    <button class="btn btn-danger btn-md" (click)="deleteDistrict(district.id)">
+                      <i class="fa fa-trash"></i>
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
+        <div pagination [currentPage]="activeDistrictPagination.page" [totalItems]="totalActiveDistricts"
+          [pageSize]="activeDistrictPagination.limit" [pageSizes]="[10, 20, 30]"
+          (currentPageChange)="changeActivePage($event)" (pageSizeChange)="changeActivePageSize($event)"
+          class="mt-0 mb-0 px-3"></div>
+      </div>
     </div>
+    <div class="tab-pane fade position-relative h-100" id="2a" role="tabpanel" aria-labelledby="tab2a">
+      <div class="position-absolute h-100 w-100 d-flex flex-column">
+        <!-- toolbar -->
+        <div class="row g-2 align-items-center">
+          <div class="col-12 ms-auto d-flex">
+            <button class="btn btn-secondary flex-grow-1" *ngIf="selectedDeletedDistricts.length > 0"
+              (click)="restoreSelectedDistricts()">
+              <i class="fa fa-refresh me-2"></i> Restore Selected
+            </button>
+          </div>
+        </div>
+
+        <!-- scrollable table -->
+        <div class="flex-grow-1 position-relative">
+          <div class="position-absolute overflow-y-auto h-100 w-100">
+            <table class="table table-responsive">
+              <thead>
+                <tr>
+                  <th></th>
+                  <th>Sr.</th>
+                  <th>ID</th>
+                  <th>Name</th>
+                  <th>Gujarati Name</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let district of deletedDistricts; let i = index" class="align-middle"
+                  [ngClass]="{ 'table-secondary': district.selected }">
+                  <td [width]="50">
+                    <input type="checkbox" [(ngModel)]="district.selected"
+                      (change)="updateSelectedDeletedDistricts()" />
+                  </td>
+                  <td [width]="80">
+                    {{
+                    i +
+                    deletedDistrictPagination.limit *
+                    (deletedDistrictPagination.page - 1) +
+                    1
+                    }}
+                  </td>
+                  <td [width]="80">{{ district.id }}</td>
+                  <td>{{ district.name }}</td>
+                  <td>{{ district.gu_name }}</td>
+                  <td [width]="100">
+                    <button class="btn btn-success btn-md" (click)="restoreDistrict(district.id)">
+                      <i class="fa fa-refresh"></i>
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div pagination [currentPage]="deletedDistrictPagination.page" [totalItems]="totalDeletedDistricts"
+          [pageSize]="deletedDistrictPagination.limit" [pageSizes]="[10, 20, 30]"
+          (currentPageChange)="changeDeletedPage($event)" (pageSizeChange)="changeDeletedPageSize($event)"
+          class="mt-0 mb-0 px-3"></div>
+      </div>
+    </div>
+  </div>
 </div>
 <div class="modal fade" id="districtModal" tabindex="-1" aria-labelledby="districtModalLabel">
-    <div class="modal-dialog modal-dialog-scrollable p-0 my-0 modal-dialog-centered position-relative h-100">
-        <div class="modal-content">
-            <div class="modal-header bg-success py-2">
-                <h5 class="modal-title text-white" id="districtModalLabel">{{districtModalTitle}}</h5>
-                <button type="button" class="btn" data-bs-dismiss="modal" aria-label="Close" (click)="districtModal.hide()">
-                    <i class="fa fa-close btn-flat text-white"></i>
+  <div class="modal-dialog modal-dialog-scrollable p-0 my-0 modal-dialog-centered position-relative h-100">
+    <div class="modal-content">
+      <div class="modal-header bg-success py-2">
+        <h5 class="modal-title text-white" id="districtModalLabel">
+          {{ districtModalTitle }}
+        </h5>
+        <button type="button" class="btn ms-auto" data-bs-dismiss="modal" aria-label="Close"
+          (click)="districtModal.hide()">
+          <i class="fa fa-close btn-flat text-white"></i>
+        </button>
+      </div>
+
+      <div class="modal-body h-100 overflow-auto py-0 my-3 d-flex flex-column">
+        <form [formGroup]="currentForm" class="mt-3">
+          <div formArrayName="districts">
+            <div *ngFor="
+                let district of districtsFormArray.controls;
+                let i = index
+              " class="d-flex align-items-stretch border border-light rounded px-2 position-relative"
+              [ngClass]="{'mb-3':i<districtsFormArray.controls.length-1}">
+              <div [formGroupName]="i" class="py-3 flex-grow-1">
+                <div class="form-group p-2">
+                  <label for="district-name" class="form-label mb-2">Name</label>
+                  <input class="form-control" type="text" placeholder="" formControlName="name" id="district-name" />
+                </div>
+                <div class="form-group p-2">
+                  <label for="district-gu-name" class="form-label mb-2">Gujarati Name</label>
+                  <input class="form-control" type="text" placeholder="" formControlName="gu_name"
+                    id="district-gu-name" />
+                </div>
+              </div>
+              <ng-container *ngIf="currentForm.get('districts').value.length > 1">
+                <button type="button" class="btn btn-outline-danger btn-sm my-3 position-absolute top-0 end-0 me-3"
+                  (click)="removeDistrict(i)">
+                  <i class="fa fa-trash me-2"></i>Remove
                 </button>
+              </ng-container>
             </div>
-            <div class="modal-body h-100 overflow-auto py-0 my-3 d-flex flex-column">
-                <form [formGroup]="currentForm" class="mt-3">
-                    <input type="hidden" placeholder="" formControlName="is_deleted" *ngIf="currentForm.get('is_deleted') !== null;">
-                    <div class="form-group row align-items-center mb-3" *ngIf="currentForm.get('id') !== null;">
-                        <div class="col-4 text-end">
-                            <label for="district-id" class="form-label mb-0">District ID</label>
-                        </div>
-                        <div class="col-8">
-                            <div *ngIf="needUpdate" class="form-control bg-light">
-                                {{currentForm.get('id')?.value}}
-                                <input type="hidden" placeholder="" formControlName="id">
-                            </div>
-                        </div>
-                    </div>
-                    <div class="form-group row align-items-center mb-3" *ngIf="currentForm.get('name') !== null;">
-                        <div class="col-4 text-end">
-                            <label for="district-name" class="form-label mb-0">Name</label>
-                        </div>
-                        <div class="col-8">
-                            <input class="form-control" type="text" placeholder="" formControlName="name" id="district-name">
-                        </div>
-                    </div>
-                    <div class="form-group row align-items-center mb-3" *ngIf="currentForm.get('gu_name') !== null;">
-                        <div class="col-4 text-end">
-                            <label for="district-name" class="form-label mb-0">Gujarati Name</label>
-                        </div>
-                        <div class="col-8">
-                            <input class="form-control" type="text" placeholder="" formControlName="gu_name" id="district-name">
-                        </div>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-md btn-success ms-2" (click)="saveDistrict()">Save</button>
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" (click)="districtModal.hide(false)">Close</button>
-            </div>
-        </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary text-white" (click)="addDistrict()" *ngIf="!needUpdate">
+          <i class="fa fa-plus me-2"></i>Add More
+        </button>
+        <button class="btn btn-md btn-success ms-2" (click)="saveDistrict()">
+          Save
+        </button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" (click)="districtModal.hide(false)">
+          Close
+        </button>
+      </div>
     </div>
-</div>
-<div class="modal fade" id="districtDeletedModal" tabindex="-1" aria-labelledby="districtDeletedModalLabel">
-    <div class="modal-dialog modal-dialog-scrollable modal-xl p-0 my-0 modal-dialog-centered position-relative h-100">
-        <div class="modal-content">
-            <div class="modal-header bg-success py-2">
-                <h5 class="modal-title text-white" id="districtDeletedModalLabel">{{districtDeletedModalTitle}}</h5>
-                <button type="button" class="btn" data-bs-dismiss="modal" aria-label="Close" (click)="districtDeletedModal.hide()">
-                    <i class="fa fa-close btn-flat text-white"></i>
-                </button>
-            </div>
-            <div class="modal-body h-100 overflow-auto py-0 my-3 d-flex flex-column">
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th scope="col">No.</th>
-                            <th scope="col">ID</th>
-                            <th scope="col">Name</th>
-                            <th scope="col">Gujarati Name</th>
-                            <th scope="col" class="w-80-px text-center">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr *ngFor="let district of deletedDistrictList; let i = index">
-                            <th scope="row">{{ i + 1 }}</th>
-                            <td>{{ district.id }}</td>
-                            <td>{{ district.name }}</td>
-                            <td>{{ district.gu_name }}</td>
-                            <td class="text-center">
-                                <button class="btn btn-success btn-sm" (click)="toggleDistrictActive(district.id)">Restore</button>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
+  </div>
 </div>

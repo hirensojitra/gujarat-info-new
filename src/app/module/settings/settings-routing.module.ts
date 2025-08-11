@@ -1,7 +1,6 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { SettingsComponent } from './settings.component';
-import { HelpSupportModule } from './help-support/help-support.module';
 
 const routes: Routes = [
   {
@@ -64,8 +63,14 @@ const routes: Routes = [
         loadChildren: () =>
           import('./image-manager/image-manager.module').then((m) => m.ImageManagerModule)
       },
+      {
+        path: 'change-password',
+        loadChildren: () =>
+          import('./change-password/change-password.module').then((m) => m.ChangePasswordModule)
+      }
     ],
   },
+  { path: 'change-password', loadChildren: () => import('./change-password/change-password.module').then(m => m.ChangePasswordModule) },
 ];
 
 @NgModule({

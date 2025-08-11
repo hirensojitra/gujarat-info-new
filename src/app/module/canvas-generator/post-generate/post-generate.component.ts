@@ -1117,14 +1117,12 @@ export class PostGenerateComponent implements OnInit, AfterViewInit {
     this.positionShuffle = false;
   }
   setActiveControl(rectIndex: number, controlIndex: number) {
-    console.log('setActiveControl: ' + this.Seq++);
     this.controlSet[rectIndex].forEach(
       (c, idx) => (c.active = idx === controlIndex)
     );
     this.buildActiveMap();
   }
   getActiveControl(rectIndex: number, controlId: string): boolean {
-    console.log('getActiveControl: ' + this.Seq++);
     return this.activeMap[rectIndex]?.has(controlId) ?? false;
   }
 

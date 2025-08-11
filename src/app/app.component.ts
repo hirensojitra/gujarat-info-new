@@ -1,10 +1,10 @@
-// app.component.ts
 import {
   Component,
   AfterViewInit,
   ChangeDetectorRef,
   OnInit,
-  OnDestroy
+  OnDestroy,
+  HostListener
 } from '@angular/core';
 import { SEOService } from './common/services/seo.service';
 import { LoaderService } from './common/services/loader';
@@ -26,6 +26,8 @@ import { AuthenticationService } from './common/services/authentication.service'
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
+const SESSION_TIMEOUT_MINUTES = 15; // 15 minutes
+
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
@@ -41,6 +43,15 @@ import { takeUntil } from 'rxjs/operators';
 })
 export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
   private destroy$ = new Subject<void>();
+  private lastActivity: number = Date.now();
+  private activityInterval: any;
+
+  @HostListener('document:mousemove')
+  @HostListener('document:keydown')
+  @HostListener('document:click')
+  onActivity() {
+    this.resetActivity();
+  }
 
   constructor(
     private seoService: SEOService,
@@ -53,7 +64,10 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngOnInit(): void {
     this.seoService.initSEO();
-    this.authService.isLoggedIn() && this.sessionService.startSessionSync();
+    if (this.authService.isLoggedIn()) {
+      this.sessionService.startSessionSync();
+      this.startInactivityTimer();
+    }
   }
 
   ngAfterViewInit(): void {
@@ -85,9 +99,32 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
+  private resetActivity(): void {
+    this.lastActivity = Date.now();
+  }
+
+  private checkInactivity(): void {
+    const now = Date.now();
+    const elapsedMinutes = (now - this.lastActivity) / (1000 * 60);
+
+    if (elapsedMinutes >= SESSION_TIMEOUT_MINUTES) {
+      this.authService.logout();
+      clearInterval(this.activityInterval);
+    }
+  }
+
+  private startInactivityTimer(): void {
+    this.resetActivity();
+    this.activityInterval = setInterval(() => {
+      this.checkInactivity();
+    }, 5000); // Check every 5 seconds
+  }
+
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+    if (this.activityInterval) {
+      clearInterval(this.activityInterval);
+    }
   }
 }
-

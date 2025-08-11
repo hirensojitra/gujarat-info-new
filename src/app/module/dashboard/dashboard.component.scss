@@ -1,25 +1,79 @@
+/* General App Styling */
+:root {
+  --primary-color: #3f51b5;
+  --background-color: #f4f7f9;
+  --surface-color: #ffffff;
+  --on-surface-color: #212121;
+  --border-color: #e0e0e0;
+}
+
+.dark {
+  --primary-color: #7e8bff;
+  --background-color: #121212;
+  --surface-color: #1e1e1e;
+  --on-surface-color: #ffffff;
+  --border-color: #424242;
+}
+
 .app-container {
-    background-color: #fafafa;
+  background-color: var(--background-color);
+  color: var(--on-surface-color);
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-.dark .app-container {
-    background-color: #121212;
+/* Header */
+.app-header {
+  background-color: var(--surface-color);
+  border-bottom: 1px solid var(--border-color);
+  padding: 0 24px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
 
+.header-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.title-text {
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.header-actions .mat-icon-button {
+  color: var(--on-surface-color);
+}
+
+/* Main Content */
 .main-content {
-    position: relative;
+  padding: 24px;
+  gap: 24px;
 }
 
+/* Panel Overlay */
 .panel-overlay {
-    backdrop-filter: blur(2px);
+  backdrop-filter: blur(4px);
 }
 
+/* Responsive Adjustments */
 @media (max-width: 768px) {
-    .app-header {
-        padding: 0 16px;
-    }
+  .app-header {
+    padding: 0 16px;
+  }
 
-    .app-header .mat-toolbar-row {
-        padding: 0;
-    }
+  .main-content {
+    flex-direction: column;
+    padding: 16px;
+    gap: 16px;
+  }
+
+  .header-actions .mat-button span {
+    display: none; /* Hide text on small screens */
+  }
 }

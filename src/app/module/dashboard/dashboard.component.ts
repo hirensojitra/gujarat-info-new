@@ -2,6 +2,7 @@ import { Component, effect } from '@angular/core';
 
 import { CanvasService } from 'src/app/common/services/canvas';
 import { PosterService } from 'src/app/common/services/poster';
+import { GraphQLService, Poster } from 'src/app/graphql/graphql.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -21,18 +22,19 @@ export class DashboardComponent {
 
   constructor(
     private posterService: PosterService,
-    private canvasService: CanvasService
-  ) {}
-
-  ngOnInit(): void {
-    // Initialize with a default project
-    this.posterService.createProject('New Poster Project');
-
+    private canvasService: CanvasService,
+    private graphQLService: GraphQLService
+  ) {
     effect(() => {
       const isDark = this.posterService.getIsDarkTheme();
       this.isDarkTheme = isDark;
       this.updateThemeClass();
     });
+  }
+
+  ngOnInit(): void {
+    // Initialize with a default project
+    this.posterService.createProject('New Poster Project');
   }
 
   get hasAnyPanelOpen(): boolean {
@@ -137,7 +139,68 @@ export class DashboardComponent {
 
   saveProject(): void {
     console.log('Save project');
-    // Implement save functionality
+    const canvas = this.canvasService.getCanvas();
+    if (!canvas) {
+      console.error('Canvas not initialized. Cannot save project.');
+      return;
+    }
+
+    const currentProject = this.posterService.getCurrentProject();
+    if (!currentProject) {
+      console.error('No current project to save.');
+      return;
+    }
+
+    const poster: Poster = {
+      name: currentProject.name,
+      canvasState: JSON.stringify(canvas.toJSON()),
+      backgroundColor: currentProject.backgroundColor,
+      width: currentProject.width,
+      height: currentProject.height,
+    };
+
+    // If the project already has an ID, include it for updates
+    if (currentProject.id) {
+      poster.id = currentProject.id;
+    }
+
+    this.graphQLService.savePoster(poster).subscribe({
+      next: (savedPoster) => {
+        console.log('Project saved successfully:', savedPoster);
+        // Update the current project with the ID from the backend if it's a new project
+        if (!currentProject.id) {
+          this.posterService.updateCurrentProjectId(savedPoster.id!);
+        }
+        alert('Project saved successfully!');
+      },
+      error: (error) => {
+        console.error('Error saving project:', error);
+        alert('Failed to save project.');
+      },
+    });
+  }
+
+  loadProject(projectId: string): void {
+    console.log('Loading project:', projectId);
+    this.graphQLService.getPoster(projectId).subscribe({
+      next: (poster) => {
+        console.log('Project loaded successfully:', poster);
+        const canvas = this.canvasService.getCanvas();
+        if (canvas) {
+          canvas.loadFromJSON(JSON.parse(poster.canvasState), () => {
+            canvas.renderAll();
+            console.log('Canvas loaded from JSON.');
+          });
+        }
+        // Update poster service with loaded project details
+        this.posterService.loadProject(poster);
+        alert('Project loaded successfully!');
+      },
+      error: (error) => {
+        console.error('Error loading project:', error);
+        alert('Failed to load project.');
+      },
+    });
   }
 
   exportProject(): void {

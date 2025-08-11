@@ -2,10 +2,7 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { LayoutComponent } from './layout/layout.component';
 import { AuthGuard } from './common/guards/auth.guard';
-import { RolesGuard } from './common/guards/roles.guard';
-import { NewAuthGuard } from './common/guards/new-auth.guard';
 import { RoleGuard } from './common/guards/role.guard';
-import { FrameManagementModule } from './module/frame-management/frame-management.module';
 
 const routes: Routes = [
   { path: '', redirectTo: 'latest', pathMatch: 'full' },
@@ -23,7 +20,7 @@ const routes: Routes = [
       },
       {
         path: 'home',
-        canActivate: [NewAuthGuard],
+        canActivate: [AuthGuard],
         children: [
           {
             path: '',
@@ -68,16 +65,7 @@ const routes: Routes = [
           },
         ],
       },
-      {
-        path: 'auth',
-        children: [
-          {
-            path: '',
-            loadChildren: () =>
-              import('./module/auth/auth.module').then((m) => m.AuthModule),
-          },
-        ],
-      },
+      
       {
         path: 'authentication',
         loadChildren: () =>
@@ -144,7 +132,7 @@ const routes: Routes = [
         path: 'img-upload',
         component: LayoutComponent,
         data: { roles: ['administrator', 'owner'] },
-        canActivate: [NewAuthGuard, RoleGuard],
+        canActivate: [AuthGuard, RoleGuard],
         children: [
           {
             path: '',
@@ -173,7 +161,7 @@ const routes: Routes = [
     path: '',
     component: LayoutComponent,
     data: { layout: 'user-layout' },
-    canActivate: [NewAuthGuard],
+    canActivate: [AuthGuard],
     children: [
       {
         path: 'dashboard',
@@ -201,7 +189,7 @@ const routes: Routes = [
       },
       {
         path: 'frame-management',
-        canActivate: [NewAuthGuard, RoleGuard],
+        canActivate: [AuthGuard, RoleGuard],
         data: { roles: ['owner', 'administrator'] },
         children: [
           {
@@ -225,19 +213,10 @@ const routes: Routes = [
           },
         ],
       },
-      {
-        path: 'admin',
-        children: [
-          {
-            path: '',
-            loadChildren: () =>
-              import('./module/admin/admin.module').then((m) => m.AdminModule),
-          },
-        ],
-      },
+      
       {
         path: 'post-management',
-        canActivate: [NewAuthGuard, RoleGuard],
+        canActivate: [AuthGuard, RoleGuard],
         data: { roles: ['owner'] },
         children: [
           {
@@ -251,7 +230,7 @@ const routes: Routes = [
       },
       {
         path: 'file-manager',
-        canActivate: [NewAuthGuard],
+        canActivate: [AuthGuard],
         children: [
           {
             path: '',
@@ -269,31 +248,17 @@ const routes: Routes = [
             path: '',
             loadChildren: () =>
               import('./module/view/view.module').then((m) => m.ViewModule),
-            canActivate: [NewAuthGuard, RoleGuard],
+            canActivate: [AuthGuard, RoleGuard],
             data: { roles: ['owner'] },
           },
         ],
       },
-    ],
-  },
-  {
-    path: '',
-    component: LayoutComponent,
-    data: { layout: 'empty-layout' },
-    canActivate: [NewAuthGuard],
-    children: [],
-  },
-  {
-    path: '',
-    component: LayoutComponent,
-    data: { layout: 'dashboard-layout' },
-    canActivate: [AuthGuard],
-    children: [
+      
       {
         path: 'img',
         component: LayoutComponent,
-        data: { layout: 'dashboard-layout', roles: ['admin'] },
-        canActivate: [AuthGuard, RolesGuard],
+        data: { roles: ['admin'] },
+        canActivate: [AuthGuard, RoleGuard],
         children: [
           {
             path: '',
@@ -314,19 +279,15 @@ const routes: Routes = [
           },
         ],
       },
-      {
-        path: 'user-profile',
-        children: [
-          {
-            path: '',
-            loadChildren: () =>
-              import('./module/user-profile/user-profile.module').then(
-                (m) => m.UserProfileModule
-              ),
-          },
-        ],
-      },
+      
     ],
+  },
+  {
+    path: '',
+    component: LayoutComponent,
+    data: { layout: 'empty-layout' },
+    canActivate: [AuthGuard],
+    children: [],
   },
   {
     path: '**',

@@ -3,8 +3,8 @@ import { CommonModule } from '@angular/common';
 
 import { TalukaRoutingModule } from './taluka-routing.module';
 import { TalukaComponent } from './taluka.component';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { SharedModule } from 'src/app/common/shared/shared.module';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 
 @NgModule({
@@ -12,12 +12,11 @@ import { SharedModule } from 'src/app/common/shared/shared.module';
     TalukaComponent
   ],
   imports: [
-    CommonModule,
-    TalukaRoutingModule,
-    SharedModule,
-
-    ReactiveFormsModule,
-    FormsModule
-  ]
+      CommonModule,
+      TalukaRoutingModule,
+      SharedModule,
+      ReactiveFormsModule,
+      FormsModule
+    ]
 })
 export class TalukaModule { }

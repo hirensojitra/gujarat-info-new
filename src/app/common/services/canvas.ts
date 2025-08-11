@@ -1,6 +1,7 @@
 import { Injectable, signal } from '@angular/core';
 import * as fabric from 'fabric'; // ✅ Correct
 import { PosterService } from './poster';
+import { HistoryService } from 'src/app/core/services/history.service';
 import { FabricImage } from 'fabric';
 @Injectable({
   providedIn: 'root',
@@ -10,7 +11,10 @@ export class CanvasService {
   private canvasElement: HTMLCanvasElement | null = null;
   private isInitialized = signal<boolean>(false);
 
-  constructor(private posterService: PosterService) {}
+  constructor(
+    private posterService: PosterService,
+    private historyService: HistoryService
+  ) {}
 
   initializeCanvas(canvasElement: HTMLCanvasElement): void {
     this.canvasElement = canvasElement;
@@ -19,10 +23,12 @@ export class CanvasService {
       height: 600,
       backgroundColor: '#ffffff',
       preserveObjectStacking: true,
+      renderOnAddRemove: false, // Optimize rendering
     });
 
     this.setupCanvasEvents();
     this.isInitialized.set(true);
+    this.saveCanvasState(); // Save initial state
   }
 
   private setupCanvasEvents(): void {
@@ -42,24 +48,28 @@ export class CanvasService {
 
     this.canvas.on('object:modified', (e) => {
       // Handle object modification
-      this.updateCanvasState();
+      this.saveCanvasState();
     });
 
     this.canvas.on('object:added', (e) => {
       // Handle object addition
-      this.updateCanvasState();
+      this.saveCanvasState();
     });
 
     this.canvas.on('object:removed', (e) => {
       // Handle object removal
-      this.updateCanvasState();
+      this.saveCanvasState();
     });
   }
 
-  private updateCanvasState(): void {
+  private saveCanvasState(): void {
+    if (!this.canvas) return;
+    const json = JSON.stringify(this.canvas.toJSON());
+    this.historyService.saveState(json);
+
     // Update the current page's canvas state
     const currentPage = this.posterService.getCurrentPage();
-    if (currentPage && this.canvas) {
+    if (currentPage) {
       currentPage.canvas = this.canvas;
       currentPage.objects = this.canvas.getObjects();
     }
@@ -82,27 +92,47 @@ export class CanvasService {
 
     this.canvas.add(textObject);
     this.canvas.setActiveObject(textObject);
-    this.canvas.renderAll();
+    this.canvas.requestRenderAll(); // Use requestRenderAll
+    this.saveCanvasState();
   }
 
-  async addImage(imageUrl: string): Promise<void> {
-    if (!this.canvas) return;
+  addImage(imageUrl: string): void {
+    console.log('addImage called with URL:', imageUrl);
+    if (!this.canvas) {
+      console.error('Canvas not initialized.');
+      return;
+    }
 
-    try {
-      const img = await fabric.FabricImage.fromURL(imageUrl);
+    console.log('Attempting to load image using HTMLImageElement for robustness.');
 
-      img.scale(0.5);
-      img.set({
-        left: 100,
-        top: 100,
+    const imgElement = new Image();
+    imgElement.crossOrigin = 'anonymous'; // Good practice for external images
+
+    imgElement.onload = () => {
+      console.log('HTMLImageElement loaded successfully.');
+      const fabricImage = new fabric.Image(imgElement);
+
+      fabricImage.scale(0.5);
+      fabricImage.set({
+        left: this.canvas!.getCenter().left,
+        top: this.canvas!.getCenter().top,
+        originX: 'center',
+        originY: 'center',
       });
 
-      this.canvas.add(img);
-      this.canvas.setActiveObject(img);
-      this.canvas.renderAll();
-    } catch (error) {
-      console.error('Failed to load image:', error);
-    }
+      this.canvas!.add(fabricImage);
+      this.canvas!.setActiveObject(fabricImage);
+      this.canvas!.requestRenderAll(); // Use requestRenderAll
+      this.saveCanvasState();
+      console.log('Image added to canvas and rendered via HTMLImageElement.');
+    };
+
+    imgElement.onerror = (error) => {
+      console.error('HTMLImageElement loading error:', error);
+      console.error(`Failed to load image from URL: ${imageUrl}`);
+    };
+
+    imgElement.src = imageUrl;
   }
 
   addShape(shapeType: 'rectangle' | 'circle' | 'triangle'): void {
@@ -141,19 +171,21 @@ export class CanvasService {
 
     this.canvas.add(shape);
     this.canvas.setActiveObject(shape);
-    this.canvas.renderAll();
+    this.canvas.requestRenderAll(); // Use requestRenderAll
+    this.saveCanvasState();
   }
 
   setBackgroundColor(color: string): void {
     if (!this.canvas) return;
 
     this.canvas.backgroundColor = color;
-    this.canvas.renderAll();
+    this.canvas.requestRenderAll(); // Use requestRenderAll
 
     const currentPage = this.posterService.getCurrentPage();
     if (currentPage) {
       currentPage.backgroundColor = color;
     }
+    this.saveCanvasState();
   }
 
   resizeCanvas(width: number, height: number): void {
@@ -161,13 +193,14 @@ export class CanvasService {
 
     this.canvas.setWidth(width);
     this.canvas.setHeight(height);
-    this.canvas.renderAll();
+    this.canvas.requestRenderAll(); // Use requestRenderAll
 
     const currentPage = this.posterService.getCurrentPage();
     if (currentPage) {
       currentPage.width = width;
       currentPage.height = height;
     }
+    this.saveCanvasState();
   }
 
   deleteSelected(): void {
@@ -179,7 +212,8 @@ export class CanvasService {
         this.canvas!.remove(obj);
       });
       this.canvas.discardActiveObject();
-      this.canvas.renderAll();
+      this.canvas.requestRenderAll(); // Use requestRenderAll
+      this.saveCanvasState();
     }
   }
 
@@ -188,7 +222,8 @@ export class CanvasService {
 
     this.canvas.clear();
     this.canvas.backgroundColor = '#ffffff';
-    this.canvas.renderAll();
+    this.canvas.requestRenderAll(); // Use requestRenderAll
+    this.saveCanvasState();
   }
 
   exportAsImage(format: 'png' | 'jpeg' = 'png'): string {
@@ -206,6 +241,7 @@ export class CanvasService {
 
     const zoom = this.canvas.getZoom();
     this.canvas.setZoom(Math.min(zoom * 1.1, 3));
+    this.canvas.requestRenderAll();
   }
 
   zoomOut(): void {
@@ -213,6 +249,7 @@ export class CanvasService {
 
     const zoom = this.canvas.getZoom();
     this.canvas.setZoom(Math.max(zoom * 0.9, 0.1));
+    this.canvas.requestRenderAll();
   }
 
   resetZoom(): void {
@@ -220,6 +257,28 @@ export class CanvasService {
 
     this.canvas.setZoom(1);
     this.canvas.viewportTransform = [1, 0, 0, 1, 0, 0];
-    this.canvas.renderAll();
+    this.canvas.requestRenderAll();
+  }
+
+  undo(): void {
+    if (!this.canvas) return;
+    const currentState = JSON.stringify(this.canvas.toJSON());
+    const prevState = this.historyService.undo(currentState);
+    if (prevState) {
+      this.canvas.loadFromJSON(JSON.parse(prevState), () => {
+        this.canvas!.requestRenderAll();
+      });
+    }
+  }
+
+  redo(): void {
+    if (!this.canvas) return;
+    const currentState = JSON.stringify(this.canvas.toJSON());
+    const nextState = this.historyService.redo(currentState);
+    if (nextState) {
+      this.canvas.loadFromJSON(JSON.parse(nextState), () => {
+        this.canvas!.requestRenderAll();
+      });
+    }
   }
 }

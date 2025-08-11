@@ -1,6 +1,7 @@
 import { Injectable, signal } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { PosterProject, PosterPage, CanvasObject, ColorPalette, ThemePreset, AnimationPreset, ResizePreset } from '../interfaces/poster.model';
+import { Poster } from 'src/app/graphql/graphql.service';
 
 
 @Injectable({
@@ -202,5 +203,48 @@ export class PosterService {
   // Utility
   private generateId(): string {
     return Math.random().toString(36).substr(2, 9);
+  }
+
+  updateCurrentProjectId(id: string): void {
+    const project = this.currentProject();
+    if (project) {
+      project.id = id;
+      this.currentProject.set({ ...project }); // Trigger signal update
+      this.projectSubject.next(project);
+    }
+  }
+
+  loadProject(poster: Poster): void {
+    const loadedProject: PosterProject = {
+      id: poster.id,
+      name: poster.name,
+      pages: [], // Pages will be loaded by canvas.loadFromJSON
+      currentPageId: '',
+      createdAt: new Date(poster.createdAt || ''),
+      updatedAt: new Date(poster.updatedAt || ''),
+      backgroundColor: poster.backgroundColor,
+      width: poster.width,
+      height: poster.height,
+    };
+
+    // Assuming a single page for simplicity, or you'd reconstruct pages here
+    const loadedPage: PosterPage = {
+      id: this.generateId(), // Generate a new page ID for the loaded content
+      name: 'Loaded Page',
+      thumbnail: '',
+      canvas: null,
+      objects: [],
+      backgroundColor: poster.backgroundColor || '#ffffff',
+      width: poster.width || 800,
+      height: poster.height || 600,
+    };
+
+    loadedProject.pages.push(loadedPage);
+    loadedProject.currentPageId = loadedPage.id;
+
+    this.currentProject.set(loadedProject);
+    this.currentPage.set(loadedPage);
+    this.projectSubject.next(loadedProject);
+    this.pageSubject.next(loadedPage);
   }
 }

@@ -1,5 +1,3 @@
-// src/app/auth/reset-password/reset-password.component.ts
-
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ResetPasswordService } from 'src/app/common/services/reset-password.service';
@@ -10,6 +8,7 @@ import { AuthenticationService } from 'src/app/common/services/authentication.se
 import { Router } from '@angular/router';
 import { interval, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
+import { passwordStrengthValidator } from 'src/app/common/validators/password-strength.validator';
 
 @Component({
   selector: 'app-reset-password',
@@ -36,7 +35,7 @@ export class ResetPasswordComponent implements OnInit, OnDestroy {
     private cookieService: CookieService,
     private authService: AuthenticationService,
     private router: Router,
-  ) {}
+  ){}
 
   ngOnInit(): void {
     this.requestForm = this.fb.group({
@@ -44,7 +43,7 @@ export class ResetPasswordComponent implements OnInit, OnDestroy {
     });
     this.resetForm = this.fb.group({
       otp_code: ['', [Validators.required, Validators.minLength(6), Validators.maxLength(6)]],
-      new_pass_key: ['', [Validators.required, Validators.minLength(6)]],
+      new_pass_key: ['', [Validators.required, passwordStrengthValidator]],
     });
   }
 

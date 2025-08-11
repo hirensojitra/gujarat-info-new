@@ -16,6 +16,9 @@ export interface PosterProject {
   currentPageId: string;
   createdAt: Date;
   updatedAt: Date;
+  backgroundColor?: string;
+  width?: number;
+  height?: number;
 }
 
 export interface CanvasObject {

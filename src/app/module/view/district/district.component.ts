@@ -1,226 +1,319 @@
 import { AfterViewInit, Component, ElementRef, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
 import { District } from 'src/app/common/interfaces/commonInterfaces';
-import { DevelopmentService } from 'src/app/common/services/development.service';
-import { DistrictService } from 'src/app/common/services/district.service';
-import { ToastService } from 'src/app/common/services/toast.service';
+import { GraphDistrictService } from 'src/app/common/services/graph-district.service';
+
 declare const bootstrap: any;
+let seq = 1;
+
 @Component({
   selector: 'app-district',
   templateUrl: './district.component.html',
-  styleUrls: ['./district.component.scss']
+  styleUrls: ['./district.component.scss'],
 })
 export class DistrictComponent implements OnInit, AfterViewInit {
+  // state properties
+  districtData = {
+    getDistrictStats: {
+      activeDistrictLength: 0,
+      deletedDistrictLength: 0,
+      districtLength: 0,
+    },
+    getDeletedDistricts: [],
+    getDistricts: [],
+  };
+
   districts: District[] = [];
-  newDistrict: any = { name: '', is_deleted: false };
-
-  districtData!: District | null;
-  districtForm: FormGroup;
-  districtUpdateForm: FormGroup;
+  deletedDistricts: District[] = [];
   currentForm: FormGroup;
-  needUpdate: boolean = false;
-  needAdd: boolean = false;
-
-  deletedDistrictCount!: number;
-  deletedDistrictList!: any[];
-  districtToToggleId!: number;
+  needUpdate = false;
+  deletedDistrictCount = 0;
 
   districtModal: any;
   districtModalElement: any;
   districtModalOptions: any;
-  districtModalTitle!: string;
+  districtModalTitle = 'Add District';
 
-  districtDeletedModal: any;
-  districtDeletedModalElement: any;
-  districtDeletedModalOptions: any;
-  districtDeletedModalTitle: string = "Deleted District";
+  activeDistrictPagination = {
+    page: 1,
+    limit: 10,
+    sortBy: 'name',
+    sortOrder: 'ASC',
+  };
+  deletedDistrictPagination = {
+    page: 1,
+    limit: 10,
+    sortBy: 'name',
+    sortOrder: 'ASC',
+  };
+  totalActiveDistricts = 0;
+  totalDeletedDistricts = 0;
+
+  selectedActiveDistricts: string[] = [];
+  selectedDeletedDistricts: string[] = [];
 
   constructor(
-    private districtService: DistrictService,
+    private districtService: GraphDistrictService,
     private fb: FormBuilder,
-    private DS: DevelopmentService,
-    private el: ElementRef,
-    private toastService: ToastService
-  ) {
-    const newForm = this.fb.group({
-      'is_deleted': [false, [Validators.required]],
-      'name': ['', [Validators.required]],
-      'gu_name': ['']
-    })
-    this.districtForm = newForm;
+    private el: ElementRef
+  ) {}
 
-    const updateForm = this.fb.group({
-      'id': ['', [Validators.required]],
-      'is_deleted': [false, [Validators.required]],
-      'name': ['', [Validators.required]],
-      'gu_name': ['']
-    })
-    this.districtUpdateForm = updateForm
-    this.currentForm = newForm;
+  ngAfterViewInit(): void {
+    console.log('ngAfterViewInit', seq++);
+    this.districtModalElement =
+      this.el.nativeElement.querySelector('#districtModal');
+    this.districtModalOptions = { backdrop: false, keyboard: false };
+    this.districtModal = new bootstrap.Modal(
+      this.districtModalElement,
+      this.districtModalOptions
+    );
   }
-  ngAfterViewInit() {
-    this.districtModalElement = this.el.nativeElement.querySelector('#districtModal');
-    this.districtModalOptions = {
-      backdrop: false,
-      keyboard: false
-    };
-    this.districtModal = new bootstrap.Modal(this.districtModalElement, this.districtModalOptions);
-    const districtShowListener = () => {
-      // Do something when the modal is shown
-      // this.calculateBillAmount();
-    };
 
-    const districtHiddenListener = () => {
-      this.districtData = null;
-      this.districtModalTitle = "";
-      this.currentForm.reset();
-      this.needUpdate = false;
-      this.needAdd = false;
-    };
-
-    const districtHideListener = (data: any) => {
-      console.log(data);
-    };
-
-    this.districtModalElement.addEventListener('show.bs.modal', districtShowListener);
-    this.districtModalElement.addEventListener('hidden.bs.modal', districtHiddenListener);
-    this.districtModalElement.addEventListener('hide.bs.modal', districtHideListener);
-
-    this.districtDeletedModalElement = this.el.nativeElement.querySelector('#districtDeletedModal');
-    this.districtDeletedModalOptions = {
-      backdrop: false,
-      keyboard: false
-    };
-    this.districtDeletedModal = new bootstrap.Modal(this.districtDeletedModalElement, this.districtModalOptions);
-    const districtDeletedShowListener = () => { };
-    const districtDeletedHiddenListener = () => { };
-    const districtDeletedHideListener = () => { };
-
-    this.districtDeletedModalElement.addEventListener('show.bs.modal', districtDeletedShowListener);
-    this.districtDeletedModalElement.addEventListener('hidden.bs.modal', districtDeletedHiddenListener);
-    this.districtDeletedModalElement.addEventListener('hide.bs.modal', districtDeletedHideListener);
+  ngOnInit(): void {
+    console.log('ngOnInit', seq++);
+    this.loadDistrictData();
+    this.initForm();
   }
-  editDistrict(d: District) {
-    this.currentForm = this.districtUpdateForm;
-    this.currentForm.reset()
-    this.districtData = d;
-    this.districtModalTitle = "Edit " + d.name;
-    this.currentForm.get('is_deleted')?.setValue(d.is_deleted ? true : false);
-    this.currentForm.get('id')?.setValue(d.id);
-    this.currentForm.get('name')?.setValue(d.name);
-    this.currentForm.get('gu_name')?.setValue(d.gu_name || '');
-    this.districtModal.show();
-    this.needUpdate = true;
+
+  updateSelectedActiveDistricts() {
+    console.log('updateSelectedActiveDistricts', seq++);
+    this.selectedActiveDistricts = this.districts
+      .filter((d) => d.selected)
+      .map((d) => d.id);
   }
+
+  updateSelectedDeletedDistricts() {
+    console.log('updateSelectedDeletedDistricts', seq++);
+    this.selectedDeletedDistricts = this.deletedDistricts
+      .filter((d) => d.selected)
+      .map((d) => d.id);
+  }
+
+  loadDistrictData() {
+    console.log('loadDistrictData', seq++);
+    this.districtService
+      .getDistrictStatsAndData(
+        this.activeDistrictPagination,
+        this.deletedDistrictPagination
+      )
+      .subscribe({
+        next: (data) => {
+          this.districtData = data.data;
+          this.districts = this.districtData.getDistricts;
+          this.deletedDistricts = this.districtData.getDeletedDistricts;
+          this.totalActiveDistricts =
+            this.districtData.getDistrictStats.activeDistrictLength;
+          this.totalDeletedDistricts =
+            this.districtData.getDistrictStats.deletedDistrictLength;
+        },
+        error: (error) => console.error('Error fetching district data:', error),
+      });
+  }
+
+  initForm() {
+    console.log('initForm', seq++);
+    this.currentForm = this.fb.group({
+      districts: this.fb.array([this.createDistrictForm()]),
+    });
+  }
+
+  createDistrictForm(): FormGroup {
+    console.log('createDistrictForm', seq++);
+    return this.fb.group({
+      name: ['', Validators.required],
+      gu_name: ['', Validators.required]
+    });
+  }
+
+  get districtsFormArray(): FormArray {
+    return this.currentForm.get('districts') as FormArray;
+  }
+
   addDistrict() {
-    this.currentForm = this.districtForm;
-    this.currentForm.reset();
-    this.currentForm.get('is_deleted')?.setValue(false);
-    this.needAdd = true;
-    this.districtModalTitle = "Add District";
-    this.districtModal.show();
+    console.log('addDistrict', seq++);
+    this.districtsFormArray.push(this.createDistrictForm());
   }
+
+  removeDistrict(index: number) {
+    console.log('removeDistrict', seq++);
+    const districtToRemove = this.districtsFormArray.at(index).value;
+    const districtId = districtToRemove.id;
+    const district = this.districts.find((d) => d.id === districtId);
+    if (district) district.selected = false;
+    if (this.districtsFormArray.length > 1)
+      this.districtsFormArray.removeAt(index);
+  }
+
   saveDistrict() {
-    this.DS.markFormGroupTouched(this.currentForm)
-    if (this.currentForm.valid) {
-      if (this.needUpdate) {
-        this.updateDistrict(this.currentForm.value)
-      }
-      if (this.needAdd) {
-        this.newDistrict = this.currentForm.value
-        this.addNewDistrict()
-      }
-      this.districtModal.hide();
+    console.log('saveDistrict', seq++);
+    if (this.currentForm.invalid) return;
+    const districtData = this.currentForm.value.districts;
+
+    if (this.needUpdate) {
+      this.districtService.updateDistricts(districtData).subscribe({
+        next: (data) => {
+          const updatedDistricts = data.data.updateDistricts;
+          updatedDistricts.forEach((updatedDistrict) => {
+            const index = this.districts.findIndex(
+              (d) => d.id === updatedDistrict.id
+            );
+            if (index !== -1) {
+              const updated = { ...this.districts[index], ...updatedDistrict };
+              this.districts[index] = updated;
+            }
+          });
+          this.districtModal.hide();
+        },
+        error: (err) => console.error('Update error:', err),
+      });
     } else {
-      const msg = this.needUpdate ? "Please enter valid data to update 'District'" : "Please enter valid data for 'New District'";
-      this.toastService.show(msg, { class: 'bg-danger' });
+      this.districtService.createDistricts(districtData).subscribe({
+        next: () => {
+          this.loadDistrictData();
+          this.districtModal.hide();
+        },
+        error: (err) => console.error('Create error:', err),
+      });
     }
   }
-  ngOnInit(): void {
-    this.loadDistrict();
-    this.loadDeletedDistrictLength();
+
+  openDistrictModal() {
+    console.log('openDistrictModal', seq++);
+    this.districtModalTitle = 'Add New Districts';
+    this.needUpdate = false;
+    const formArray = this.districtsFormArray;
+    formArray.clear();
+    this.addDistrict();
+    this.districtModal.show();
   }
-  loadDistrict(): void {
-    this.districtService.getDistrict().subscribe((data) => {
-      this.districts = data.sort((a, b) => {
-        const nameA = a.name.toLowerCase();
-        const nameB = b.name.toLowerCase();
-        if (nameA < nameB) {
-          return -1; // Name A comes before name B
-        }
-        if (nameA > nameB) {
-          return 1; // Name A comes after name B
-        }
-        return 0; // Names are equal
+
+  openMultipleEditModal(districts: District[]) {
+    console.log('openMultipleEditModal', seq++);
+    this.districtModalTitle = 'Edit Multiple Districts';
+    this.needUpdate = true;
+    const formArray = this.districtsFormArray;
+    formArray.clear();
+    districts.forEach((district) => {
+      formArray.push(
+        this.fb.group({
+          id: [district.id],
+          name: [district.name, Validators.required],
+          gu_name: [district.gu_name, Validators.required],
+          is_deleted: [district.is_deleted],
+        })
+      );
+    });
+    this.districtModal.show();
+  }
+
+  deleteSelectedDistricts() {
+    console.log('deleteSelectedDistricts', seq++);
+    const selectedIds = this.getSelectedDistricts(this.districts);
+    if (selectedIds.length) {
+      this.districtService
+        .softDeleteDistricts(selectedIds)
+        .subscribe(() => this.loadDistrictData());
+    }
+  }
+
+  restoreSelectedDistricts() {
+    console.log('restoreSelectedDistricts', seq++);
+    const selectedIds = this.getSelectedDistricts(this.deletedDistricts);
+    if (selectedIds.length) {
+      this.districtService
+        .restoreDistricts(selectedIds)
+        .subscribe(() => this.loadDistrictData());
+    }
+  }
+
+  editSelectedDistricts() {
+    console.log('editSelectedDistricts', seq++);
+    const selectedIds = this.getSelectedDistricts(this.districts);
+    if (!selectedIds.length) return;
+    const selected = this.districts.filter((d) => selectedIds.includes(d.id));
+    this.openMultipleEditModal(selected);
+  }
+
+  getSelectedDistricts(districts: District[]): string[] {
+    console.log('getSelectedDistricts', seq++);
+    return districts.filter((d) => d.selected).map((d) => d.id);
+  }
+
+  toggleDistrictSelection(d: District) {
+    console.log('toggleDistrictSelection', seq++);
+    d.selected = !d.selected;
+  }
+
+  editDistrict(d: District) {
+    console.log('editDistrict', seq++);
+    this.districtModalTitle = 'Update District';
+    this.needUpdate = true;
+    const formArray = this.districtsFormArray;
+    formArray.clear();
+    formArray.push(
+      this.fb.group({
+        id: [d.id],
+        name: [d.name, Validators.required],
+        gu_name: [d.gu_name, Validators.required],
+        is_deleted: [d.is_deleted],
+      })
+    );
+    this.districtModal.show();
+  }
+
+  deleteDistrict(id: string) {
+    console.log('deleteDistrict', seq++);
+    this.districtService
+      .softDeleteDistrict(id)
+      .subscribe(() => this.loadDistrictData());
+  }
+
+  restoreDistrict(id: string) {
+    console.log('restoreDistrict', seq++);
+    this.districtService
+      .restoreDistrict(id)
+      .subscribe(() => this.loadDistrictData());
+  }
+
+  changeActivePage(page: number) {
+    console.log('changeActivePage', seq++);
+    if (this.activeDistrictPagination.page === page) return;
+    this.activeDistrictPagination.page = page;
+    this.districtService
+      .getDistricts(page, this.activeDistrictPagination.limit)
+      .subscribe((res) => {
+        this.districts = res.data.getDistricts;
       });
-    });
-  }
-  addNewDistrict(): void {
-    console.log(this.newDistrict)
-    this.districtService.addDistrict(this.newDistrict).subscribe((data) => {
-      console.log('District added successfully:', data);
-      this.loadDistrict();
-    });
-  }
-  deleteDistrict(id: string): void {
-    this.districtService.deleteDistrict(id).subscribe((data) => {
-      console.log('District deleted successfully:', data);
-      this.loadDistrict();
-      this.loadDeletedDistrictLength();
-    });
-  }
-  updateDistrict(value: District): void {
-    const districtId = value.id;
-    this.districtService.updateDistrict(districtId, value).subscribe(
-      response => {
-        if (response.success) {
-          this.loadDistrict()
-        } else {
-          console.error('Failed to update district:', response.message);
-        }
-      },
-      error => {
-        console.error('Error:', error);
-      }
-    );
-  }
-  loadDeletedDistrictLength(): void {
-    this.districtService.getDeletedDistrictLength().subscribe(
-      (data) => {
-        this.deletedDistrictCount = data.deletedDistrictCount;
-        (!data.deletedDistrictCount) ? this.districtDeletedModal.hide() : false;
-      },
-      (error) => {
-        console.error('Error loading deleted districts count:', error);
-      }
-    );
   }
 
-  loadDeletedDistrict(): void {
-    this.districtService.getDeletedDistrict().subscribe(
-      (data) => {
-        this.deletedDistrictList = data;
-      },
-      (error) => {
-        console.error('Error loading deleted districts:', error);
-      }
-    );
+  changeActivePageSize(limit: number) {
+    console.log('changeActivePageSize', seq++);
+    if (this.activeDistrictPagination.limit === limit) return;
+    this.activeDistrictPagination.limit = limit;
+    this.activeDistrictPagination.page = 1;
+    this.districtService.getDistricts(1, limit).subscribe((res) => {
+      this.districts = res.data.getDistricts;
+    });
   }
 
-  toggleDistrictActive(id: number): void {
-    this.districtService.toggleDistrictActive(id).subscribe(
-      (response) => {
-        this.loadDeletedDistrictLength();
-        this.loadDeletedDistrict();
-        this.loadDistrict();
-      },
-      (error) => {
-        console.error('Error toggling district active state:', error);
-      }
-    );
+  changeDeletedPage(page: number) {
+    console.log('changeDeletedPage', seq++);
+    if (this.deletedDistrictPagination.page === page) return;
+    this.deletedDistrictPagination.page = page;
+    this.districtService
+      .getDeletedDistricts(page, this.deletedDistrictPagination.limit)
+      .subscribe((res) => {
+        this.deletedDistricts = res.data.getDeletedDistricts;
+      });
   }
-  openDeletedModal() {
-    this.loadDeletedDistrict();
-    this.districtDeletedModal.show();
+
+  changeDeletedPageSize(limit: number) {
+    console.log('changeDeletedPageSize', seq++);
+    if (this.deletedDistrictPagination.limit === limit) return;
+    this.deletedDistrictPagination.limit = limit;
+    this.deletedDistrictPagination.page = 1;
+    this.districtService.getDeletedDistricts(1, limit).subscribe((res) => {
+      this.deletedDistricts = res.data.getDeletedDistricts;
+    });
   }
 }

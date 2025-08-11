@@ -1,214 +1,190 @@
-<div class="container my-5" *ngIf="user">
-  <pre>{{user|json}}</pre>
-  <div class="row g-3 align-items-center">
-    <div class="col-md-12">
-      <div class="mx-auto" remSize [maxWPX]="140">
-        <img [src]="imageUrl" class="w-100" [ngClass]="{'img-thumbnail rounded-circle':user.image}"
-          alt="{{user.firstname}}">
-        <input #imageInput type="file" (change)="handleImageInputChange($event)" style="display: none">
-      </div>
-    </div>
-    <div class="col-md-12">
-      <div class="d-flex align-items-center justify-content-center">
-        <button class="btn btn-primary btn-sm" [ngClass]="{'me-2':user.image}" (click)="openImageCropperDialog()"><i
-            class="fa me-2"
-            [ngClass]="{'fa-pencil':user.image,'fa-plus':!user.image}"></i>{{user.image?"Change&nbsp;Photo":"Add&nbsp;Photo"}}</button>
-        <button class="btn btn-danger btn-sm" *ngIf="user.image" (click)="deleteImage()"><i
-            class="fa fa-trash"></i></button>
-      </div>
+<div class="profile-container container my-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-10 col-md-12">
+      <div class="card shadow-lg profile-card">
+        <div class="card-body p-4">
 
-    </div>
-  </div>
-  <div *ngIf="!editing" class="card mx-auto shadow-lg" style="max-width:900px; border-radius:1rem; overflow:hidden;">
-    <div class="card-body px-4 pt-4">
-      <div class="row gx-2">
-        <div class="col-md-6 d-flex align-items-center pb-2 mb-2 border-bottom"
-          *ngIf="user.firstname||user.lastname||user.middlename">
-          <div class="icon-circle bg-white text-primary me-3">
-            <i class="fa fa-user"></i>
+          <!-- Profile Header Section -->
+          <div class="profile-header text-center mb-4">
+            <div class="profile-image-wrapper mx-auto mb-3">
+              <img [src]="imageUrl" class="profile-image" [ngClass]="{'rounded-circle': user?.image}"
+                alt="{{user?.firstname}} {{user?.lastname}}">
+              <input #imageInput type="file" (change)="handleImageInputChange($event)" style="display: none">
+            </div>
+            <div class="profile-actions mb-3">
+              <button class="btn btn-primary btn-sm me-2" (click)="openImageCropperDialog()">
+                <i class="fa me-2" [ngClass]="{'fa-pencil':user?.image,'fa-plus':!user?.image}"></i>
+                {{user?.image?"Change Photo":"Add Photo"}}
+              </button>
+              <button class="btn btn-danger btn-sm" *ngIf="user?.image" (click)="deleteImage()">
+                <i class="fa fa-trash"></i> Delete Photo
+              </button>
+            </div>
+            <h4 class="profile-name">{{user?.firstname}} {{user?.middlename}} {{user?.lastname}}</h4>
+            <p class="profile-email text-muted">{{user?.email}}</p>
           </div>
-          <div>
-            <div class="fw-bold">Name</div>
-            <div class="d-flex">
-              <div class="text-muted small me-2">{{user.firstname}}</div>
-              <div class="text-muted small me-2">{{user.middlename}}</div>
-              <div class="text-muted small me-2">{{user.lastname}}</div>
+
+          <!-- Profile Details Section (View Mode) -->
+          <div *ngIf="!editing" class="profile-details-section">
+            <h5 class="section-title mb-3">Personal Information</h5>
+            <div class="row g-3 mb-4">
+              <div class="col-md-6" *ngIf="user?.id">
+                <div class="detail-item">
+                  <i class="fa fa-id-card detail-icon"></i>
+                  <div>
+                    <div class="detail-label">User ID</div>
+                    <div class="detail-value">{{user?.id}}</div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6" *ngIf="user?.number">
+                <div class="detail-item">
+                  <i class="fa fa-phone detail-icon text-success"></i>
+                  <div>
+                    <div class="detail-label">Mobile Number</div>
+                    <div class="detail-value">{{user?.number}}</div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6" *ngIf="user?.number">
+                <div class="detail-item">
+                  <i class="fa detail-icon" [ngClass]="user?.number_verified?'fa-check-circle text-success':'fa-times-circle text-danger'"></i>
+                  <div>
+                    <div class="detail-label">Number Verified</div>
+                    <div class="detail-value">{{user?.number_verified ? 'Yes' : 'No'}}</div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6" *ngIf="user?.email">
+                <div class="detail-item">
+                  <i class="fa detail-icon" [ngClass]="user?.email_verified?'fa-check-circle text-success':'fa-times-circle text-danger'"></i>
+                  <div>
+                    <div class="detail-label">Email Verified</div>
+                    <div class="detail-value">{{user?.email_verified ? 'Yes' : 'No'}}</div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6" *ngIf="user?.username">
+                <div class="detail-item">
+                  <i class="fa fa-user-circle detail-icon"></i>
+                  <div>
+                    <div class="detail-label">Username</div>
+                    <div class="detail-value">{{user?.username}}</div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6" *ngIf="user?.birthday">
+                <div class="detail-item">
+                  <i class="fa fa-calendar detail-icon"></i>
+                  <div>
+                    <div class="detail-label">Birthday</div>
+                    <div class="detail-value">{{ user?.birthday }}</div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6" *ngIf="user?.gender">
+                <div class="detail-item">
+                  <i class="fa fa-venus-mars detail-icon"></i>
+                  <div>
+                    <div class="detail-label">Gender</div>
+                    <div class="detail-value">{{ user?.gender | titlecase }}</div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6" *ngIf="user?.marital_status">
+                <div class="detail-item">
+                  <i class="fa fa-users detail-icon"></i>
+                  <div>
+                    <div class="detail-label">Marital Status</div>
+                    <div class="detail-value">{{ user?.marital_status | titlecase }}</div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6" *ngIf="user?.language">
+                <div class="detail-item">
+                  <i class="fa fa-language detail-icon"></i>
+                  <div>
+                    <div class="detail-label">Language</div>
+                    <div class="detail-value">{{ user?.language.name }}</div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
-        <div class="col-md-6 d-flex align-items-center pb-2 mb-2 border-bottom">
-          <div class="icon-circle bg-white text-primary me-3">
-            <i class="fa fa-id-card"></i>
-          </div>
-          <div>
-            <div class="fw-bold">ID</div>
-            <div class="text-muted small">{{user.id}}</div>
-          </div>
-        </div>
-        <div class="col-md-6 d-flex align-items-center pb-2 mb-2 border-bottom">
-          <div class="icon-circle bg-white text-success me-3">
-            <i class="fa fa-phone"></i>
-          </div>
-          <div>
-            <div class="fw-bold">Mobile Number</div>
-            <div class="text-muted small">{{user.number||'Not Updated'}}</div>
-          </div>
-        </div>
-        <div class="col-md-6 d-flex align-items-center pb-2 mb-2 border-bottom" *ngIf="user.number">
-          <div class="icon-circle bg-white me-3" [ngClass]="user.number_verified?'text-success':'text-danger'">
-            <i class="fa" [ngClass]="user.number_verified?'fa-check':'fa-close'"></i>
-          </div>
-          <div>
-            <div class="fw-bold">Number Verified</div>
-            <div class="text-muted small">{{user.number_verified}}</div>
-          </div>
-        </div>
-        <div class="col-md-6 d-flex align-items-center pb-2 mb-2 border-bottom">
-          <div class="icon-circle bg-white text-warning me-3">
-            <i class="fa fa-envelope"></i>
-          </div>
-          <div>
-            <div class="fw-bold">Email</div>
-            <div class="text-muted small">{{user.email}}</div>
-          </div>
-        </div>
-        <div class="col-md-6 d-flex align-items-center pb-2 mb-2 border-bottom">
-          <div class="icon-circle bg-white me-3" [ngClass]="user.email?'text-success':'text-danger'">
-            <i class="fa" [ngClass]="user.email_verified?'fa-check':'fa-close'"></i>
-          </div>
-          <div>
-            <div class="fw-bold">Email Verified</div>
-            <div class="text-muted small">{{user.email_verified}}</div>
-          </div>
-        </div>
-        <div class="col-md-6 d-flex align-items-center pb-2 mb-2 border-bottom">
-          <div class="icon-circle bg-white text-info me-3">
-            <i class="fa fa-tag"></i>
-          </div>
-          <div>
-            <div class="fw-bold">Role ID</div>
-            <div class="text-muted small">{{user.role_id}}</div>
-          </div>
-        </div>
-        <div class="col-md-6 d-flex align-items-center pb-2 mb-2 border-bottom">
-          <div class="icon-circle bg-white text-primary me-3">
-            <i class="fa fa-user-circle"></i>
-          </div>
-          <div>
-            <div class="fw-bold">Username</div>
-            <div class="text-muted small">{{user.username || 'Not Uvailable'}}</div>
-          </div>
-        </div>
 
-        <div *ngIf="user.birthday" class="col-md-6 d-flex align-items-center pb-2 mb-2 border-bottom">
-          <div class="icon-circle bg-white text-secondary me-3">
-            <i class="fa fa-calendar"></i>
+          <!-- Profile Edit Form (Edit Mode) -->
+          <div *ngIf="editing" class="profile-edit-section">
+            <h5 class="section-title mb-3">Edit Profile</h5>
+            <pre>{{profileForm.value | json}}</pre>
+            <form [formGroup]="profileForm" (ngSubmit)="onSubmit()">
+              <div class="row g-3 mb-4">
+                <ng-container *ngFor="let field of formFields">
+                  <div class="col-md-6">
+                    <label [for]="field.name" class="form-label">{{ field.label }}</label>
+                    <ng-container [ngSwitch]="field.name">
+                      <select *ngSwitchCase="'gender'" class="form-select" [id]="field.name" [formControlName]="field.name">
+                        <option [ngValue]="null">-- Select Gender --</option>
+                        <option *ngFor="let g of genderOptions" [value]="g">
+                          {{ g | titlecase }}
+                        </option>
+                      </select>
+                      <select *ngSwitchCase="'marital_status'" class="form-select" [id]="field.name"
+                        [formControlName]="field.name">
+                        <option [ngValue]="null">-- Select Marital Status --</option>
+                        <option *ngFor="let m of maritalStatusOptions" [value]="m">
+                          {{ m | titlecase }}
+                        </option>
+                      </select>
+                      <select *ngSwitchCase="'language_id'" class="form-select" [formControlName]="field.name">
+                        <option [ngValue]="null">-- Select Language --</option>
+                        <option *ngFor="let L of languageOptions" [value]="L.id">
+                          {{ L.name }}
+                        </option>
+                      </select>
+                      <input *ngSwitchDefault [type]="field.type" class="form-control" [id]="field.name"
+                        [formControlName]="field.name" />
+                    </ng-container>
+                  </div>
+                </ng-container>
+              </div>
+              <div class="d-flex justify-content-end">
+                <button type="submit" class="btn btn-success me-2" [disabled]="profileForm.invalid">
+                  <i class="fa fa-save me-2"></i>Save Changes
+                </button>
+                <button type="button" class="btn btn-secondary" (click)="toggleEdit()">
+                  <i class="fa fa-times me-2"></i>Cancel
+                </button>
+              </div>
+            </form>
           </div>
-          <div>
-            <div class="fw-bold">Birthday</div>
-            <div class="text-muted small">{{ user.birthday }}</div>
-          </div>
-        </div>
 
-        <div *ngIf="user.gender" class="col-md-6 d-flex align-items-center pb-2 mb-2 border-bottom">
-          <div class="icon-circle bg-white text-secondary me-3">
-            <i class="fa fa-venus-mars"></i>
+          <!-- Profile Completion and Edit Button -->
+          <div class="profile-completion-section mt-4 pt-4 border-top">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h5 class="section-title mb-0">Profile Completion</h5>
+              <span class="completion-percentage">{{ completion }}%</span>
+            </div>
+            <div class="progress mb-3">
+              <div class="progress-bar" role="progressbar" [style.width.%]="completion" [attr.aria-valuenow]="completion"
+                aria-valuemin="0" aria-valuemax="100">
+              </div>
+            </div>
+            <div class="text-center">
+              <button class="btn btn-primary" (click)="toggleEdit()">
+                {{ editing ? 'View Profile' : (completion < 100 ? 'Complete Profile' : 'Edit Profile') }}
+              </button>
+            </div>
           </div>
-          <div>
-            <div class="fw-bold">Gender</div>
-            <div class="text-muted small">{{ user.gender }}</div>
-          </div>
-        </div>
 
-        <div *ngIf="user.marital_status" class="col-md-6 d-flex align-items-center pb-2 mb-2 border-bottom">
-          <div class="icon-circle bg-white text-secondary me-3">
-            <i class="fa fa-users"></i>
-          </div>
-          <div>
-            <div class="fw-bold">Marital Status</div>
-            <div class="text-muted small">{{ user.marital_status }}</div>
-          </div>
-        </div>
-
-        <div class="col-md-6 d-flex align-items-center pb-2 mb-2 border-bottom">
-          <div class="icon-circle bg-white text-secondary me-3">
-            <i class="fa fa-language"></i>
-          </div>
-          <div>
-            <div class="fw-bold">Language</div>
-            <div class="text-muted small">{{ user.language.name }}</div>
-          </div>
         </div>
       </div>
     </div>
-  </div>
-
-  <!-- EDITABLE FORM -->
-  <div *ngIf="editing">
-    <form [formGroup]="profileForm" (ngSubmit)="onSubmit()" class="mx-auto" style="max-width:900px;">
-      <div class="row">
-        <ng-container *ngFor="let field of formFields">
-          <div class="col-md-6 mb-3">
-            <label [for]="field.name" class="form-label">{{ field.label }}</label>
-
-            <ng-container [ngSwitch]="field.name">
-
-              <!-- Gender dropdown -->
-              <select *ngSwitchCase="'gender'" class="form-select" [id]="field.name" [formControlName]="field.name">
-                <option [ngValue]="null">-- Select Gender --</option>
-                <option *ngFor="let g of genderOptions" [value]="g">
-                  {{ g | titlecase }}
-                </option>
-              </select>
-
-              <!-- Marital Status dropdown -->
-              <select *ngSwitchCase="'marital_status'" class="form-select" [id]="field.name"
-                [formControlName]="field.name">
-                <option [ngValue]="null">-- Select Marital Status --</option>
-                <option *ngFor="let m of maritalStatusOptions" [value]="m">
-                  {{ m | titlecase }}
-                </option>
-              </select>
-              <select *ngSwitchCase="'language_id'" class="form-select" [formControlName]="field.name">
-                <option [ngValue]="null">-- Select Language --</option>
-                <option *ngFor="let L of languageOptions" [value]="L.id">
-                  {{ L.name }}
-                </option>
-              </select>
-              <!-- Default input for all other fields -->
-              <input *ngSwitchDefault [type]="field.type" class="form-control" [id]="field.name"
-                [formControlName]="field.name" />
-            </ng-container>
-          </div>
-        </ng-container>
-      </div>
-
-      <button type="submit" class="btn btn-success me-2" [disabled]="profileForm.invalid">
-        Save
-      </button>
-      <button type="button" class="btn btn-secondary" (click)="toggleEdit()">
-        Cancel
-      </button>
-    </form>
-  </div>
-  <!-- Progress + Action Button -->
-  <div class="d-flex justify-content-between align-items-center my-4">
-    <div class="flex-grow-1 me-3">
-      <div class="progress">
-        <div class="progress-bar" role="progressbar" [style.width.%]="completion" [attr.aria-valuenow]="completion"
-          aria-valuemin="0" aria-valuemax="100">
-          {{ completion }}%
-        </div>
-      </div>
-    </div>
-    <button class="btn btn-primary" (click)="toggleEdit()">
-      {{ editing
-      ? 'Cancel'
-      : (completion < 100 ? 'Complete Profile' : 'Edit Profile' ) }} </button>
   </div>
 </div>
+
+<!-- Modals (Keep as is for now, styling will be handled by Bootstrap) -->
 <div class="modal fade" id="cropperModal" tabindex="-1" aria-labelledby="cropperModalLabel" aria-hidden="true">
-  <div class="modal-dialog  modal-dialog-centered modal-dialog-scrollable">
+  <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="cropperModalLabel">Profile Photo</h5>
@@ -237,10 +213,10 @@
       </div>
       <div class="modal-body">
         <div class="d-flex align-items-center justify-content-center">
-          <button class="btn btn-primary btn-sm" [ngClass]="{'me-2':user.image}" (click)="openImageCropperDialog()"><i
+          <button class="btn btn-primary btn-sm" [ngClass]="{'me-2':user?.image}" (click)="openImageCropperDialog()"><i
               class="fa me-2"
-              [ngClass]="{'fa-pencil':user.image,'fa-plus':!user.image}"></i>{{user.image?"Change&nbsp;Photo":"Add&nbsp;Photo"}}</button>
-          <button class="btn btn-danger btn-sm" *ngIf="user.image" (click)="deleteImage()"><i
+              [ngClass]="{'fa-pencil':user?.image,'fa-plus':!user?.image}"></i>{{user?.image?"Change Photo":"Add Photo"}}</button>
+          <button class="btn btn-danger btn-sm" *ngIf="user?.image" (click)="deleteImage()"><i
               class="fa fa-trash"></i></button>
         </div>
       </div>

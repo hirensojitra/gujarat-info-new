@@ -1,68 +1,79 @@
-<div class="h-100 d-flex flex-column container-fluid">
+<div class="image-manager-container">
 
   <!-- Header -->
-  <div class="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between border-bottom py-3 bg-white">
-    <div>
-      <h3 class="mb-1 fw-bold">Image Manager</h3>
-      <small class="text-muted">
+  <header class="manager-header">
+    <div class="header-left">
+      <h3 class="header-title">Image Manager</h3>
+      <span class="folder-path text-muted">
         {{ selectedFolder ? selectedFolder.name : 'All folders' }}
-      </small>
+      </span>
     </div>
-    <div class="mt-2 mt-md-0">
-      <button *ngIf="canUpload()" class="btn btn-primary" (click)="fileInput.click()">
-        <i class="fa fa-upload me-2"></i>Upload
+    <div class="header-right">
+      <button *ngIf="canUpload()" class="btn btn-primary upload-btn" (click)="fileInput.click()">
+        <i class="fa fa-upload me-2"></i>Upload Images
       </button>
       <input type="file" #fileInput hidden multiple (change)="onFileSelected($event)" />
     </div>
-  </div>
+  </header>
 
-  <!-- Body -->
-  <div class="row flex-grow-1 m-0">
+  <!-- Main Content Area -->
+  <div class="main-content-area">
     <!-- Folder Sidebar -->
-    <div class="col-md-3 border-end p-3 bg-light overflow-auto">
-      <h5>Folders</h5>
+    <aside class="folder-sidebar">
+      <h5 class="sidebar-title">Folders</h5>
 
-      <div *ngIf="canUpload()" class="d-flex mb-2">
-        <input type="text" class="form-control me-1" [(ngModel)]="newFolderName" placeholder="New folder name" />
+      <div *ngIf="canUpload()" class="new-folder-input-group">
+        <input type="text" class="form-control" [(ngModel)]="newFolderName" placeholder="New folder name" />
         <button class="btn btn-success" (click)="createFolder()" [disabled]="!newFolderName?.trim()">
           <i class="fa fa-plus"></i>
         </button>
       </div>
 
-      <input type="text" class="form-control mb-3" placeholder="Search..." [(ngModel)]="search"
-        (ngModelChange)="loadFolders()" />
-      <ul class="list-group">
+      <div class="folder-search-bar">
+        <input type="text" class="form-control" placeholder="Search folders..." [(ngModel)]="search"
+          (ngModelChange)="loadFolders()" />
+      </div>
+
+      <ul class="folder-list">
         <li *ngFor="let folder of folders"
-            class="list-group-item list-group-item-action d-flex justify-content-between align-items-center"
+            class="folder-list-item"
             [class.active]="folder.id === selectedFolder?.id"
             (click)="selectFolder(folder)">
-          <span>{{ folder.name }}</span>
-          <button class="btn btn-sm btn-outline-danger" (click)="deleteFolder(folder)">
+          <span class="folder-name"><i class="fa fa-folder me-2"></i>{{ folder.name }}</span>
+          <button class="btn btn-sm btn-outline-danger delete-folder-btn" (click)="deleteFolder(folder); $event.stopPropagation();">
             <i class="fa fa-trash"></i>
           </button>
         </li>
       </ul>
-    </div>
+    </aside>
 
-    <!-- Image Grid -->
-    <div class="col-md-9 py-3 overflow-auto">
-      <div class="row g-3">
-        <div *ngFor="let image of images" class="col-6 col-sm-4 col-md-3 col-lg-2">
-          <div class="card border shadow-sm">
-            <div class="ratio ratio-1x1 bg-light bg-opacity-25" role="img"
-              [ngStyle]="{
-                'background-image': 'url(' + apiUrl + '/user-img/uploads/' + image.id + '?thumb=medium)',
-                'background-size': 'contain',
-                'background-position': 'center',
-                'background-repeat': 'no-repeat'
-              }"
-              [attr.aria-label]="image.metadata || 'Image'">
-            </div>
-            <div class="card-body p-2">
-              <div class="d-flex justify-content-between align-items-center">
-                <small class="text-truncate" style="max-width: 75%;">{{ image.image_url || 'Unnamed' }}</small>
+    <!-- Image Display Area -->
+    <section class="image-display-area">
+      <div *ngIf="images.length === 0 && !loading.images" class="no-images-placeholder">
+        <i class="fa fa-picture-o no-images-icon"></i>
+        <p class="no-images-text">No images found in this folder.</p>
+        <button *ngIf="canUpload()" class="btn btn-primary mt-3" (click)="fileInput.click()">
+          <i class="fa fa-upload me-2"></i>Upload First Image
+        </button>
+      </div>
+
+      <div class="image-grid-container" *ngIf="images.length > 0 || loading.images">
+        <div class="row g-3">
+          <div *ngFor="let image of images" class="col-6 col-sm-4 col-md-3 col-lg-2">
+            <div class="image-card">
+              <div class="image-thumbnail" role="img"
+                [ngStyle]="{
+                  'background-image': 'url(' + apiUrl + '/user-img/uploads/' + image.id + '?thumb=medium)',
+                  'background-size': 'contain',
+                  'background-position': 'center',
+                  'background-repeat': 'no-repeat'
+                }"
+                [attr.aria-label]="image.metadata || 'Image'">
+              </div>
+              <div class="image-info">
+                <span class="image-name">{{ image.image_url || 'Unnamed' }}</span>
                 <div class="dropdown">
-                  <button class="btn btn-sm" type="button" data-bs-toggle="dropdown">
+                  <button class="btn btn-sm image-options-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                     <i class="fa fa-ellipsis-v"></i>
                   </button>
                   <ul class="dropdown-menu dropdown-menu-end">
@@ -85,23 +96,23 @@
       </div>
 
       <!-- Pagination -->
-      <div *ngIf="totalImages > 0" class="mt-4">
+      <div *ngIf="totalImages > 0" class="pagination-container">
         <div pagination [currentPage]="imagePage" [totalItems]="totalImages" [pageSize]="imageLimit"
           [pageSizes]="[12, 24, 48]" (currentPageChange)="onImagePageChange($event)"
           (pageSizeChange)="onImagePageSizeChange($event)">
+        </div>
       </div>
-      </div>
-    </div>
+    </section>
   </div>
 
   <!-- No Access -->
-  <div *ngIf="!canView()" class="alert alert-warning m-3">
+  <div *ngIf="!canView()" class="alert alert-warning no-access-alert">
     You do not have permission to view this content.
   </div>
 
   <!-- Confirm Modal -->
   <div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="confirmModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
         <div class="modal-header">
           <h5 class="modal-title">{{ modalTitle }}</h5>

@@ -1,24 +1,22 @@
-// src/app/common/services/authentication.service.ts
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { Router } from '@angular/router';
-import { CookieService } from 'ngx-cookie-service';
+import { AuthCookieService } from './auth-cookie.service';
 import { UserPublicInfo } from 'src/app/graphql/types/login.types';
 import { environment } from 'src/environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class AuthenticationService {
-  private userSubject = new BehaviorSubject<UserPublicInfo | null>(this.loadUser());
+  private userSubject = new BehaviorSubject<UserPublicInfo | null>(
+    this.loadUser()
+  );
   public user$ = this.userSubject.asObservable();
   private apiUrl = environment.MasterApi + '/auth/avatar/';
-  constructor(private cookie: CookieService, private router: Router) {}
+  constructor(private authCookie: AuthCookieService, private router: Router) {}
   private loadUser(): UserPublicInfo | null {
-    const json = this.cookie.get('user');
-    try {
-      return json ? JSON.parse(json) : null;
-    } catch {
-      return null;
-    }
+    const user = this.authCookie.getUser();
+    console.log('User object after loading from cookie:', user); // Add this line
+    return user;
   }
 
   /** Get the current user value */
@@ -29,10 +27,9 @@ export class AuthenticationService {
   }
 
   /** Save user in a cookie and broadcast it */
-  public setUser(user: UserPublicInfo): void {
-    const json = JSON.stringify(user);
-    const secure = window.location.protocol === 'https:';
-    this.cookie.set('user', json, 7, '/', undefined, secure, 'Lax');
+  public setUser(user: UserPublicInfo, rememberMe: boolean = false): void {
+    console.log('Setting user:', user); // Add this line for debugging
+    this.authCookie.setUser(user, rememberMe);
     this.userSubject.next(user);
   }
 
@@ -46,20 +43,19 @@ export class AuthenticationService {
   }
 
   /** Store the JWT in its own cookie */
-  public setToken(token: string): void {
-    const secure = window.location.protocol === 'https:';
-    this.cookie.set('token', token, 7, '/', undefined, secure, 'Lax');
+  public setToken(token: string, rememberMe: boolean = false): void {
+    this.authCookie.setToken(token, rememberMe);
   }
 
   /** Retrieve JWT */
-  public getToken(): string {
-    return this.cookie.get('token');
+  public getToken(): string | null {
+    return this.authCookie.getToken();
   }
 
   /** Clear cookies and broadcast logout */
   public logout(): void {
-    this.cookie.delete('token', '/');
-    this.cookie.delete('user', '/');
+    this.authCookie.removeToken();
+    this.authCookie.removeUser();
     this.userSubject.next(null);
     this.router.navigate(['/authentication/login']);
   }
@@ -70,15 +66,12 @@ export class AuthenticationService {
   }
 
   /** Save both token and user in session */
-  public saveSession(token: string, user: UserPublicInfo): void {
-    this.cookie.deleteAll('/');
-    const isSecure = window.location.protocol === 'https:';
-    this.cookie.set('token', token, {
-      path: '/',
-      secure: isSecure,
-      sameSite: 'Lax',
-    });
-    this.setUser(user);
-    console.log(token);
+  public saveSession(
+    token: string,
+    user: UserPublicInfo,
+    rememberMe: boolean = false
+  ): void {
+    this.authCookie.setToken(token, rememberMe);
+    this.authCookie.setUser(user, rememberMe);
   }
 }

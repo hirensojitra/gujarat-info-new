@@ -1,6 +1,7 @@
-import { Component, ElementRef, ViewChild } from '@angular/core';
+import { Component, ElementRef, ViewChild, NgZone } from '@angular/core';
 import { CanvasService } from '../../services/canvas';
 import { PosterService } from '../../services/poster';
+import { HistoryService } from 'src/app/core/services/history.service';
 
 @Component({
   selector: 'app-canvas-workspace',
@@ -26,10 +27,12 @@ export class CanvasWorkspaceComponent {
 
   constructor(
     private canvasService: CanvasService,
-    private posterService: PosterService
+    private posterService: PosterService,
+    private zone: NgZone,
+    public historyService: HistoryService // Made public for template access
   ) {}
 
-  ngOnInit(): void {
+  ngAfterViewInit(): void {
     this.initializeCanvas();
     this.updateCanvasInfo();
   }
@@ -39,10 +42,13 @@ export class CanvasWorkspaceComponent {
   }
 
   private initializeCanvas(): void {
-    setTimeout(() => {
+    this.zone.runOutsideAngular(() => {
       this.canvasService.initializeCanvas(this.canvasElement.nativeElement);
+    });
+    // Update canvas info within Angular zone after initialization
+    this.zone.run(() => {
       this.updateCanvasInfo();
-    }, 100);
+    });
   }
     onFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
@@ -72,17 +78,23 @@ export class CanvasWorkspaceComponent {
 
   zoomIn(): void {
     this.canvasService.zoomIn();
-    this.updateCanvasInfo();
+    this.zone.run(() => {
+      this.updateCanvasInfo();
+    });
   }
 
   zoomOut(): void {
     this.canvasService.zoomOut();
-    this.updateCanvasInfo();
+    this.zone.run(() => {
+      this.updateCanvasInfo();
+    });
   }
 
   resetZoom(): void {
     this.canvasService.resetZoom();
-    this.updateCanvasInfo();
+    this.zone.run(() => {
+      this.updateCanvasInfo();
+    });
   }
 
   toggleGrid(): void {
@@ -123,9 +135,25 @@ export class CanvasWorkspaceComponent {
     reader.onload = (e) => {
       const imageUrl = e.target?.result as string;
       this.canvasService.addImage(imageUrl);
-      this.updateCanvasInfo();
+      this.zone.run(() => {
+        this.updateCanvasInfo();
+      });
     };
     reader.readAsDataURL(file);
   }
 
+  // New methods for Undo/Redo
+  undo(): void {
+    this.canvasService.undo();
+    this.zone.run(() => {
+      this.updateCanvasInfo();
+    });
+  }
+
+  redo(): void {
+    this.canvasService.redo();
+    this.zone.run(() => {
+      this.updateCanvasInfo();
+    });
+  }
 }

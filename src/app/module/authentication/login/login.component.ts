@@ -27,6 +27,7 @@ export class LoginComponent implements OnInit {
     this.loginForm = this.fb.group({
       login_id: ['', [Validators.required]],
       pass_key: ['', [Validators.required, Validators.minLength(6)]],
+      rememberMe: [false] // Add this line
     });
   }
 
@@ -37,13 +38,13 @@ export class LoginComponent implements OnInit {
     this.loginService.login(input).subscribe({
       next: (res) => {
         this.loading = false;
-        this.authService.saveSession(res.token, res.user); // ✅ store both token and user
+        this.authService.saveSession(res.token, res.user, input.rememberMe); // Store both token and user, with rememberMe option
         this.toast.show('Login successful!', { class: 'bg-success' });
         res.user.email_verified?this.router.navigate(['/home']):this.router.navigate(['/authentication/verify-email']);
       },
       error: (err) => {
         this.loading = false;
-        console.log(err);
+        
         this.toast.show(err.message || 'Login failed.', { class: 'bg-danger' });
       },
     });

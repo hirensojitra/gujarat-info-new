@@ -38,7 +38,7 @@ export class UpdateUserService {
   ): Observable<UserPublicInfo> {
     const token = this.authenticationService.getToken();
     const { image, ...rest } = input;
-
+    console.log('Updating profile with:', rest, 'and image:', image); // Debugging line
     return this.apollo
       .mutate<UpdateUserProfileResponse, UpdateUserProfileVariables>({
         mutation: UPDATE_USER_PROFILE,

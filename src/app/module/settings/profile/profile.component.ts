@@ -87,7 +87,9 @@ export class ProfileComponent implements OnInit, OnDestroy {
       this.user = u;
       this.calculateCompletion();
       if (this.editing) this.buildForm();
-      this.validateImage(this.user.id);
+      if (this.user) {
+        this.validateImage(this.user.id);
+      }
     });
 
     this.updateUserService.getLanguages().subscribe((list) => {

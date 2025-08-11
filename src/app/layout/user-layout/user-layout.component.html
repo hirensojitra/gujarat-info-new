@@ -1,6 +1,6 @@
 <div class="vh-100 d-flex flex-column">
-  <admin-header [menuData]="filteredMenu$ | async"></admin-header>
-  <div *ngIf="menuLoaded" class="d-flex flex-column flex-grow-1 container-fluid position-relative
+  <admin-header></admin-header>
+  <div class="d-flex flex-column flex-grow-1 container-fluid position-relative
                overflow-hidden overflow-y-auto px-0">
     <router-outlet></router-outlet>
   </div>

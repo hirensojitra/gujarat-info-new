@@ -19,7 +19,7 @@ import { HAS_ROLE } from 'src/app/graphql/queries/authentication.queries';
   providedIn: 'root',
 })
 export class LoginService {
-  constructor(private apollo: Apollo, private cookieService: CookieService) {}
+  constructor(private apollo: Apollo) {}
 
   login(input: LoginInput): Observable<LoginPayload> {
     return this.apollo
@@ -30,7 +30,12 @@ export class LoginService {
       })
       .pipe(
         map((result: any) => result.data.login),
-        catchError((error) => throwError(() => new Error(error.message)))
+        catchError((error) => {
+          if (error.networkError) {
+            return throwError(() => new Error('Network error: Could not connect to the server. Please check your internet connection or try again later.'));
+          }
+          return throwError(() => new Error(error.message));
+        })
       );
   }
   checkUserHasRole(user_id: string, role_code: string) {

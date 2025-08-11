@@ -20,7 +20,6 @@ import {
 import { LoaderModule } from './common/component/loader/loader.module';
 import { ToastModule } from './common/component/toast/toast.module';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { AuthGuard } from './common/guards/auth.guard';
 import { HttpLoaderInterceptor } from './common/interceptor/http-loader.interceptor';
 import { EmailVerificationComponent } from './module/email-verification/email-verification.component';
 
@@ -29,6 +28,7 @@ import { ApolloLink, InMemoryCache } from '@apollo/client/core';
 import { environment } from '../environments/environment';
 import { CookieService } from 'ngx-cookie-service';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
+import { AuthGuard } from './common/guards/auth.guard';
 
 @NgModule({
   declarations: [AppComponent, EmailVerificationComponent],

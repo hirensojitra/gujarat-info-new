@@ -1,325 +1,260 @@
-import { AfterViewInit, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { District, Taluka, Village } from 'src/app/common/interfaces/commonInterfaces';
-import { DevelopmentService } from 'src/app/common/services/development.service';
-import { DistrictService } from 'src/app/common/services/district.service';
-import { TalukaService } from 'src/app/common/services/taluka.service';
-import { VillageService } from 'src/app/common/services/village.service';
-import { ToastService } from 'src/app/common/services/toast.service';
-import { MemberService } from 'src/app/common/services/member.service';
-import { ActivatedRoute, Router } from '@angular/router';
+// ./components/village/village.component.ts
+import {
+  ChangeDetectorRef,
+  Component,
+  ElementRef,
+  OnInit,
+} from '@angular/core';
+import { FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
+import { GraphVillageService } from 'src/app/common/services/graph-village.service';
+import { District, Taluka, Village } from 'src/app/graphql/types/village.types';
+import { catchError } from 'rxjs/operators';
+import { of } from 'rxjs';
+
 declare const bootstrap: any;
+
 @Component({
   selector: 'app-village',
   templateUrl: './village.component.html',
   styleUrls: ['./village.component.scss']
 })
-export class VillageComponent implements OnInit, AfterViewInit {
-
+export class VillageComponent implements OnInit {
+  selectedActiveVillages: Village[] = [];
+  selectedDeletedVillages: Village[] = [];
   villages: Village[] = [];
+  deletedVillages: Village[] = [];
   talukas: Taluka[] = [];
   districts: District[] = [];
-  selectedDistrict!: District | null;
-  selectedTaluka!: Taluka | null;
-  newVillage!: Village;
-  filterVillage!: FormGroup;
-  villageData!: Village | null;
-  villageForm: FormGroup;
-  villageUpdateForm: FormGroup;
-  currentForm: FormGroup;
-  needUpdate: boolean = false;
-  needAdd: boolean = false;
+  selectedTalukaId = '';
+  selectedDistrictId = '';
+  totalActiveVillages = 0;
+  totalDeletedVillages = 0;
 
   villageModal: any;
-  villageModalElement: any;
-  villageModalOptions: any;
-  villageModalTitle!: string;
+  villageModalTitle = 'Add Village';
+  currentForm: FormGroup;
+  needUpdate = false;
 
-  villageDeletedModal: any;
-  villageDeletedModalElement: any;
-  villageDeletedModalOptions: any;
-  villageDeletedModalTitle!: string;
-
-  deletedVillageCount: any;
-  deletedVillageList: any;
+  readonly DEFAULT_LIMIT = 10;
+  activeVillagePagination = { page: 1, limit: this.DEFAULT_LIMIT };
+  deletedVillagePagination = { page: 1, limit: this.DEFAULT_LIMIT };
 
   constructor(
-    private districtService: DistrictService,
-    private talukaService: TalukaService,
-    private villageService: VillageService,
     private fb: FormBuilder,
-    private DS: DevelopmentService,
     private el: ElementRef,
-    private toastService: ToastService,
-    private route: ActivatedRoute,
-    private router: Router
-  ) {
-    const newForm = this.fb.group({
-      name: ['', [Validators.required]],
-      gu_name: [''],
-      district_id: ['', Validators.required],
-      taluka_id: ['', Validators.required],
-      is_deleted: [false] // Default value
-    })
-    this.villageForm = newForm;
+    private villageService: GraphVillageService,
+    private cdr: ChangeDetectorRef
+  ) {}
 
-    const updateForm = this.fb.group({
-      'id': ['', [Validators.required]],
+  ngOnInit(): void {
+    this.initForm();
+    this.loadAllDistricts();
+    this.initModal();
+  }
+
+  private initModal(): void {
+    const element = this.el.nativeElement.querySelector('#villageModal');
+    this.villageModal = new bootstrap.Modal(element);
+  }
+
+  private initForm(): void {
+    this.currentForm = this.fb.group({
+      villages: this.fb.array([this.createVillageForm()])
+    });
+  }
+
+  private createVillageForm(): FormGroup {
+    return this.fb.group({
       name: ['', Validators.required],
-      gu_name: [''],
-      district_id: ['', Validators.required],
-      taluka_id: ['', Validators.required],
-      is_deleted: [false]
-    })
-    this.villageUpdateForm = updateForm
-    this.currentForm = newForm;
-    this.filterVillage = this.fb.group({
-      district: ['', Validators.required],
-      taluka: ['', Validators.required]
-    })
-    this.route.params.subscribe((params) => {
-      this.paramDist = params['distId'] || 1;
-      this.paramTaluka = params['talukaId'] || 1;
+      gu_name: ['', Validators.required],
+      taluka_id: [this.selectedTalukaId, Validators.required]
     });
   }
-  paramDist: any;
-  paramTaluka: any;
-  ngAfterViewInit() {
 
-    this.loadDistrict();
-    this.filterVillage.get('district')?.valueChanges.subscribe((data) => {
-      if (data) {
-        this.districtService.getDistrictById(data).subscribe((value) => {
-          if (value) {
-            this.selectedDistrict = value;
-            this.paramDist = value.id;
-            this.talukas = [];
-            this.villages = [];
-            this.loadTaluka();
-          }
-        });
-      }
-    })
-    this.filterVillage.get('taluka')?.valueChanges.subscribe((data) => {
-      if (data) {
-        this.talukaService.getTalukaById(data).subscribe((value) => {
-          if (value) {
-            this.selectedTaluka = value.data[0];
-            this.updateRoute();
-          }
-          this.loadVillage();
-        });
-      }
-    })
-
-    this.villageModalElement = this.el.nativeElement.querySelector('#villageModal');
-    this.villageModalOptions = {
-      backdrop: false,
-      keyboard: false
-    };
-    this.villageModal = new bootstrap.Modal(this.villageModalElement, this.villageModalOptions);
-    const showListener = () => {
-      this.currentForm.get('district_id')?.setValue(this.selectedDistrict?.id)
-      this.currentForm.get('taluka_id')?.setValue(this.selectedTaluka?.id)
-      this.currentForm.get('is_deleted')?.setValue(false)
-    };
-
-    const hiddenListener = () => {
-      this.villageData = null;
-      this.villageModalTitle = "";
-      this.currentForm.reset();
-      this.needUpdate = false;
-      this.needAdd = false;
-    };
-
-    const hideListener = (data: any) => {
-      console.log(data);
-    };
-
-    this.villageModalElement.addEventListener('show.bs.modal', showListener);
-    this.villageModalElement.addEventListener('hidden.bs.modal', hiddenListener);
-    this.villageModalElement.addEventListener('hide.bs.modal', hideListener);
-
-
-    this.villageDeletedModalElement = this.el.nativeElement.querySelector('#villageDeletedModal');
-    this.villageDeletedModalOptions = {
-      backdrop: false,
-      keyboard: false
-    };
-    this.villageDeletedModal = new bootstrap.Modal(this.villageDeletedModalElement, this.villageDeletedModalOptions);
-    const villageDeletedShowListener = () => { };
-    const villageDeletedHiddenListener = () => { };
-    const villageDeletedHideListener = (data: any) => {
-    };
-
-    this.villageDeletedModalElement.addEventListener('show.bs.modal', villageDeletedShowListener);
-    this.villageDeletedModalElement.addEventListener('hidden.bs.modal', villageDeletedHiddenListener);
-    this.villageDeletedModalElement.addEventListener('hide.bs.modal', villageDeletedHideListener);
+  get villagesFormArray(): FormArray {
+    return this.currentForm.get('villages') as FormArray;
   }
-  editVillage(d: Village) {
-    this.currentForm = this.villageUpdateForm;
-    this.currentForm.reset()
-    this.villageData = d;
-    this.villageModalTitle = "Edit " + d.name;
-    this.currentForm.get('id')?.setValue(d.id);
-    this.currentForm.get('name')?.setValue(d.name);
-    this.currentForm.get('gu_name')?.setValue(d.gu_name);
-    this.currentForm.get('is_deleted')?.setValue(false);
-    this.villageModal.show();
-    this.needUpdate = true;
+
+  updateSelectedActiveVillages(): void {
+    this.selectedActiveVillages = this.villages.filter((v) => v.selected);
   }
-  addVillage() {
-    this.currentForm = this.villageForm;
-    this.currentForm.reset()
-    this.currentForm.get('taluka_id')?.setValue(this.selectedTaluka?.id);
-    this.currentForm.get('is_deleted')?.setValue(false);
-    this.needAdd = true;
-    this.villageModalTitle = "Add Village";
+
+  updateSelectedDeletedVillages(): void {
+    this.selectedDeletedVillages = this.deletedVillages.filter((v) => v.selected);
+  }
+
+  onDistrictChange(): void {
+    this.selectedTalukaId = '';
+    this.loadAllTalukas();
+  }
+
+  onTalukaChange(): void {
+    this.activeVillagePagination = { page: 1, limit: this.DEFAULT_LIMIT };
+    this.deletedVillagePagination = { page: 1, limit: this.DEFAULT_LIMIT };
+    this.loadVillageData();
+  }
+
+  private loadAllDistricts(): void {
+    this.villageService.getAllDistricts().pipe(
+      catchError(err => { console.error(err); return of({ data: { getDistricts: [] } }); })
+    ).subscribe((res) => {
+      this.districts = res?.data?.getDistricts || [];
+      if (this.districts.length) {
+        this.selectedDistrictId = this.districts[0].id;
+        this.loadAllTalukas();
+      }
+    });
+  }
+
+  private loadAllTalukas(): void {
+    this.villageService.getAllTalukas(this.selectedDistrictId).pipe(
+      catchError(err => { console.error(err); return of({ data: { getTalukasByDistrictId: [] } }); })
+    ).subscribe((res) => {
+      this.talukas = res?.data?.getTalukasByDistrictId || [];
+      if (this.talukas.length) {
+        this.selectedTalukaId = this.talukas[0].id;
+        this.loadVillageData();
+      }
+    });
+  }
+
+  private loadVillageData(): void {
+    this.selectedActiveVillages = [];
+    this.selectedDeletedVillages = [];
+    this.villageService.getVillageStatsByTaluka(
+      this.selectedTalukaId,
+      this.activeVillagePagination,
+      this.deletedVillagePagination
+    ).pipe(
+      catchError(err => { console.error(err); return of({ data: null }); })
+    ).subscribe((res) => {
+      const response = res?.data?.getVillageStatsByTaluka;
+      if (!response) return;
+      this.selectedDistrictId = response.selectedDistrictId;
+      this.selectedTalukaId = response.selectedTalukaId;
+      this.talukas = response.talukas || [];
+      this.villages = (response.activeVillagesByTalukaId || []).map(v => ({ ...v, selected: false }));
+      this.deletedVillages = (response.deletedVillagesByTalukaId || []).map(v => ({ ...v, selected: false }));
+      this.totalActiveVillages = response.totalActiveVillagesByTalukaId;
+      this.totalDeletedVillages = response.totalDeletedVillagesByTalukaId;
+      this.cdr.detectChanges();
+    });
+  }
+
+  openVillageModal(): void {
+    this.villageModalTitle = 'Add Village';
+    this.needUpdate = false;
+    this.currentForm.reset();
+    this.villagesFormArray.clear();
+    this.villagesFormArray.push(this.createVillageForm());
     this.villageModal.show();
   }
-  saveVillage() {
-    this.DS.markFormGroupTouched(this.currentForm)
-    if (this.currentForm.valid) {
-      if (this.needUpdate) {
-        this.updateVillage(this.currentForm.value)
-      }
-      if (this.needAdd) {
-        this.newVillage = this.currentForm.value
-        this.addNewVillage()
-      }
+
+  addVillage(): void {
+    this.villagesFormArray.push(this.createVillageForm());
+  }
+
+  removeVillage(i: number): void {
+    if (this.villagesFormArray.length > 1) {
+      this.villagesFormArray.removeAt(i);
+    }
+  }
+
+  private getSelectedVillages(list: Village[]): Village[] {
+    return list.filter((v) => v.selected);
+  }
+
+  saveVillage(): void {
+    if (this.currentForm.invalid) return;
+    const data = this.currentForm.value.villages;
+    const request = this.needUpdate
+      ? this.villageService.updateVillages(data)
+      : this.villageService.createVillages(data);
+    request.pipe(
+      catchError(err => { console.error(err); return of(null); })
+    ).subscribe(() => {
+      this.loadVillageData();
       this.villageModal.hide();
-    } else {
-      const msg = this.needUpdate ? "Please enter valid data to update 'Village'" : "Please enter valid data for 'New Village'";
-      this.toastService.show(msg, { class: 'bg-danger' });
-    }
-  }
-  ngOnInit(): void { }
-  loadDistrict(): void {
-    this.districtService.getDistrict().subscribe((data) => {
-      this.districts = data;
-      if (data.length) {
-        data.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
-        this.selectedDistrict = this.paramDist !== undefined ? data.find(district => district.id == this.paramDist) || data[0] : data[0];
-        this.filterVillage.get('district')?.setValue(this.selectedDistrict?.id);
-        this.talukas = [];
-        this.villages = [];
-      }
     });
   }
-  loadTaluka(): void {
-    const districtId = this.selectedDistrict.id;
-    !!districtId && this.talukaService.getTalukaByDistrict(districtId).subscribe(
-      (data) => {
-        this.talukas = data;
-        data.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
-        this.selectedTaluka = this.paramTaluka !== undefined ? data.find(taluka => taluka.id == this.paramTaluka) || data[0] : data[0];
-        this.filterVillage.get('taluka')?.setValue(this.selectedTaluka?.id);
-      },
-      (error) => {
-        this.filterVillage.get('taluka')?.setValue('');
-        this.talukas = [];
-        this.villages = [];
-      }
-    );
-  }
-  loadVillage(): void {
-    const talukaId = this.filterVillage.get('taluka')?.value;
-    const districtId = this.filterVillage.get('district')?.value;
-    this.villages = [];
-    if (districtId && talukaId) {
-      this.villageService.getVillageByTaluka(talukaId).subscribe((response) => {
-        response.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
-        this.villages = response;
-      });
-    }
-    this.loadDeletedVillageLength();
-  }
-  addNewVillage(): void {
 
-    this.villageService.addVillage(this.newVillage).subscribe(
-      (response) => {
-        console.log('Village name updated successfully:', response);
-        this.loadVillage();
-      },
-      (error) => {
-        console.error(error);
-        // Handle error, e.g., show an error message to the user
-      }
-    );
+  editVillage(village: Village): void {
+    this.villageModalTitle = 'Update Village';
+    this.needUpdate = true;
+    this.villagesFormArray.clear();
+    this.villagesFormArray.push(this.fb.group({
+      id: [village.id],
+      name: [village.name, Validators.required],
+      gu_name: [village.gu_name, Validators.required],
+      taluka_id: [this.selectedTalukaId, Validators.required]
+    }));
+    this.villageModal.show();
   }
+
+  editSelectedVillages(): void {
+    const selected = this.getSelectedVillages(this.villages);
+    if (!selected.length) return;
+    this.needUpdate = true;
+    this.villageModalTitle = 'Edit Villages';
+    const formGroups = selected.map((v) => this.fb.group({
+      id: [v.id],
+      name: [v.name, Validators.required],
+      gu_name: [v.gu_name, Validators.required],
+      taluka_id: [this.selectedTalukaId, Validators.required]
+    }));
+    this.currentForm.setControl('villages', this.fb.array(formGroups));
+    this.villageModal.show();
+  }
+
   deleteVillage(id: string): void {
-    this.villageService.deleteVillage(id).subscribe((response) => {
-      this.loadVillage();
-      this.loadDeletedVillageLength();
-    }, (error) => {
-
-    });
-  }
-  updateVillage(value: Village): void {
-    const villageId = value.id;
-    this.villageService.updateVillageName(villageId, value).subscribe(
-      response => {
-        console.log('Village name updated successfully:', response);
-        this.loadVillage();
-      },
-      error => {
-        console.error('Error updating village name:', error);
-        // Handle error, e.g., show an error message to the user
-      }
-    );
-  }
-  loadDeletedVillageLength(show?: boolean): void {
-    const districtId = this.selectedDistrict?.id;
-    const talukaId = this.selectedTaluka?.id;
-    if (districtId && talukaId) {
-      this.villageService.getDeletedVillageLength(talukaId).subscribe(
-        (data) => {
-          this.deletedVillageCount = data.deletedvillagecount;
-          (!data.deletedVillagesLength) ? this.villageDeletedModal.hide() : false;
-          if (show) {
-            this.openDeletedModal();
-          }
-        },
-        (error) => {
-          console.error('Error loading deleted village count:', error);
-        }
-      );
-    }
-  }
-  loadDeletedVillage(): void {
-    const talukaId = this.selectedTaluka?.id;
-    this.villageService.getDeletedVillage(talukaId).subscribe(
-      (data) => {
-        this.deletedVillageList = data;
-      },
-      (error) => {
-        this.deletedVillageList = null;
-      }
-    );
-  }
-  toggleVillageActive(id: number): void {
-    this.villageService.toggleVillageActive(id).subscribe(
-      (response) => {
-        this.loadDeletedVillageLength(true);
-        this.loadDeletedVillage();
-        this.loadVillage();
-        console.log(response)
-      },
-      (error) => {
-        console.error('Error toggling village active state:', error);
-      }
-    );
-  }
-  openDeletedModal() {
-    this.loadDeletedVillage();
-    this.villageDeletedModal.show();
-  }
-  updateRoute(): void {
-    this.router.navigate(['../../', this.selectedDistrict?.id, this.selectedTaluka?.id], {
-      relativeTo: this.route,
-      queryParamsHandling: 'merge',
-      replaceUrl: true
-    });
+    this.villageService.softDeleteVillage(id).pipe(
+      catchError(err => { console.error(err); return of(null); })
+    ).subscribe(() => this.loadVillageData());
   }
 
+  deleteSelectedVillages(): void {
+    const ids = this.getSelectedVillages(this.villages).map((v) => v.id);
+    this.villageService.softDeleteVillages(ids).pipe(
+      catchError(err => { console.error(err); return of(null); })
+    ).subscribe(() => this.loadVillageData());
+  }
+
+  restoreVillage(id: string): void {
+    this.villageService.restoreVillage(id).pipe(
+      catchError(err => { console.error(err); return of(null); })
+    ).subscribe(() => this.loadVillageData());
+  }
+
+  restoreSelectedVillages(): void {
+    const ids = this.getSelectedVillages(this.deletedVillages).map((v) => v.id);
+    this.villageService.restoreVillages(ids).pipe(
+      catchError(err => { console.error(err); return of(null); })
+    ).subscribe(() => this.loadVillageData());
+  }
+
+  changeActiveVillagePage(page: number): void {
+    if (this.activeVillagePagination.page === page) return;
+    this.activeVillagePagination.page = page;
+    this.loadVillageData();
+  }
+
+  changeActiveVillagePageSize(limit: number): void {
+    if (this.activeVillagePagination.limit === limit) return;
+    this.activeVillagePagination.limit = limit;
+    this.activeVillagePagination.page = 1;
+    this.loadVillageData();
+  }
+
+  changeDeletedVillagePage(page: number): void {
+    if (this.deletedVillagePagination.page === page) return;
+    this.deletedVillagePagination.page = page;
+    this.loadVillageData();
+  }
+
+  changeDeletedVillagePageSize(limit: number): void {
+    if (this.deletedVillagePagination.limit === limit) return;
+    this.deletedVillagePagination.limit = limit;
+    this.deletedVillagePagination.page = 1;
+    this.loadVillageData();
+  }
 }

@@ -1,5 +1,5 @@
 <div class="header-container d-flex flex-md-row">
-    <abs [menuData]="menuData" [menuHover]="menuHover" [toggleOutside]="toggleOutside"
+    <abs [menuData]="filteredMenu$ | async" [menuHover]="menuHover" [toggleOutside]="toggleOutside"
         [logo]="logo" [compactLogo]="compactLogo"></abs>
     <button class="btn btn-primary menu-toggle m-0" (click)="toggleMenu()" aria-label="Menu" remSize [hPX]="46"
         [wPX]="46">

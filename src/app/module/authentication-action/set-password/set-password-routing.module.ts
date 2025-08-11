@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { SetPasswordComponent } from './set-password.component';
-import { NewAuthGuard } from 'src/app/common/guards/new-auth.guard';
+import { AuthGuard } from 'src/app/common/guards/auth.guard';
 
 const routes: Routes = [{
   path: '',
@@ -12,7 +12,7 @@ const routes: Routes = [{
     keywords: 'PostNew, set password, authentication, portal',
     robots: 'index, follow',
   },
-  canActivate: [NewAuthGuard]
+  canActivate: [AuthGuard]
 }];
 
 @NgModule({

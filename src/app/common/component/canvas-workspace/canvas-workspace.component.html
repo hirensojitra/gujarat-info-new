@@ -55,6 +55,8 @@
 
             <!-- Canvas Element -->
             <canvas #canvasElement
+                [attr.width]="canvasWidth"
+                [attr.height]="canvasHeight"
                 class="canvas-element border border-gray-300 dark:border-gray-600 rounded-lg bg-white"
                 (dragover)="onDragOver($event)" (dragleave)="onDragLeave($event)" (drop)="onDrop($event)">
             </canvas>

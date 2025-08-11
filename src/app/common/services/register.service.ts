@@ -41,12 +41,14 @@ export class RegisterService {
           return res.data.register;
         }),
         catchError((err: ApolloError) => {
+          if (err.networkError) {
+            return throwError(() => new Error('Network error: Could not connect to the server. Please check your internet connection or try again later.'));
+          }
           const gqlMsg = err.graphQLErrors?.[0]?.message;
           if (gqlMsg) {
             return throwError(() => new Error(gqlMsg));
           }
-          const netMsg = err.networkError?.message;
-          return throwError(() => new Error(netMsg || err.message));
+          return throwError(() => new Error(err.message));
         })
       );
   }
@@ -68,12 +70,14 @@ export class RegisterService {
           return res.data.verifyEmailOtp;
         }),
         catchError((err: ApolloError) => {
+          if (err.networkError) {
+            return throwError(() => new Error('Network error: Could not connect to the server. Please check your internet connection or try again later.'));
+          }
           const gqlMsg = err.graphQLErrors?.[0]?.message;
           if (gqlMsg) {
             return throwError(() => new Error(gqlMsg));
           }
-          const netMsg = err.networkError?.message;
-          return throwError(() => new Error(netMsg || err.message));
+          return throwError(() => new Error(err.message));
         })
       );
   }
