@@ -15,6 +15,7 @@ export interface Image {
   description?: string;
   size?: string;
   created_at?: string;
+  _objectUrl?: string;
 }
 
 // ─── GraphQL Response Types ──────────────────────────

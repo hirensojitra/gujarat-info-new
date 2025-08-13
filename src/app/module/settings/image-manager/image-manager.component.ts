@@ -9,6 +9,8 @@ import {
   UploadImageResponse,
 } from 'src/app/graphql/types/img.types';
 import { environment } from 'src/environments/environment';
+import { Modal } from 'bootstrap';
+
 
 interface UploadFile {
   name: string;
@@ -55,7 +57,7 @@ export class ImageManagerComponent implements OnInit {
     private roleService: RoleService,
     private elementRef: ElementRef,
     private renderer: Renderer2,
-    private toastService: ToastService
+    private toastService: ToastService,
   ) {}
 
   async ngOnInit(): Promise<void> {
@@ -237,7 +239,8 @@ export class ImageManagerComponent implements OnInit {
     }
   }
   generateRandomName(length: number) {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    const chars =
+      'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     let result = '';
     for (let i = 0; i < length; i++) {
       result += chars.charAt(Math.floor(Math.random() * chars.length));
@@ -293,7 +296,15 @@ export class ImageManagerComponent implements OnInit {
         this.imgService
           .refreshImage(image.id, this.selectedFolder.id, file)
           .subscribe({
-            next: () => this.loadImages(),
+            next: (updatedImage) => {
+              // Replace only the updated image in the array
+              const index = this.images.findIndex((img) => img.id === image.id);
+              if (index !== -1) {
+                image.image_url = updatedImage.imageUrl;
+                console.log('Image refreshed successfully:', image.image_url);
+                image._objectUrl = URL.createObjectURL(file);
+              }
+            },
             error: (err) => {
               console.error('Error refreshing image:', err);
               alert('Failed to refresh image');
@@ -337,28 +348,39 @@ export class ImageManagerComponent implements OnInit {
   modalMessage = '';
   pendingDeleteImage: Image | null = null;
 
+  private confirmModalInstance?: Modal;
+
+
   openConfirmModal(image: Image): void {
     this.modalTitle = 'Confirm Delete';
     this.modalMessage = `Are you sure you want to delete "${image.id}"?`;
     this.pendingDeleteImage = image;
-    const modal = new bootstrap.Modal(document.getElementById('confirmModal')!);
-    modal.show();
+
+    const modalElement = document.getElementById('confirmModal')!;
+    this.confirmModalInstance = new bootstrap.Modal(modalElement);
+    this.confirmModalInstance.show();
   }
 
   confirmModal(): void {
     if (!this.selectedFolder || !this.pendingDeleteImage) return;
+
     this.imgService
       .deleteImage(this.selectedFolder.id, this.pendingDeleteImage.id)
       .subscribe({
-        next: () => this.loadImages(),
+        next: () => {
+          this.loadImages();
+          this.confirmModalInstance?.hide(); // ✅ Close modal on success
+        },
         error: () => alert('Failed to delete image.'),
       });
+
     this.pendingDeleteImage = null;
   }
+
   copyHrefToClipboard(event: MouseEvent, image: Image): void {
     event.preventDefault();
     const el = this.renderer.createElement('textarea');
-    el.value = environment.MasterApi +`/user-img/uploads/`+ image.id;
+    el.value = environment.MasterApi + `/user-img/uploads/` + image.id;
     this.renderer.appendChild(this.elementRef.nativeElement, el);
     el.select();
     document.execCommand('copy');

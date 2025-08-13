@@ -27,7 +27,11 @@ export const UPLOAD_IMAGE = gql`
 // 🔁 Refresh (replace) an existing image
 export const REFRESH_IMAGE = gql`
   mutation RefreshImage($folderId: ID!, $imageId: ID!, $image: Upload!) {
-    refreshImage(folderId: $folderId, imageId: $imageId, image: $image)
+    refreshImage(folderId: $folderId, imageId: $imageId, image: $image) {
+      id
+      message
+      imageUrl
+    }
   }
 `;
 

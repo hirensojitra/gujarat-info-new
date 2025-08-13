@@ -98,7 +98,11 @@ import{C as Mt,F as Et,H as g,Q as St,S as Lt,a as yt,aa as Tt,ba as P,ca as At,
   }
 `,Gt=l`
   mutation RefreshImage($folderId: ID!, $imageId: ID!, $image: Upload!) {
-    refreshImage(folderId: $folderId, imageId: $imageId, image: $image)
+    refreshImage(folderId: $folderId, imageId: $imageId, image: $image) {
+      id
+      message
+      imageUrl
+    }
   }
 `,Ht=l`
   mutation RenameFolder($folderId: ID!, $name: String!) {

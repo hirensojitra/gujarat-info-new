@@ -97,7 +97,11 @@ import{m as xt,o as l}from"./chunk-SQRP6PMK.js";import{a as ft}from"./chunk-WIB4
   }
 `,Gt=l`
   mutation RefreshImage($folderId: ID!, $imageId: ID!, $image: Upload!) {
-    refreshImage(folderId: $folderId, imageId: $imageId, image: $image)
+    refreshImage(folderId: $folderId, imageId: $imageId, image: $image) {
+      id
+      message
+      imageUrl
+    }
   }
 `,Ht=l`
   mutation RenameFolder($folderId: ID!, $name: String!) {
