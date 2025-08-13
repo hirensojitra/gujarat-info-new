@@ -205,6 +205,24 @@ export interface PostDetails {
   created_at?: string | null;
   updated_at?: string | null;
   deleted_at?: string | null;
+  category?: PostCategory;
+  subcategory?: PostSubcategory;
+  subcategory_id?: string | null;
+}
+
+export interface PostCategory {
+  id: string;
+  name: string;
+  description?: string;
+  active?: boolean;
+}
+
+export interface PostSubcategory {
+  id: string;
+  name: string;
+  description?: string;
+  category_id: string;
+  active?: boolean;
 }
 
 /** ===== Input types for mutations ===== */
@@ -261,27 +279,30 @@ export interface PostInput {
 }
 
 export interface PostUpdateInput {
-  id: string;
-  h?: number;
-  w?: number;
-  title?: string;
-  info?: string;
-  info_show?: boolean;
-  backgroundurl?: string;
-  data?: DataElementInput[];
-  download_counter?: number;
-  published?: boolean;
-  track?: boolean;
+  id?: string;
+  deleted: boolean;
+  h: number;
+  w: number;
+  title: string;
+  info: string;
+  info_show: boolean;
+  backgroundurl: string;
+  data: JSON;
+  download_counter: number;
+  published: boolean;
+  track: boolean;
+  subcategory_id: string | null;
+  apiData: JSON;
 }
 export interface MinimalPost {
-  id:         string;
-  title:      string;
-  info:       string;
-  image:      string | null;
+  id: string;
+  title: string;
+  info: string;
+  image: string | null;
   updated_at: string | null;
 }
 
 export interface MinimalPostListResponse {
-  posts:      MinimalPost[];
+  posts: MinimalPost[];
   pagination: Pagination;
 }

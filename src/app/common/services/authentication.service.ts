@@ -15,7 +15,6 @@ export class AuthenticationService {
   constructor(private authCookie: AuthCookieService, private router: Router) {}
   private loadUser(): UserPublicInfo | null {
     const user = this.authCookie.getUser();
-    console.log('User object after loading from cookie:', user); // Add this line
     return user;
   }
 
@@ -28,7 +27,6 @@ export class AuthenticationService {
 
   /** Save user in a cookie and broadcast it */
   public setUser(user: UserPublicInfo, rememberMe: boolean = false): void {
-    console.log('Setting user:', user); // Add this line for debugging
     this.authCookie.setUser(user, rememberMe);
     this.userSubject.next(user);
   }
@@ -71,7 +69,7 @@ export class AuthenticationService {
     user: UserPublicInfo,
     rememberMe: boolean = false
   ): void {
-    this.authCookie.setToken(token, rememberMe);
-    this.authCookie.setUser(user, rememberMe);
+    this.setToken(token, rememberMe);
+    this.setUser(user, rememberMe);
   }
 }

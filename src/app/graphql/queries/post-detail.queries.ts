@@ -93,148 +93,28 @@ export const GET_POST_BY_ID = gql`
       download_counter
       published
       track
-      data {
-        title
-        editable
-        boxed
-        rect {
-          x
-          y
-          width
-          height
-          rx
-          ry
-          fill
-          fillOpacity
-          opacity
-          rotate
-          originX
-          originY
-          stroke
-          strokeOpacity
-          strokeWidth
-          strokeAlignment
-        }
-        circle {
-          cx
-          cy
-          r
-          fill
-          fillOpacity
-          opacity
-          originX
-          originY
-          stroke
-          strokeWidth
-          strokeOpacity
-          strokeAlignment
-        }
-        ellipse {
-          cx
-          cy
-          rx
-          ry
-          fill
-          fillOpacity
-          opacity
-          originX
-          originY
-          rotate
-          stroke
-          strokeWidth
-          strokeOpacity
-          strokeAlignment
-        }
-        line {
-          x1
-          y1
-          x2
-          y2
-          stroke
-          strokeWidth
-          opacity
-          originX
-          originY
-          rotate
-        }
-        text {
-          x
-          y
-          fs
-          fw
-          text
-          api
-          lang
-          controlName
-          dependency
-          type
-          color
-          fontStyle {
-            italic
-            underline
-          }
-          rotate
-          fontFamily
-          textShadow {
-            enable
-            color
-            blur
-            offsetX
-            offsetY
-          }
-          backgroundColor
-          textEffects {
-            enable
-            gradient {
-              enable
-              startColor
-              endColor
-              direction
-            }
-            outline {
-              enable
-              color
-              width
-            }
-            glow {
-              enable
-              color
-              blur
-            }
-          }
-          textAnchor
-          alignmentBaseline
-          letterSpacing
-          lineHeight
-          textTransformation
-          opacity
-          originX
-          originY
-        }
-        image {
-          r
-          x
-          y
-          imageUrl
-          borderColor
-          borderWidth
-          shape
-          origin
-          placeholder
-          svgProperties {
-            fill
-            stroke
-            strokeWidth
-          }
-          rotate
-        }
-      }
+      data
       msg
       apiData
       image
       created_at
       updated_at
       deleted_at
+      subcategory_id
+      category {
+        id
+        name
+        description
+        active
+      }
+      deleted
+      subcategory {
+        id
+        name
+        description
+        category_id
+        active
+      }
     }
   }
 `;

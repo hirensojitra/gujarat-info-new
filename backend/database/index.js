@@ -19,25 +19,32 @@
 
 const { Pool } = require('pg');
 
-// Create a new Pool instance with connection details
-const pool = new Pool({
-    user: process.env.DB_USERNAME,
-    host: process.env.DB_HOST,
-    database: process.env.DB_DBNAME,
-    password: process.env.DB_PASSWORD,
-    port: process.env.DB_PORT, // Provide your PostgreSQL port
-    ssl: {
-        rejectUnauthorized: false, // Disable SSL certificate verification if using self-signed certificates
-    },
-});
+let pool;
+try {
+    // Create a new Pool instance with connection details
+    pool = new Pool({
+        user: process.env.DB_USERNAME,
+        host: process.env.DB_HOST,
+        database: process.env.DB_DBNAME,
+        password: process.env.DB_PASSWORD,
+        port: process.env.DB_PORT, // Provide your PostgreSQL port
+        ssl: {
+            rejectUnauthorized: false, // Disable SSL certificate verification if using self-signed certificates
+        },
+    });
 
-// Test the connection
-pool.connect((err, client, release) => {
-    if (err) {
-        return console.error('Error acquiring client', err.stack);
-    }
-    console.log('Connected successfully');
-    // release(); // Release the client back to the pool
-});
+    // Test the connection
+    pool.connect((err, client, release) => {
+        if (err) {
+            return console.error('Error acquiring client', err.stack);
+        }
+        console.log('Connected successfully');
+        release(); // Release the client back to the pool
+    });
+} catch (error) {
+    console.error('Error initializing PostgreSQL pool:', error);
+    // You might want to exit the process or handle this error more gracefully
+    process.exit(1); // Exit if pool cannot be initialized
+}
 
 module.exports = pool;

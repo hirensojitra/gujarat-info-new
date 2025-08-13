@@ -199,6 +199,9 @@ const typeDefs = gql`
     created_at: String
     updated_at: String
     deleted_at: String
+    subcategoryId: ID
+    category: PostCategory
+    subcategory: PostSubcategory
   }
 
   input RectPropertiesInput {
@@ -360,6 +363,7 @@ const typeDefs = gql`
     download_counter: Int!
     published: Boolean!
     track: Boolean!
+    subcategory_id: ID!
   }
   input PostUpdateInput {
     id: String!
@@ -373,6 +377,7 @@ const typeDefs = gql`
     download_counter: Int
     published: Boolean
     track: Boolean
+    subcategory_id: ID
   }
 
   type Query {
@@ -384,6 +389,7 @@ const typeDefs = gql`
       order: String
       published: Boolean
       info_show: Boolean
+      subcategoryId: ID
     ): PostListResponse!
     getPostById(id: String!): PostDetails
 

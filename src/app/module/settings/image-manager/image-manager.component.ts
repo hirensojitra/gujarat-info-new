@@ -236,7 +236,14 @@ export class ImageManagerComponent implements OnInit {
       this.uploadImages(Array.from(event.dataTransfer.files));
     }
   }
-
+  generateRandomName(length: number) {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let result = '';
+    for (let i = 0; i < length; i++) {
+      result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return result;
+  }
   uploadImages(files: File[]) {
     if (!this.selectedFolder) return;
     for (const file of files) {
@@ -245,9 +252,9 @@ export class ImageManagerComponent implements OnInit {
         alert('Only JPG, JPEG, or PNG files are allowed.');
         continue;
       }
-
+      const randomFileName = this.generateRandomName(6) + '.' + ext;
       const upload: UploadFile = {
-        name: file.name,
+        name: randomFileName,
         progress: 0,
         status: 'uploading',
       };

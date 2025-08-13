@@ -18,7 +18,9 @@ import {
   EllipseProperties,
   ImageElement,
   LineProperties,
+  PostCategory,
   PostDetails,
+  PostSubcategory,
   RectProperties,
   SvgProperties,
   TextElement,
@@ -34,6 +36,8 @@ import { animate, style, transition, trigger } from '@angular/animations';
 import { environment } from 'src/environments/environment';
 import { PostThumbService } from 'src/app/common/services/post-thumb.service';
 import { forkJoin, Observable } from 'rxjs';
+import { CategoryService } from 'src/app/common/services/category.service';
+import { NewPostDetailService } from 'src/app/common/services/new-post-detail.service';
 declare const bootstrap: any;
 interface FontStyles {
   [fontFamily: string]: Set<string>;
@@ -87,6 +91,8 @@ export class PostGenerateComponent implements OnInit, AfterViewInit {
   colorSet: string[] = [];
   activeControlIndex!: number;
   controlSet: ShapeControl[][] = [];
+  categories$: Observable<PostCategory[]>;
+  subcategories$: Observable<PostSubcategory[]>;
   controlValues: ShapeControls = {
     rect: [
       { id: 'border', title: 'Border', icon: 'fa-x-border', active: false },
@@ -330,7 +336,9 @@ export class PostGenerateComponent implements OnInit, AfterViewInit {
     private router: Router,
     private http: HttpClient,
     private toastService: ToastService,
-    private postThumb: PostThumbService
+    private postThumb: PostThumbService,
+    private categoryService: CategoryService,
+    private postService: NewPostDetailService
   ) {
     console.log('constructor: ' + this.Seq++);
     this.route.queryParams.subscribe((params) => {
@@ -440,12 +448,64 @@ export class PostGenerateComponent implements OnInit, AfterViewInit {
   }
   getPostById(postId: any): void {
     console.log('getPostById: ' + this.Seq++);
-    this.PS.getPostById(postId).subscribe(
+    this.postService.getPostById(postId).subscribe(
       (post) => {
         if (post) {
-          this.postDetails = post;
+          console.log('Post fetched successfully:', post);
+          // Map the fetched post to match the local PostDetails interface
+          this.postDetails = {
+            ...post,
+            data: (post.data || []).map((item: any) => {
+              // Ensure all required properties exist and have defaults
+              return {
+                ...item,
+                rect: item.rect
+                  ? {
+                      originX: item.rect.originX ?? 0,
+                      originY: item.rect.originY ?? 0,
+                      ...item.rect,
+                    }
+                  : undefined,
+                circle: item.circle
+                  ? {
+                      originX: item.circle.originX ?? 0,
+                      originY: item.circle.originY ?? 0,
+                      ...item.circle,
+                    }
+                  : undefined,
+                ellipse: item.ellipse
+                  ? {
+                      originX: item.ellipse.originX ?? 0,
+                      originY: item.ellipse.originY ?? 0,
+                      ...item.ellipse,
+                    }
+                  : undefined,
+                line: item.line
+                  ? {
+                      originX: item.line.originX ?? 0,
+                      originY: item.line.originY ?? 0,
+                      ...item.line,
+                    }
+                  : undefined,
+                text: item.text
+                  ? {
+                      originX: item.text.originX ?? 0,
+                      originY: item.text.originY ?? 0,
+                      ...item.text,
+                    }
+                  : undefined,
+                image: item.image
+                  ? {
+                      origin: item.image.origin ?? 'center',
+                      ...item.image,
+                    }
+                  : undefined,
+              };
+            }),
+          };
           this.initForm();
         } else {
+          console.error('Post not found');
         }
       },
       (error) => {
@@ -456,6 +516,7 @@ export class PostGenerateComponent implements OnInit, AfterViewInit {
   dataArray!: FormArray;
   initForm() {
     console.log('initForm: ' + this.Seq++);
+    console.log(this.postDetails.category);
     this.postDetailsForm = this.fb.group({
       id: [this.postDetails.id],
       deleted: [this.postDetails.deleted, Validators.required],
@@ -471,6 +532,8 @@ export class PostGenerateComponent implements OnInit, AfterViewInit {
       info_show: [this.postDetails.info_show || false],
       published: [this.postDetails.published || false],
       track: [this.postDetails.track || false],
+      category_id: [this.postDetails.category?.id, Validators.required],
+      subcategory_id: [this.postDetails.subcategory?.id, Validators.required],
       data: this.fb.array([]),
       apiData: this.apiData,
     });
@@ -483,6 +546,15 @@ export class PostGenerateComponent implements OnInit, AfterViewInit {
     this.postDetailsForm.valueChanges.subscribe(async (v) => {
       this.postDetails = v;
     });
+    this.postDetailsForm.get('category_id').valueChanges.subscribe((val) => {
+      this.onCategoryChange();
+    });
+    this.categories$ = this.categoryService.getCategories();
+    if (this.postDetails.category?.id) {
+      this.subcategories$ = this.categoryService.getSubcategories(
+        this.postDetails.category?.id
+      );
+    }
     this.getColors(this.postDetails.backgroundurl, 10);
     this.dataArray = this.postDetailsForm.get('data') as FormArray;
     this.postDetails.data.forEach((d) => {
@@ -494,6 +566,15 @@ export class PostGenerateComponent implements OnInit, AfterViewInit {
       d.image && this.addData('image', d);
     });
     this.rebuild(this.postDetails.data);
+  }
+
+  onCategoryChange(): void {
+    const categoryId = this.postDetailsForm.get('category_id').value;
+    if (categoryId) {
+      this.subcategories$ = this.categoryService.getSubcategories(categoryId);
+      console.log('Subcategories loaded for category:', categoryId);
+      this.postDetailsForm.get('subcategory_id').setValue(null);
+    }
   }
 
   addData(t: string, value?: Data) {
@@ -953,7 +1034,7 @@ export class PostGenerateComponent implements OnInit, AfterViewInit {
     return textForm;
   }
   async fetchDataFromAPI(apiUrl: string, controlName: string): Promise<void> {
-    console.log("fetchDataFromAPI: " + this.Seq++);
+    console.log('fetchDataFromAPI: ' + this.Seq++);
     await this.http.get<any[]>(apiUrl).subscribe({
       next: (data) => {
         this.apiData[controlName] = data['data'] || data;
@@ -962,7 +1043,7 @@ export class PostGenerateComponent implements OnInit, AfterViewInit {
     });
   }
   async syncData(control: AbstractControl | null) {
-    console.log("syncData: " + this.Seq++);
+    console.log('syncData: ' + this.Seq++);
     if (!(control instanceof FormGroup)) {
       console.error('Invalid form group');
       return;
@@ -1005,7 +1086,7 @@ export class PostGenerateComponent implements OnInit, AfterViewInit {
     t: Data,
     cn: string
   ) {
-    console.log("addSelectControls: " + this.Seq++);
+    console.log('addSelectControls: ' + this.Seq++);
     this.selectData[cn] = {
       title: textForm.get('title')?.value || '',
       control: textFormGroup.get('text') as FormControl,
@@ -1039,7 +1120,7 @@ export class PostGenerateComponent implements OnInit, AfterViewInit {
     }
   }
   private removeSelectControls(textFormGroup: FormGroup) {
-    console.log("removeSelectControls: " + this.Seq++);
+    console.log('removeSelectControls: ' + this.Seq++);
     if (textFormGroup.contains('lang')) {
       textFormGroup.removeControl('lang');
     }
@@ -1227,7 +1308,7 @@ export class PostGenerateComponent implements OnInit, AfterViewInit {
     return false;
   }
   async rebuild(dataArray: Data[]) {
-    console.log("rebuild: " + this.Seq++);
+    console.log('rebuild: ' + this.Seq++);
     console.log('rebuild: ' + this.Seq++);
     this.dataArray.clear();
     this.controlSet = [];
@@ -1272,13 +1353,12 @@ export class PostGenerateComponent implements OnInit, AfterViewInit {
     return invalidControls;
   }
   private loadData(key: string, api: string) {
-    console.log("loadData: " + this.Seq++);
+    console.log('loadData: ' + this.Seq++);
     if (!this.apiData[key]) {
       this.fetchDataFromAPI(api, key);
     }
   }
   private setupDependency(
-    
     key: string,
     data: {
       title: string;
@@ -1287,7 +1367,7 @@ export class PostGenerateComponent implements OnInit, AfterViewInit {
       dependency: string;
     }
   ) {
-    console.log("setupDependency: " + this.Seq++);
+    console.log('setupDependency: ' + this.Seq++);
     if (!data.api.endsWith('/')) {
       data.api += '/';
     }
@@ -1307,10 +1387,13 @@ export class PostGenerateComponent implements OnInit, AfterViewInit {
     console.log('onSubmit: ' + this.Seq++);
     if (this.postDetailsForm?.valid) {
       const postData = this.postDetailsForm.value;
+      delete postData.category_id;
+      delete postData.apiData;
+      postData.data = postData.data as JSON[];
       const operation$ =
         isCopy == true || this.postDetails.id == null
-          ? this.PS.addPost({ ...postData, id: null })
-          : this.PS.updatePost(postData);
+          ? this.postService.addPost({ ...postData, id: null })
+          : this.postService.updatePost(postData);
 
       operation$.subscribe({
         next: (res) => {
@@ -1378,7 +1461,7 @@ export class PostGenerateComponent implements OnInit, AfterViewInit {
   }
   @ViewChild('svgElement') svgElement: ElementRef;
   private generateThumbnail(): Promise<Blob> {
-    console.log("generateThumbnail: " + this.Seq++);
+    console.log('generateThumbnail: ' + this.Seq++);
     return new Promise(async (resolve, reject) => {
       try {
         if (!this.svgElement?.nativeElement) {
@@ -1489,7 +1572,7 @@ export class PostGenerateComponent implements OnInit, AfterViewInit {
     return fontStyles;
   }
   async loadFonts(fontStyles: FontStyles) {
-    console.log("loadFonts: " + this.Seq++);
+    console.log('loadFonts: ' + this.Seq++);
     const svg = this.svgElement.nativeElement;
     let svgDefs =
       (svg.querySelector('defs') as SVGDefsElement) ||
@@ -1531,7 +1614,7 @@ export class PostGenerateComponent implements OnInit, AfterViewInit {
     }
   }
   async loadFontAsBase64(fontUrl: string): Promise<string> {
-    console.log("loadFontAsBase64: " + this.Seq++);
+    console.log('loadFontAsBase64: ' + this.Seq++);
     const response = await fetch(fontUrl);
     const fontData = await response.arrayBuffer();
     return btoa(
@@ -1585,7 +1668,7 @@ export class PostGenerateComponent implements OnInit, AfterViewInit {
     return `${environment.MasterApi}/thumb-images/${postId}`;
   }
   private uploadThumbnail(postId: string, blob: Blob): void {
-    console.log("uploadThumbnail: " + this.Seq++);
+    console.log('uploadThumbnail: ' + this.Seq++);
     const file = new File([blob], `${postId}.jpg`, {
       type: blob.type || 'image/jpeg',
     });

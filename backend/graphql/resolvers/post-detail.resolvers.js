@@ -58,24 +58,28 @@ async function ensureAdmin(req) {
       WHERE ui.id = $1`,
     [payload.user_id]
   );
-  if (!rows.length || rows[0].code !== 'ADMIN') {
+  if (!rows.length || rows[0].code !== 'ADMIN' && rows[0].code !== 'OWNER') {
     throw new Error('Not authorized: ADMIN role required');
   }
 }
 
 /** Build dynamic WHERE clauses for list queries */
-function buildFilters({ search, published, info_show }) {
+function buildFilters({ search, published, info_show, subcategoryId }) {
   const clauses = ['deleted = false', 'LOWER(title) LIKE $1'];
   const params  = [`%${search.toLowerCase()}%`];
   let idx = 2;
 
   if (published !== undefined) {
-    clauses.push(`published = $${idx++}`);
+    clauses.push(`published = ${idx++}`);
     params.push(published);
   }
   if (info_show !== undefined) {
-    clauses.push(`info_show = $${idx++}`);
+    clauses.push(`info_show = ${idx++}`);
     params.push(info_show);
+  }
+  if (subcategoryId !== undefined) {
+    clauses.push(`subcategoryId = ${idx++}`);
+    params.push(subcategoryId);
   }
 
   return { where: clauses.join(' AND '), params, nextIndex: idx };
@@ -85,18 +89,35 @@ const resolvers = {
   JSON:   JSONScalar,
   Upload: GraphQLUpload,
 
+  PostDetails: {
+    async subcategory(post, _, { pool }) {
+      if (!post.subcategoryId) return null;
+      const { rows } = await pool.query('SELECT * FROM poster_subcategories WHERE id = $1', [post.subcategoryId]);
+      return rows[0];
+    },
+    async category(post, _, { pool }) {
+      if (!post.subcategoryId) return null;
+      const { rows } = await pool.query(`
+        SELECT c.* FROM poster_categories c
+        JOIN poster_subcategories sc ON c.id = sc.category_id
+        WHERE sc.id = $1
+      `, [post.subcategoryId]);
+      return rows[0];
+    }
+  },
+
   Query: {
     async getAllPosts(_, {
       page = 1, limit = 12, search = '',
       sortBy = 'created_at', order = 'desc',
-      published, info_show
+      published, info_show, subcategoryId
     }) {
       const offset = (page - 1) * limit;
       const validOrder = order.toLowerCase() === 'desc' ? 'DESC' : 'ASC';
       const validSortColumns = ['id','title','created_at'];
       const sortColumn = validSortColumns.includes(sortBy) ? sortBy : 'created_at';
 
-      const { where, params, nextIndex } = buildFilters({ search, published, info_show });
+      const { where, params, nextIndex } = buildFilters({ search, published, info_show, subcategoryId });
       const listSql = `
         SELECT * FROM post_details
         WHERE ${where}
@@ -125,9 +146,34 @@ const resolvers = {
 
     async getPostById(_, { id }) {
       const { rows } = await pool.query(
-        `SELECT * FROM post_details WHERE id = $1`, [id]
+        `SELECT pd.*, pd.subcategory_id as "subcategoryId",
+                c.id as category_id, c.name as category_name, c.description as category_description, c.active as category_active,
+                sc.id as subcategory_id_from_sc, sc.name as subcategory_name, sc.description as subcategory_description, sc.active as subcategory_active
+         FROM post_details pd
+         LEFT JOIN poster_subcategories sc ON pd.subcategory_id = sc.id
+         LEFT JOIN poster_categories c ON sc.category_id = c.id
+         WHERE pd.id = $1`,
+        [id]
       );
-      return rows[0] || null;
+      const post = rows[0];
+      if (!post) return null;
+
+      return {
+        ...post,
+        category: post.category_id ? {
+          id: post.category_id,
+          name: post.category_name,
+          description: post.category_description,
+          active: post.category_active
+        } : null,
+        subcategory: post.subcategory_id_from_sc ? {
+          id: post.subcategory_id_from_sc,
+          name: post.subcategory_name,
+          description: post.subcategory_description,
+          category_id: post.category_id,
+          active: post.subcategory_active
+        } : null
+      };
     },
 
     async getAllSoftDeletedPosts(_, {
@@ -210,7 +256,7 @@ const resolvers = {
       const {
         h, w, title, info, info_show,
         backgroundurl, data, download_counter,
-        published, track
+        published, track, subcategoryId
       } = input;
 
       const now      = new Date().toISOString();
@@ -220,17 +266,17 @@ const resolvers = {
         INSERT INTO post_details
           (id, deleted, h, w, title, info, info_show,
            backgroundurl, data, download_counter,
-           created_at, updated_at, published, track)
+           created_at, updated_at, published, track, subcategory_id)
         VALUES
-          ($1, false, $2, $3, $4, $5, $6,
-           $7, $8, $9,
-           $10, $10, $11, $12)
+          ($1, $2, $3, $4, $5, $6, $7,
+           $8, $9, $10,
+           $11, $12, $13, $14, $15)
         RETURNING *;
       `;
       const { rows } = await pool.query(sql, [
-        id, h, w, title, info, info_show,
+        id, false, h, w, title, info, info_show,
         backgroundurl, data, download_counter,
-        now, published, track
+        now, now, published, track, subcategoryId
       ]);
       return rows[0];
     },
@@ -239,25 +285,30 @@ const resolvers = {
       await ensureAdmin(req);
 
       const { id, ...fields } = input;
+      if (fields.subcategoryId) {
+        fields.subcategory_id = fields.subcategoryId;
+        delete fields.subcategoryId;
+      }
+
       const sets  = [];
       const vals  = [];
       let idx = 1;
       for (const [k,v] of Object.entries(fields)) {
         if (v === null || v === undefined) continue;
-        sets.push(`${k} = $${idx++}`);
+        sets.push(`${k} = ${idx++}`);
         vals.push(v);
       }
       if (!sets.length) {
         throw new Error('No fields provided for update');
       }
-      sets.push(`updated_at = $${idx++}`);
+      sets.push(`updated_at = ${idx++}`);
       vals.push(new Date().toISOString());
 
       vals.push(id);
       const sql = `
         UPDATE post_details
            SET ${sets.join(', ')}
-         WHERE id = $${idx}
+         WHERE id = ${idx}
         RETURNING *;
       `;
       const { rows } = await pool.query(sql, vals);
@@ -269,7 +320,7 @@ const resolvers = {
       const now = new Date().toISOString();
       await pool.query(
         `UPDATE post_details
-            SET.deleted = true,
+            SET deleted = true,
                 published = false,
                 deleted_at = $1
           WHERE id = $2`,

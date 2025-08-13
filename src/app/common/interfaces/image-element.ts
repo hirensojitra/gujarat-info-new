@@ -173,7 +173,25 @@ export interface PostDetails {
   image?: string;
   published: boolean;
   track: boolean;
+  category?: PostCategory;
+  subcategory?: PostSubcategory;
 }
+
+export interface PostCategory {
+  id: string;
+  name: string;
+  description?: string;
+  active?: boolean;
+}
+
+export interface PostSubcategory {
+  id: string;
+  name: string;
+  description?: string;
+  category_id: string;
+  active?: boolean;
+}
+
 export interface AspectRatio {
   ratio: number;
   divisor: number;
