@@ -144,7 +144,7 @@ export class NewPostDetailService {
   }
 
   /** Create a new post */
-  addPost(input: PostInput): Observable<PostDetails> {
+  addPost(input: PostUpdateInput): Observable<PostDetails> {
     return this.apollo
       .mutate<{ addPost: PostDetails }>({
         mutation: ADD_POST,

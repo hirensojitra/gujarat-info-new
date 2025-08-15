@@ -23,7 +23,7 @@ import { MatSidenavModule } from '@angular/material/sidenav';
     MatIconModule,
     MatButtonModule,
     MatSidenavModule,
-    MatTooltipModule,
+    MatTooltipModule
   ],
 })
 export class ImageManagerModule {}

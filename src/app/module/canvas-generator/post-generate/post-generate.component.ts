@@ -1387,15 +1387,12 @@ export class PostGenerateComponent implements OnInit, AfterViewInit {
     console.log('onSubmit: ' + this.Seq++);
     if (this.postDetailsForm?.valid) {
       const postData = this.postDetailsForm.value;
-      delete postData.category_id;
       delete postData.apiData;
       postData.data = postData.data as JSON[];
-      const operation$ =
-        isCopy == true || this.postDetails.id == null
-          ? this.postService.addPost({ ...postData, id: null })
-          : this.postService.updatePost(postData);
-
-      operation$.subscribe({
+      let addOrUpdate = isCopy == true || this.postDetails.id == null;
+      postData.id = addOrUpdate ? '' : this.postDetails.id;
+      console.log('onSubmit: addOrUpdate: ' + addOrUpdate);
+      this.postService.updatePost(postData).subscribe({
         next: (res) => {
           if (res.id) {
             const postId = res.id;

@@ -279,7 +279,7 @@ export interface PostInput {
 }
 
 export interface PostUpdateInput {
-  id?: string;
+  id?: string | null;
   deleted: boolean;
   h: number;
   w: number;
