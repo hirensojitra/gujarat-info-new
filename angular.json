@@ -24,6 +24,10 @@
         "build": {
           "builder": "@angular-devkit/build-angular:application",
           "options": {
+            "allowedCommonJsDependencies": [
+              "device-detector-js",
+              "device-uuid"
+            ],
             "outputPath": "dist/gujarat-uvach",
             "index": "src/index.html",
             "browser": "src/main.ts",

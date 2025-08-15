@@ -2,20 +2,18 @@ import { Injectable, Inject, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 
 import FingerprintJS from '@fingerprintjs/fingerprintjs';
-import DeviceDetector from 'device-detector-js';
+
 @Injectable({
   providedIn: 'root'
 })
 export class PlatformService {
 
-  private deviceDetector: DeviceDetector;
-  constructor(@Inject(PLATFORM_ID) private platformId: Object) {
-    this.deviceDetector = new DeviceDetector();
-  }
+  constructor(@Inject(PLATFORM_ID) private platformId: Object) {}
 
   public isBrowser(): boolean {
     return isPlatformBrowser(this.platformId);
   }
+
   public async getDeviceId(): Promise<string | null> {
     if (this.isBrowser()) {
       try {
@@ -28,6 +26,7 @@ export class PlatformService {
     }
     return null;
   }
+
   public async getDeviceFingerprint(): Promise<any> {
     if (this.isBrowser()) {
       const fp = await FingerprintJS.load();
@@ -36,10 +35,13 @@ export class PlatformService {
     }
     return null;
   }
-  public getDeviceInfo(): any {
+
+  public async getDeviceInfo(): Promise<any> {
     if (this.isBrowser()) {
+      const DeviceDetector = (await import('device-detector-js')).default;
+      const deviceDetector = new DeviceDetector();
       const userAgent = navigator.userAgent;
-      const deviceInfo = this.deviceDetector.parse(userAgent);
+      const deviceInfo = deviceDetector.parse(userAgent);
       if (deviceInfo.device.type === 'desktop') {
         return {
           ...deviceInfo,
