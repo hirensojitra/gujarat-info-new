@@ -520,8 +520,8 @@ export class PostGenerateComponent implements OnInit, AfterViewInit {
     this.postDetailsForm = this.fb.group({
       id: [this.postDetails.id],
       deleted: [this.postDetails.deleted, Validators.required],
-      h: [this.postDetails.h, Validators.required],
-      w: [this.postDetails.w, Validators.required],
+      h: [Number(this.postDetails.h), Validators.required],
+      w: [Number(this.postDetails.w), Validators.required],
       title: [this.postDetails.title, Validators.required],
       backgroundurl: [this.postDetails.backgroundurl, Validators.required],
       download_counter: [
@@ -1387,6 +1387,8 @@ export class PostGenerateComponent implements OnInit, AfterViewInit {
     console.log('onSubmit: ' + this.Seq++);
     if (this.postDetailsForm?.valid) {
       const postData = this.postDetailsForm.value;
+      postData.h = Number(postData.h);
+      postData.w = Number(postData.w);
       delete postData.apiData;
       postData.data = postData.data as JSON[];
       let addOrUpdate = isCopy == true || this.postDetails.id == null;

@@ -466,8 +466,8 @@ export class ImageGenerateComponent implements OnInit, AfterViewInit {
     this.postDetailsForm = this.fb.group({
       id: [this.postDetails.id],
       deleted: [this.postDetails.deleted, Validators.required],
-      h: [this.postDetails.h, Validators.required],
-      w: [this.postDetails.w, Validators.required],
+      h: [Number(this.postDetails.h), Validators.required],
+      w: [Number(this.postDetails.w), Validators.required],
       title: [this.postDetails.title, Validators.required],
       backgroundurl: [this.postDetails.backgroundurl, Validators.required],
       download_counter: [
@@ -1331,6 +1331,8 @@ export class ImageGenerateComponent implements OnInit, AfterViewInit {
   onSubmit(isCopy?: boolean) {
     if (this.postDetailsForm?.valid) {
       const postData = this.postDetailsForm.value;
+      postData.h = Number(postData.h);
+      postData.w = Number(postData.w);
       const operation$ =
         isCopy == true || this.postDetails.id == null
           ? this.PS.addPost({ ...postData, id: null })
