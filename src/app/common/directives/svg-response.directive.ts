@@ -456,7 +456,7 @@ export class SvgResponseDirective implements OnChanges, AfterViewInit {
     if (this.el.nativeElement && d.text) {
       const svg = this.el.nativeElement;
       const t = this.renderer.createElement('text', 'http://www.w3.org/2000/svg');
-      const { x, y, fs, fw, text, type, controlName, api, lang, dependency, color, fontStyle, rotate, fontFamily, textShadow, backgroundColor, textEffects, textAnchor, alignmentBaseline, letterSpacing, lineHeight, textTransformation, originX, originY, opacity } = d.text;
+      const { x, y, fs, fw, text, type, controlName, api, lang, dependency, color, fontStyle, rotate, fontFamily, textShadow, backgroundColor, textEffects, textAnchor, alignmentBaseline, letterSpacing, lineHeight, textTransformation, originX, originY, opacity, wordSpacing, fontVariant, direction, writingMode } = d.text;
       let textAttributes: Record<string, string> = {
         'data-type': 'text',
         'x': x.toString(),
@@ -471,6 +471,9 @@ export class SvgResponseDirective implements OnChanges, AfterViewInit {
         'text-decoration': fontStyle.underline ? 'underline' : 'none',
         'font-style': fontStyle.italic ? 'italic' : 'normal',
         'opacity': opacity ? opacity.toString() : '100',
+        'font-variant': fontVariant || 'normal',
+        'direction': direction || 'ltr',
+        'writing-mode': writingMode || 'horizontal-tb',
       };
 
       // Apply text shadow if available
@@ -488,6 +491,7 @@ export class SvgResponseDirective implements OnChanges, AfterViewInit {
       let textStyles: Record<string, string> = {
         '-webkit-user-select': 'none',
         'letter-spacing': letterSpacing ? `${letterSpacing}px` : '0',
+        'word-spacing': wordSpacing ? `${wordSpacing}` : '0',
         'line-height': d.text.lineHeight ? `${d.text.lineHeight}` : '1.5',
         'text-transform': textTransformation || 'none'
       };

@@ -1,5 +1,5 @@
+{{formData.value| json}}
 <div [formGroup]="formData">
-
     <div class="form-group col-12" [class.d-none]="!getActiveControl(index,'edit')">
         <label for="text" class="form-label">Type</label>
         <select id="type" class="form-select" formControlName="type">
@@ -193,6 +193,48 @@
                 <color-picker [colorSet]="colorSet" [getActiveControl]="getActiveControl"
                     formControlName="color"></color-picker>
             </div>
+        </div>
+        <!-- WORD SPACING: number + range, synced to formControlName="wordSpacing" -->
+        <div class="form-group col-12" [class.d-none]="!getActiveControl(index, 'typography')">
+            <div class="d-flex align-items-center">
+                <label class="form-label text-nowrap me-3" remSize [wPX]="120">Word Spacing</label>
+                <!-- Range slider -->
+                <input type="range" class="form-range flex-grow-1" [min]="-10" [max]="10" step="0.1"
+                    [value]="formGroupData.get('wordSpacing')?.value"
+                    (input)="formGroupData.get('wordSpacing')?.setValue($any($event.target).valueAsNumber)" />
+                <!-- Numeric input -->
+                <input type="number" class="form-control ms-3" style="width: 75px;" [min]="0" [max]="10" step="0.1"
+                    [value]="formGroupData.get('wordSpacing')?.value"
+                    (input)="formGroupData.get('wordSpacing')?.setValue($any($event.target).valueAsNumber)" />
+            </div>
+        </div>
+
+        <!-- FONT VARIANT: select -->
+        <div class="form-group col-12" [class.d-none]="!getActiveControl(index, 'typography')">
+            <label class="form-label">Font Variant</label>
+            <select class="form-select" formControlName="fontVariant">
+                <option value="normal">Normal</option>
+                <option value="small-caps">Small Caps</option>
+            </select>
+        </div>
+
+        <!-- DIRECTION: select -->
+        <div class="form-group col-12" [class.d-none]="!getActiveControl(index, 'typography')">
+            <label class="form-label">Direction</label>
+            <select class="form-select" formControlName="direction">
+                <option value="ltr">Left-to-Right</option>
+                <option value="rtl">Right-to-Left</option>
+            </select>
+        </div>
+
+        <!-- WRITING MODE: select -->
+        <div class="form-group col-12" [class.d-none]="!getActiveControl(index, 'typography')">
+            <label class="form-label">Writing Mode</label>
+            <select class="form-select" formControlName="writingMode">
+                <option value="horizontal-tb">Horizontal</option>
+                <option value="vertical-rl">Vertical (Right-to-Left)</option>
+                <option value="vertical-lr">Vertical (Left-to-Right)</option>
+            </select>
         </div>
     </div>
 

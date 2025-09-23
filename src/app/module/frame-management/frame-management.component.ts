@@ -163,7 +163,7 @@ export class FrameManagementComponent {
   selectedDimension: SizeEntry = this.sizes[0].entries[0];
   originalDimension: SizeEntry = { ...this.selectedDimension };
   @ViewChild('mainSVG', { static: true }) mainSVG!: ElementRef<SVGElement>;
-  toolbarItems: ToolbarItem[] = [
+    toolbarItems: ToolbarItem[] = [
     {
       key: 'dimension',
       label: 'Dimension',
@@ -173,6 +173,7 @@ export class FrameManagementComponent {
     { key: 'theme', label: 'Theme', icon: 'palette' },
     { key: 'replace', label: 'Replace', icon: 'sync' },
     { key: 'language', label: 'Language', icon: 'language' },
+    { key: 'settings', label: 'Settings', icon: 'settings' },
   ];
   constructor(
     private authService: AuthenticationService,
@@ -300,6 +301,8 @@ export class FrameManagementComponent {
               enable: false,
               color: '#FFFFFF',
               width: 2,
+              strokeDasharray: undefined,
+              strokeLinejoin: ''
             },
             glow: {
               enable: false,
@@ -315,6 +318,10 @@ export class FrameManagementComponent {
           opacity: 100,
           originX: 0,
           originY: 0,
+          wordSpacing: 0,
+          fontVariant: 'normal',
+          direction: 'ltr',
+          writingMode: 'horizontal-tb'
         },
       },
     ],
@@ -796,6 +803,8 @@ export class FrameManagementComponent {
           enable: false,
           color: '#FFFFFF',
           width: 2,
+          strokeDasharray: undefined,
+          strokeLinejoin: ''
         },
         glow: {
           enable: false,
@@ -811,6 +820,10 @@ export class FrameManagementComponent {
       opacity: 100,
       originX: 0,
       originY: 0,
+      wordSpacing: 0,
+      fontVariant: 'normal',
+      direction: 'ltr',
+      writingMode: 'horizontal-tb'
     },
   };
   createTextFormGroup(t: Data): FormGroup {

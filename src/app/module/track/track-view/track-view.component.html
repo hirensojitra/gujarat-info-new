@@ -1,0 +1,27 @@
+<div class="container-fluid">
+  <div class="card">
+    <div class="card-header">
+      <h3>Tracked Data for: {{ imgParam }}</h3>
+      <div class="d-flex justify-content-end">
+        <button class="btn btn-primary me-2" (click)="exportExcel()" [disabled]="!canExport()">Export to Excel</button>
+        <button class="btn btn-primary" (click)="exportPdf()" [disabled]="!canExport()">Export to PDF</button>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table table-striped">
+          <thead>
+            <tr>
+              <th *ngFor="let header of tableHeaders">{{ header }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let row of trackedData">
+              <td *ngFor="let header of tableHeaders">{{ row[header] }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

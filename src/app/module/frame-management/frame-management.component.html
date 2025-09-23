@@ -105,6 +105,26 @@
                                             <ng-container *ngSwitchCase="'language'">
                                                 <strong>Translate</strong> content goes here…
                                             </ng-container>
+                                            <ng-container *ngSwitchCase="'settings'">
+                                                <div [formGroup]="postDetailsForm">
+                                                  <div class="mb-3">
+                                                    <label for="title" class="form-label">Title</label>
+                                                    <input type="text" id="title" class="form-control" formControlName="title">
+                                                  </div>
+                                                  <div class="mb-3">
+                                                    <label for="info" class="form-label">Info</label>
+                                                    <textarea id="info" class="form-control" formControlName="info"></textarea>
+                                                  </div>
+                                                  <div class="form-check mb-3">
+                                                    <input type="checkbox" id="published" class="form-check-input" formControlName="published">
+                                                    <label for="published" class="form-check-label">Published</label>
+                                                  </div>
+                                                  <div class="form-check mb-3">
+                                                    <input type="checkbox" id="track" class="form-check-input" formControlName="track">
+                                                    <label for="track" class="form-check-label">Enable Tracking</label>
+                                                  </div>
+                                                </div>
+                                              </ng-container>
                                         </ng-container>
                                     </div>
                                 </div>

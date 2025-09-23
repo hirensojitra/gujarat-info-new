@@ -304,6 +304,8 @@ export class ImageGenerateComponent implements OnInit, AfterViewInit {
               enable: false,
               color: '#FFFFFF',
               width: 2,
+              strokeDasharray: undefined,
+              strokeLinejoin: ''
             },
             glow: {
               enable: false,
@@ -319,6 +321,10 @@ export class ImageGenerateComponent implements OnInit, AfterViewInit {
           opacity: 100,
           originX: 0,
           originY: 0,
+          wordSpacing: 0,
+          fontVariant: 'normal',
+          direction: 'ltr',
+          writingMode: 'horizontal-tb'
         },
       },
     ],
@@ -851,6 +857,8 @@ export class ImageGenerateComponent implements OnInit, AfterViewInit {
           enable: false,
           color: '#FFFFFF',
           width: 2,
+          strokeDasharray: undefined,
+          strokeLinejoin: ''
         },
         glow: {
           enable: false,
@@ -866,6 +874,10 @@ export class ImageGenerateComponent implements OnInit, AfterViewInit {
       opacity: 100,
       originX: 0,
       originY: 0,
+      wordSpacing: 0,
+      fontVariant: 'normal',
+      direction: 'ltr',
+      writingMode: 'horizontal-tb'
     },
   };
   createTextFormGroup(t: Data): FormGroup {

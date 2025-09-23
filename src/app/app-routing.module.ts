@@ -279,6 +279,15 @@ const routes: Routes = [
           },
         ],
       },
+      {
+        path: 'track',
+        canActivate: [AuthGuard, RoleGuard],
+        data: { roles: ['owner', 'administrator'] },
+        loadChildren: () =>
+          import('./module/track/track.module').then(
+            (m) => m.TrackModule
+          ),
+      },
       
     ],
   },

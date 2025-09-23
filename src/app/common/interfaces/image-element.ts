@@ -90,6 +90,9 @@ export interface TextEffects {
     enable: false;
     color: string;
     width: number;
+    strokeDasharray: any;
+    strokeLinejoin: string;
+    strokeLinecap?: string;
   };
   glow: {
     enable: false;
@@ -124,6 +127,10 @@ export interface TextElement {
   opacity: number;
   originX: number;
   originY: number;
+  wordSpacing: number;
+  fontVariant: 'normal' | 'small-caps';
+  direction: 'ltr' | 'rtl';
+  writingMode: 'horizontal-tb' | 'vertical-rl' | 'vertical-lr';
 }
 
 export interface SvgProperties {

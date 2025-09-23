@@ -288,6 +288,8 @@ export class PostGenerateComponent implements OnInit, AfterViewInit {
               enable: false,
               color: '#FFFFFF',
               width: 2,
+              strokeDasharray: undefined,
+              strokeLinejoin: '',
             },
             glow: {
               enable: false,
@@ -303,6 +305,10 @@ export class PostGenerateComponent implements OnInit, AfterViewInit {
           opacity: 100,
           originX: 0,
           originY: 0,
+          wordSpacing: 0,
+          fontVariant: 'normal',
+          direction: 'ltr',
+          writingMode: 'horizontal-tb'
         },
       },
     ],
@@ -933,6 +939,9 @@ export class PostGenerateComponent implements OnInit, AfterViewInit {
           enable: false,
           color: '#FFFFFF',
           width: 2,
+          strokeDasharray: '',
+          strokeLinejoin: 'miter',
+          strokeLinecap: 'butt',
         },
         glow: {
           enable: false,
@@ -948,6 +957,10 @@ export class PostGenerateComponent implements OnInit, AfterViewInit {
       opacity: 100,
       originX: 0,
       originY: 0,
+      wordSpacing: 0,
+      fontVariant: 'normal',
+      direction: 'ltr',
+      writingMode: 'horizontal-tb',
     },
   };
   createTextFormGroup(t: Data): FormGroup {
@@ -1014,6 +1027,13 @@ export class PostGenerateComponent implements OnInit, AfterViewInit {
         opacity: [t.text?.opacity, Validators.required],
         originX: [t.text?.originX],
         originY: [t.text?.originY],
+        wordSpacing: [t.text?.wordSpacing || 0, Validators.required],
+        fontVariant: [t.text?.fontVariant || 'normal', Validators.required],
+        direction: [t.text?.direction || 'ltr', Validators.required],
+        writingMode: [
+          t.text?.writingMode || 'horizontal-tb',
+          Validators.required,
+        ],
       }),
     });
     const cn = t.text?.controlName ?? Math.random().toString(36).substring(7);

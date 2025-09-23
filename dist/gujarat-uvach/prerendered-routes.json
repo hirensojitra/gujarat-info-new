@@ -45,6 +45,7 @@
     "/settings/security",
     "/shape-manager",
     "/shape-manager/upload",
+    "/track",
     "/user-img",
     "/verify-email",
     "/view",
