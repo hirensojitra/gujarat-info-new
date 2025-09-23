@@ -579,6 +579,10 @@ export class PosterComponent implements OnInit {
                 originX,
                 originY,
                 opacity,
+                wordSpacing,
+                fontVariant,
+                direction,
+                writingMode,
               } = item.text;
               if (text) {
                 const lines = this.textFormat(text);
@@ -728,6 +732,8 @@ export class PosterComponent implements OnInit {
                 'text-decoration': fontStyle.underline ? 'underline' : 'none',
                 'font-style': fontStyle.italic ? 'italic' : 'normal',
                 opacity: opacity ? opacity.toString() : '100',
+                direction: direction || 'ltr',
+                'writing-mode': writingMode || 'horizontal-tb',
               };
               if (backgroundColor) {
                 textAttributes['background-color'] = backgroundColor;
@@ -742,6 +748,8 @@ export class PosterComponent implements OnInit {
                   : 'normal',
                 'line-height': lineHeight ? `${lineHeight}` : 'normal',
                 'text-transform': textTransformation || 'none',
+                'word-spacing': wordSpacing ? `${wordSpacing}px` : 'normal',
+                'font-variant': fontVariant || 'normal',
               };
               if (textShadow.enable) {
                 textAttributes['filter'] =
@@ -756,8 +764,9 @@ export class PosterComponent implements OnInit {
               );
 
               this.renderer.setAttribute(t, 'data-id', uniqueId);
+              this.renderer.appendChild(svg, t);
               if (rotate || (originX !== undefined && originY !== undefined)) {
-                const bbox = t.getBBox();
+                const bbox = (t as SVGTextElement).getBBox();
                 const width = bbox.width;
                 const height = bbox.height;
                 const transformValue = `rotate(${rotate || 0} ${
@@ -778,7 +787,6 @@ export class PosterComponent implements OnInit {
                   dependency: dependency,
                 });
               }
-              this.renderer.appendChild(svg, t);
               this.renderer.addClass(t, 'pointer-events-none');
               item.editable &&
                 this.renderer.listen(t, 'click', () => {
