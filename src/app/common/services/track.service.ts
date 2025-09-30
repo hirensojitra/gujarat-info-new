@@ -9,7 +9,7 @@ import { AuthCookieService } from './auth-cookie.service';
   providedIn: 'root',
 })
 export class TrackService {
-  private graphqlEndpoint = environment.MasterApi + '/graphql';
+  private graphqlEndpoint = environment.GraphApi + '/graphql';
 
   constructor(
     private http: HttpClient,

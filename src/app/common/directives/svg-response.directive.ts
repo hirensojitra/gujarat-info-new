@@ -456,24 +456,41 @@ export class SvgResponseDirective implements OnChanges, AfterViewInit {
     if (this.el.nativeElement && d.text) {
       const svg = this.el.nativeElement;
       const t = this.renderer.createElement('text', 'http://www.w3.org/2000/svg');
-      const { x, y, fs, fw, text, type, controlName, api, lang, dependency, color, fontStyle, rotate, fontFamily, textShadow, backgroundColor, textEffects, textAnchor, alignmentBaseline, letterSpacing, lineHeight, textTransformation, originX, originY, opacity, wordSpacing, fontVariant, direction, writingMode } = d.text;
+      const { x, y, fs, fw, text, type, controlName, api, lang, dependency, color, fontStyle, rotate, fontFamily, textShadow, backgroundColor, textEffects, textAnchor, alignmentBaseline, letterSpacing, lineHeight, textTransformation, originX, originY, opacity, wordSpacing, fontVariant, direction, writingMode, dx, dy, textLength, lengthAdjust, dominantBaseline, baselineShift, unicodeBidi, kerning, whiteSpace, fillOpacity, stroke, strokeWidth, strokeOpacity, fontSizeAdjust, fontStretch, visibility } = d.text;
       let textAttributes: Record<string, string> = {
         'data-type': 'text',
         'x': x.toString(),
         'y': y.toString(),
+        'dx': dx ? dx.toString() : '0',
+        'dy': dy ? dy.toString() : '0',
         'font-size': fs.toString(),
-        'fill': color || '#000000', // Set default fill color to black if not provided
+        'fill': color || '#000000',
         'text-anchor': textAnchor || 'start',
         'alignment-baseline': alignmentBaseline || 'middle',
-        'dominant-baseline': 'reset-size',
+        'dominant-baseline': dominantBaseline || 'auto',
         'font-family': fontFamily ? "'" + fontFamily + "', sans-serif" : "'Hind Vadodara', sans-serif",
         'font-weight': fw || '400',
         'text-decoration': fontStyle.underline ? 'underline' : 'none',
         'font-style': fontStyle.italic ? 'italic' : 'normal',
-        'opacity': opacity ? opacity.toString() : '100',
+        'opacity': opacity ? opacity.toString() : '1',
         'font-variant': fontVariant || 'normal',
         'direction': direction || 'ltr',
         'writing-mode': writingMode || 'horizontal-tb',
+        'textLength': textLength ? textLength.toString() : '',
+        'lengthAdjust': lengthAdjust || 'spacing',
+        'baseline-shift': baselineShift || '0',
+        'unicode-bidi': unicodeBidi || 'normal',
+        'kerning': kerning ? kerning.toString() : '0',
+        'white-space': whiteSpace || 'normal',
+        'fill-opacity': fillOpacity ? fillOpacity.toString() : '1',
+        'stroke': stroke || 'none',
+        'stroke-width': strokeWidth ? strokeWidth.toString() : '0',
+        'stroke-opacity': strokeOpacity ? strokeOpacity.toString() : '1',
+        'font-size-adjust': fontSizeAdjust ? fontSizeAdjust.toString() : '0',
+        'font-stretch': fontStretch || 'normal',
+        'visibility': visibility || 'visible',
+        'paint-order': 'stroke fill',
+        'stroke-linejoin': 'round',
       };
 
       // Apply text shadow if available
@@ -491,7 +508,7 @@ export class SvgResponseDirective implements OnChanges, AfterViewInit {
       let textStyles: Record<string, string> = {
         '-webkit-user-select': 'none',
         'letter-spacing': letterSpacing ? `${letterSpacing}px` : '0',
-        'word-spacing': wordSpacing ? `${wordSpacing}` : '0',
+        'word-spacing': wordSpacing ? `${wordSpacing}px` : '0',
         'line-height': d.text.lineHeight ? `${d.text.lineHeight}` : '1.5',
         'text-transform': textTransformation || 'none'
       };
@@ -513,24 +530,26 @@ export class SvgResponseDirective implements OnChanges, AfterViewInit {
           this.renderer.appendChild(t, textElement);
         } else {
           // Calculate dy offset based on font size
-          const dyOffset = fs * lineHeight || 0;
+          const dyOffset = fs * (lineHeight || 1.5);
 
           // Calculate dx offset based on text-anchor
           let dxOffset = 0;
-          switch (textAnchor) {
-            case 'middle':
-              // For middle alignment, calculate the total width of the text and divide by 2
-              const totalWidth = lines.reduce((sum, line) => sum + this.getTextWidth(line, fs, fontFamily), 0);
-              dxOffset = totalWidth / 2;
-              break;
-            case 'end':
-              // For end alignment, calculate the total width of the text
-              dxOffset = lines.reduce((maxWidth, line) => {
-                const lineWidth = this.getTextWidth(line, fs, fontFamily);
-                return lineWidth > maxWidth ? lineWidth : maxWidth;
-              }, 0);
-              break;
-            // For start alignment, dxOffset remains 0
+          if (fontFamily) {
+            switch (textAnchor) {
+              case 'middle':
+                // For middle alignment, calculate the total width of the text and divide by 2
+                const totalWidth = lines.reduce((sum, line) => sum + this.getTextWidth(line, fs, fontFamily), 0);
+                dxOffset = totalWidth / 2;
+                break;
+              case 'end':
+                // For end alignment, calculate the total width of the text
+                dxOffset = lines.reduce((maxWidth, line) => {
+                  const lineWidth = this.getTextWidth(line, fs, fontFamily);
+                  return lineWidth > maxWidth ? lineWidth : maxWidth;
+                }, 0);
+                break;
+              // For start alignment, dxOffset remains 0
+            }
           }
 
           // Iterate over each line of text

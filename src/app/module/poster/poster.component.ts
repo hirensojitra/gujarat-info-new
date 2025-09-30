@@ -556,6 +556,8 @@ export class PosterComponent implements OnInit {
               let {
                 x,
                 y,
+                dx,
+                dy,
                 fs,
                 fw,
                 text,
@@ -583,6 +585,20 @@ export class PosterComponent implements OnInit {
                 fontVariant,
                 direction,
                 writingMode,
+                textLength,
+                lengthAdjust,
+                dominantBaseline,
+                baselineShift,
+                unicodeBidi,
+                kerning,
+                whiteSpace,
+                fillOpacity,
+                stroke,
+                strokeWidth,
+                strokeOpacity,
+                fontSizeAdjust,
+                fontStretch,
+                visibility
               } = item.text;
               if (text) {
                 const lines = this.textFormat(text);
@@ -602,32 +618,34 @@ export class PosterComponent implements OnInit {
                   this.renderer.appendChild(t, textElement);
                 } else {
                   // Calculate dy offset based on font size
-                  const dyOffset = fs * lineHeight || 0;
+                  const dyOffset = fs * (lineHeight || 1.5);
 
                   // Calculate dx offset based on text-anchor
                   let dxOffset = 0;
-                  switch (textAnchor) {
-                    case 'middle':
-                      // For middle alignment, calculate the total width of the text and divide by 2
-                      const totalWidth = lines.reduce(
-                        (sum, line) =>
-                          sum + this.getTextWidth(line, fs, fontFamily),
-                        0
-                      );
-                      dxOffset = totalWidth / 2;
-                      break;
-                    case 'end':
-                      // For end alignment, calculate the total width of the text
-                      dxOffset = lines.reduce((maxWidth, line) => {
-                        const lineWidth = this.getTextWidth(
-                          line,
-                          fs,
-                          fontFamily
+                  if (fontFamily) {
+                    switch (textAnchor) {
+                      case 'middle':
+                        // For middle alignment, calculate the total width of the text and divide by 2
+                        const totalWidth = lines.reduce(
+                          (sum, line) =>
+                            sum + this.getTextWidth(line, fs, fontFamily),
+                          0
                         );
-                        return lineWidth > maxWidth ? lineWidth : maxWidth;
-                      }, 0);
-                      break;
-                    // For start alignment, dxOffset remains 0
+                        dxOffset = totalWidth / 2;
+                        break;
+                      case 'end':
+                        // For end alignment, calculate the total width of the text
+                        dxOffset = lines.reduce((maxWidth, line) => {
+                          const lineWidth = this.getTextWidth(
+                            line,
+                            fs,
+                            fontFamily
+                          );
+                          return lineWidth > maxWidth ? lineWidth : maxWidth;
+                        }, 0);
+                        break;
+                      // For start alignment, dxOffset remains 0
+                    }
                   }
                   // Iterate over each line of text
                   lines.forEach((line, index) => {
@@ -679,61 +697,42 @@ export class PosterComponent implements OnInit {
                 }
               }
 
-              // switch (fontFamily) {
-              //   case "Hind Vadodara":
-              //     let f = "Hind_Vadodara/"
-              //     let a: boolean = false;
-              //     switch (fw) {
-              //       case '300':
-              //         f += 'HindVadodara-Light';
-              //         a = true;
-              //         break;
-              //       case '400':
-              //         f += 'HindVadodara-Regular';
-              //         a = true;
-              //         break;
-              //       case '500':
-              //         f += 'HindVadodara-Medium';
-              //         a = true;
-              //         break;
-              //       case '600':
-              //         f += 'HindVadodara-SemiBold';
-              //         a = true;
-              //         break;
-              //       case '700':
-              //         f += 'HindVadodara-Bold';
-              //         a = true;
-              //         break;
-
-              //       default:
-              //         break;
-              //     }
-              //     if (a) { fontLink = f }
-
-              //     break;
-
-              //   default:
-              //     break;
-              // }
-
               let textAttributes: Record<string, string> = {
                 'data-type': 'text',
                 x: x.toString(),
                 y: y.toString(),
+                dx: dx ? dx.toString() : '0',
+                dy: dy ? dy.toString() : '0',
                 'font-size': fs.toString(),
-                fill: color || '#000000', // Set default fill color to black if not provided
+                fill: color || '#000000',
                 'text-anchor': textAnchor || 'start',
                 'alignment-baseline': alignmentBaseline || 'middle',
-                'dominant-baseline': 'reset-size',
+                'dominant-baseline': dominantBaseline || 'auto',
                 'font-family': fontFamily
                   ? "'" + fontFamily + "', sans-serif"
                   : "'Hind Vadodara', sans-serif",
                 'font-weight': fw || 'normal',
                 'text-decoration': fontStyle.underline ? 'underline' : 'none',
                 'font-style': fontStyle.italic ? 'italic' : 'normal',
-                opacity: opacity ? opacity.toString() : '100',
+                opacity: opacity ? opacity.toString() : '1',
+                'font-variant': fontVariant || 'normal',
                 direction: direction || 'ltr',
                 'writing-mode': writingMode || 'horizontal-tb',
+                textLength: textLength ? textLength.toString() : '',
+                lengthAdjust: lengthAdjust || 'spacing',
+                'baseline-shift': baselineShift || '0',
+                'unicode-bidi': unicodeBidi || 'normal',
+                kerning: kerning ? kerning.toString() : '0',
+                'white-space': whiteSpace || 'normal',
+                'fill-opacity': fillOpacity ? fillOpacity.toString() : '1',
+                stroke: stroke || 'none',
+                'stroke-width': strokeWidth ? strokeWidth.toString() : '0',
+                'stroke-opacity': strokeOpacity ? strokeOpacity.toString() : '1',
+                'font-size-adjust': fontSizeAdjust ? fontSizeAdjust.toString() : '0',
+                'font-stretch': fontStretch || 'normal',
+                visibility: visibility || 'visible',
+                'paint-order': 'stroke fill',
+                'stroke-linejoin': 'round',
               };
               if (backgroundColor) {
                 textAttributes['background-color'] = backgroundColor;

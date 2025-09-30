@@ -314,7 +314,7 @@ export class ImageGenerateComponent implements OnInit, AfterViewInit {
             },
           },
           textAnchor: 'start',
-          alignmentBaseline: 'start',
+          alignmentBaseline: 'middle',
           letterSpacing: 0,
           lineHeight: 1.5,
           textTransformation: 'none',

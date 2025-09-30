@@ -46,25 +46,22 @@
                                 <label class="form-label">Personal Info</label>
                                 <input class="form-check-input" type="checkbox" formControlName="info_show">
                             </div> -->
-                                    <div class="col-4">
-                                        <div class="form-group form-check form-switch"
-                                            [class.d-none]="selectedElement!==-1">
+                                    <div class="col-4" [class.d-none]="selectedElement!==-1">
+                                        <div class="form-group form-check form-switch">
                                             <label class="form-check-label form-label">Published</label>
                                             <input class="form-check-input" type="checkbox" role="switch"
                                                 formControlName="published">
                                         </div>
                                     </div>
-                                    <div class="col-4">
-                                        <div class="form-group form-check form-switch"
-                                            [class.d-none]="selectedElement!==-1">
+                                    <div class="col-4" [class.d-none]="selectedElement!==-1">
+                                        <div class="form-group form-check form-switch">
                                             <label class="form-check-label form-label">Personal Info</label>
                                             <input class="form-check-input" type="checkbox" role="switch"
                                                 formControlName="info_show">
                                         </div>
                                     </div>
-                                    <div class="col-4">
-                                        <div class="form-group form-check form-switch"
-                                            [class.d-none]="selectedElement!==-1">
+                                    <div class="col-4" [class.d-none]="selectedElement!==-1">
+                                        <div class="form-group form-check form-switch">
                                             <label class="form-check-label form-label">Track</label>
                                             <input class="form-check-input" type="checkbox" role="switch"
                                                 formControlName="track">
@@ -81,9 +78,11 @@
                                     </div>
                                     <div class="form-group col-6" [class.d-none]="selectedElement!==-1">
                                         <label for="subcategory" class="form-label">Subcategory</label>
-                                        <select id="subcategory" class="form-select" formControlName="subcategory_id" [disabled]="!(subcategories$ | async)">
+                                        <select id="subcategory" class="form-select" formControlName="subcategory_id"
+                                            [disabled]="!(subcategories$ | async)">
                                             <option [ngValue]="null" disabled>Select a Subcategory</option>
-                                            <option *ngFor="let subcategory of subcategories$ | async" [value]="subcategory.id">
+                                            <option *ngFor="let subcategory of subcategories$ | async"
+                                                [value]="subcategory.id">
                                                 {{subcategory.name}}
                                             </option>
                                         </select>
@@ -111,29 +110,34 @@
                                         <div *ngFor="let item of dataArray.controls; let i = index" class="row g-3"
                                             [class.d-none]="selectedElement!==i">
                                             <ng-container [formGroupName]="i">
-                                                <div class="form-group col-12"
-                                                    [class.d-none]="!getActiveControl(i,'control')">
-                                                    <label class="form-label">Title</label>
-                                                    <input type="text" class="form-control" formControlName="title">
-                                                </div>
-                                                <div class="col-8 d-flex"
-                                                    [class.d-none]="!getActiveControl(i,'control')">
-                                                    <div class="form-check form-switch">
-                                                        <input class="form-check-input" type="checkbox"
-                                                            [id]="'boxed-'+i" formControlName="boxed">
-                                                        <label class="form-check-label" [for]="'boxed-'+i">Boxed</label>
+                                                <div class="col-12 bg-light p-3 rounded-2">
+                                                    <div class="row g-3 align-items-center">
+                                                        <div class="form-group col-12">
+                                                            <label class="form-label">Title</label>
+                                                            <input type="text" class="form-control"
+                                                                formControlName="title">
+                                                        </div>
+                                                        <div class="col-8 d-flex">
+                                                            <div class="form-check form-switch">
+                                                                <input class="form-check-input" type="checkbox"
+                                                                    [id]="'boxed-'+i" formControlName="boxed">
+                                                                <label class="form-check-label"
+                                                                    [for]="'boxed-'+i">Boxed</label>
+                                                            </div>
+                                                            <div class="form-check form-switch  ms-4">
+                                                                <input class="form-check-input" type="checkbox"
+                                                                    [id]="'can-edit-'+i" formControlName="editable">
+                                                                <label class="form-check-label"
+                                                                    [for]="'can-edit-'+i">Can
+                                                                    Edit</label>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-4 d-flex">
+                                                            <button class="btn btn-sm btn-danger ms-auto" type="button"
+                                                                (click)="removeData(i)"><i
+                                                                    class="fa fa-trash"></i></button>
+                                                        </div>
                                                     </div>
-                                                    <div class="form-check form-switch  ms-4">
-                                                        <input class="form-check-input" type="checkbox"
-                                                            [id]="'can-edit-'+i" formControlName="editable">
-                                                        <label class="form-check-label" [for]="'can-edit-'+i">Can
-                                                            Edit</label>
-                                                    </div>
-                                                </div>
-                                                <div class="col-4 d-flex"
-                                                    [class.d-none]="!getActiveControl(i,'control')">
-                                                    <button class="btn btn-sm btn-danger ms-auto" type="button"
-                                                        (click)="removeData(i)"><i class="fa fa-trash"></i></button>
                                                 </div>
                                                 <div class="form-group col-12 col-md-6 offset-0 offset-md-3"
                                                     [class.d-none]="!getActiveControl(i,'position')">
@@ -484,7 +488,7 @@
                                                             formControlName="rotate">
                                                     </div>
                                                 </ng-container>
-                                                <ng-container  *ngIf="item.get('text') as textGroup">
+                                                <ng-container *ngIf="item.get('text') as textGroup">
                                                     <app-text-properties formGroupName="text"
                                                         [formGroupData]="textGroup" [index]="i"
                                                         [controlSet]="controlSet" [colorSet]="colorSet"
@@ -494,8 +498,8 @@
                                                 </ng-container>
                                                 <ng-container *ngIf="item.get('image') as imgGroup">
                                                     <app-image-properties formGroupName="image"
-                                                        [formGroupData]="imgGroup" [index]="i"
-                                                        [controlSet]="controlSet" [colorSet]="colorSet"></app-image-properties>
+                                                        [formGroupData]="imgGroup" [index]="i" [controlSet]="controlSet"
+                                                        [colorSet]="colorSet"></app-image-properties>
                                                 </ng-container>
                                             </ng-container>
                                         </div>

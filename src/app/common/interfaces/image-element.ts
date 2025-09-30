@@ -102,36 +102,63 @@ export interface TextEffects {
 }
 
 export interface TextElement {
+  // Positioning & Geometry Attributes
   x: number;
   y: number;
-  fs: number;
-  fw: string;
+  dx?: number;
+  dy?: number;
+  rotate?: number;
+  textLength?: number;
+  lengthAdjust?: 'spacing' | 'spacingAndGlyphs';
+
+  // Text & Layout Styling Attributes
+  textAnchor?: 'start' | 'middle' | 'end';
+  dominantBaseline?: 'auto' | 'middle' | 'hanging' | 'ideographic';
+  alignmentBaseline?: 'auto' | 'baseline' | 'before-edge' | 'text-before-edge' | 'middle' | 'central' | 'after-edge' | 'text-after-edge' | 'ideographic' | 'alphabetic' | 'hanging' | 'mathematical';
+  baselineShift?: string; // Can be 'sub', 'super', or a length value
+  direction?: 'ltr' | 'rtl';
+  unicodeBidi?: 'normal' | 'embed' | 'bidi-override';
+  writingMode?: 'horizontal-tb' | 'vertical-rl' | 'vertical-lr';
+  letterSpacing?: number;
+  wordSpacing?: number;
+  kerning?: number;
+  whiteSpace?: 'normal' | 'pre' | 'nowrap';
+
+  // Paint & Font Attributes
+  fill?: string;
+  fillOpacity?: number;
+  stroke?: string;
+  strokeWidth?: number;
+  strokeOpacity?: number;
+  fontFamily?: string;
+  fs: number; // font-size
+  fontSizeAdjust?: number;
+  fontStretch?: 'normal' | 'condensed' | 'expanded' | 'extra-condensed' | 'extra-expanded' | 'semi-condensed' | 'semi-expanded' | 'ultra-condensed' | 'ultra-expanded';
+  fontStyle: FontStyle;
+  fontVariant?: 'normal' | 'small-caps';
+  fw: string; // font-weight
+
+  // Global & Core Attributes
+  opacity?: number;
+  visibility?: 'visible' | 'hidden' | 'collapse';
+  
+  // Other existing properties from original interface
   text?: string;
   api?: string;
   lang?: string;
   controlName?: string;
   dependency?: string;
   type: 'text' | 'select' | 'textarea' | 'date';
-  color: string;
-  fontStyle: FontStyle;
-  rotate: number;
-  fontFamily: string;
+  color: string; // This will be mapped to fill
   textShadow: TextShadow;
   backgroundColor: string;
   textEffects: TextEffects;
-  textAnchor: string;
-  alignmentBaseline: string;
-  letterSpacing: number;
   lineHeight: number;
   textTransformation: string;
-  opacity: number;
   originX: number;
   originY: number;
-  wordSpacing: number;
-  fontVariant: 'normal' | 'small-caps';
-  direction: 'ltr' | 'rtl';
-  writingMode: 'horizontal-tb' | 'vertical-rl' | 'vertical-lr';
 }
+
 
 export interface SvgProperties {
   fill: string;
